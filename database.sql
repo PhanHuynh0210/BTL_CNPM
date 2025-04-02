@@ -41,8 +41,7 @@ CREATE TABLE Bookings (
     end_time TIME NOT NULL,
     status ENUM('Pending', 'Confirmed', 'Cancelled') DEFAULT 'Pending',
     FOREIGN KEY (room_id) REFERENCES Rooms(ID) ON DELETE CASCADE,
-    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE,
-    CHECK (start_time < end_time)
+    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE
 );
 
 -- Bảng CheckInOut: Quản lý check-in/check-out của người dùng
