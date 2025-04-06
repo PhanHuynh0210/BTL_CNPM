@@ -7,8 +7,10 @@ const router = express.Router();
  */
 
 const iniWebRouter = (app) => {
-    router.get("/", homeComtroller.hanhello);
-    router.get("/user", homeComtroller.haluser);
+    router.get("/", homeComtroller.login);
+    router.post("/home", homeComtroller.home);
+    router.post("/home/account", homeComtroller.account);
+
     return app.use("/",router);
 }
 

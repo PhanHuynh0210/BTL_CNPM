@@ -1,7 +1,5 @@
 const { Sequelize } = require('sequelize');
 
-
-
 const sequelize = new Sequelize('BTL_CNPM', 'root', null, {
     host: 'localhost',
     dialect: 'mysql' 
