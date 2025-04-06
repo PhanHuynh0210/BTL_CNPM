@@ -4,7 +4,7 @@ USE BTL_CNPM;
 
 -- Bảng Users: Lưu thông tin người dùng
 CREATE TABLE Users (
-    mssv VARCHAR(20) PRIMARY KEY, -- Mã số sinh viên làm khóa chính
+    mssv VARCHAR(20) PRIMARY KEY,
     FullName VARCHAR(255) NOT NULL,
     Email VARCHAR(255) UNIQUE NOT NULL,
     Pass VARCHAR(255) NOT NULL,
@@ -13,13 +13,17 @@ CREATE TABLE Users (
     Role ENUM('Admin_IT', 'Student', 'School', 'Admin_IOT') NOT NULL
 );
 
--- Bảng Support: Lưu yêu cầu hỗ trợ và thông tin liên hệ của trường
+-- Bảng Support: Lưu yêu cầu hỗ trợ từ sinh viên
 CREATE TABLE Support (
     support_id INT PRIMARY KEY AUTO_INCREMENT,
-    mssv VARCHAR(20), -- Tham chiếu mssv từ bảng Users
-    Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    comment TEXT NOT NULL,
-    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE
+    mssv VARCHAR(20) NOT NULL,
+    support_type VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    contact_info VARCHAR(255),
+    time_sent TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Pending', 'In Progress', 'Resolved') DEFAULT 'Pending',
+    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Bảng Rooms: Lưu thông tin các phòng học
@@ -35,26 +39,25 @@ CREATE TABLE Rooms (
 CREATE TABLE Bookings (
     ID INT PRIMARY KEY AUTO_INCREMENT,
     room_id INT NOT NULL,
-    mssv VARCHAR(20) NOT NULL, -- Tham chiếu mssv từ bảng Users
+    mssv VARCHAR(20) NOT NULL,
     Day DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     status ENUM('Pending', 'Confirmed', 'Cancelled') DEFAULT 'Pending',
-    FOREIGN KEY (room_id) REFERENCES Rooms(ID) ON DELETE CASCADE,
-    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE,
-    CHECK (start_time < end_time)
+    FOREIGN KEY (room_id) REFERENCES Rooms(ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Bảng CheckInOut: Quản lý check-in/check-out của người dùng
+-- Bảng CheckInOut: Quản lý check-in/check-out
 CREATE TABLE CheckInOut (
     check_id INT PRIMARY KEY AUTO_INCREMENT,
-    mssv VARCHAR(20) NOT NULL, -- Tham chiếu mssv từ bảng Users
+    mssv VARCHAR(20) NOT NULL,
     book_id INT NOT NULL,
     time_in TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     time_out TIMESTAMP NULL,
     status_check ENUM('Not-checked-in', 'Checked-in') DEFAULT 'Not-checked-in',
-    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE,
-    FOREIGN KEY (book_id) REFERENCES Bookings(ID) ON DELETE CASCADE
+    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES Bookings(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Bảng Devices: Quản lý thiết bị trong phòng
@@ -63,17 +66,24 @@ CREATE TABLE Devices (
     device_name VARCHAR(255) NOT NULL,
     status ENUM('Active', 'Inactive', 'Maintenance') DEFAULT 'Active',
     room_id INT NOT NULL,
-    FOREIGN KEY (room_id) REFERENCES Rooms(ID) ON DELETE CASCADE
+    FOREIGN KEY (room_id) REFERENCES Rooms(ID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Bảng Feedbacks: Lưu phản hồi của người dùng
 CREATE TABLE Feedbacks (
     feedback_id INT PRIMARY KEY AUTO_INCREMENT,
-    mssv VARCHAR(20) NOT NULL, -- Tham chiếu mssv từ bảng Users
+    mssv VARCHAR(20) NOT NULL,
     rating INT CHECK (rating BETWEEN 1 AND 5),
     comment TEXT,
     Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE
+    FOREIGN KEY (mssv) REFERENCES Users(mssv) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Bảng Infor: Lưu thông tin liên hệ
+CREATE TABLE Infor (
+    infor_id INT PRIMARY KEY AUTO_INCREMENT,
+    Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    contact_info TEXT NOT NULL
 );
 
 -- Chèn dữ liệu vào bảng Users
@@ -84,9 +94,23 @@ INSERT INTO Users (mssv, FullName, Email, Pass, Phone, Sex, Role) VALUES
 ('23XXXXX', 'Phạm Thị D', 'student2@hcmut.edu.vn', 'student456', '0356789123', 'F', 'Student'),
 ('24XXXXX', 'Đỗ Văn E', 'school@hcmut.edu.vn', 'school123', '0367891234', 'M', 'School');
 
--- Chèn thông tin liên hệ của trường vào bảng Support
-INSERT INTO Support (mssv, comment) VALUES
-(NULL, 'School Contact - Email: contact@hcmut.edu.vn, Phone: 028-38647256');
+-- Chèn dữ liệu mẫu vào bảng Support
+INSERT INTO Support (mssv, support_type, title, description, contact_info) VALUES
+('22XXXXX', 'Thiết bị', 'Máy chiếu không hoạt động', 
+ 'Máy chiếu trong phòng 101 không lên hình. Tôi đã thử bật nhiều lần nhưng không có tín hiệu.', 
+ 'student1@hcmut.edu.vn'),
+
+('23XXXXX', 'Phòng học', 'Phòng quá nóng', 
+ 'Phòng 102 không có quạt hoặc điều hòa, rất khó chịu khi học vào buổi chiều.', 
+ '0356789123'),
+
+('22XXXXX', 'Hệ thống', 'Không đặt được phòng', 
+ 'Khi tôi chọn ngày và giờ để đặt phòng, hệ thống báo lỗi và không thể xác nhận.', 
+ 'student1@hcmut.edu.vn'),
+
+('23XXXXX', 'Khác', 'Cần tư vấn sử dụng hệ thống', 
+ 'Tôi là sinh viên mới và chưa biết cách sử dụng hệ thống đặt phòng, mong được hỗ trợ.', 
+ 'student2@hcmut.edu.vn');
 
 -- Chèn dữ liệu vào bảng Rooms
 INSERT INTO Rooms (capacity, location, status, qr_code) VALUES
@@ -122,3 +146,7 @@ INSERT INTO Feedbacks (mssv, rating, comment) VALUES
 ('23XXXXX', 4, 'Thiết bị hoạt động tốt nhưng cần bảo trì thêm.'),
 ('22XXXXX', 3, 'Phòng hơi chật khi học nhóm.'),
 ('23XXXXX', 2, 'Thiếu điều hòa, hơi nóng.');
+
+-- Chèn dữ liệu vào bảng Infor
+INSERT INTO Infor (contact_info) VALUES
+('School Contact - Email: contact@hcmut.edu.vn, Phone: 028-38647256');
