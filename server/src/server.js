@@ -22,5 +22,5 @@ checkconnect();
 initWebRoutes(app);
 
 app.listen(PORT, () => {
-    console.log(" Runner "+PORT);
+    console.log(`Server is running at http://localhost:${PORT}`);
 })

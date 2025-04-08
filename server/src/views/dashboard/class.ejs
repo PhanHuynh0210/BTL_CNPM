@@ -1,0 +1,104 @@
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Danh sách Phòng học</h5>
+        <button class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Thêm phòng mới
+        </button>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs" id="roomTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all"
+                    type="button" role="tab">Tất cả phòng</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse"
+                    type="button" role="tab">Đang sử dụng</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="empty-tab" data-bs-toggle="tab" data-bs-target="#empty"
+                    type="button" role="tab">Trống</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab"
+                    data-bs-target="#maintenance" type="button" role="tab">Bảo trì</button>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="roomTabsContent">
+            <div class="tab-pane fade show active" id="all" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Trạng thái</th>
+                                <th>Sức chứa</th>
+                                <th>Thiết bị</th>
+                                <th>Vị trí</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Phòng A101</td>
+                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
+                                <td>45 người</td>
+                                <td>Máy chiếu, Âm thanh, Máy tính</td>
+                                <td>Đặt 8:00 - 11:30</td>
+                                <td>
+                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
+                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Phòng A101</td>
+                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
+                                <td>45 người</td>
+                                <td>Máy chiếu, Âm thanh, Máy tính</td>
+                                <td>Đặt 8:00 - 11:30</td>
+                                <td>
+                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
+                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Phòng A101</td>
+                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
+                                <td>45 người</td>
+                                <td>Máy chiếu, Âm thanh, Máy tính</td>
+                                <td>Đặt 8:00 - 11:30</td>
+                                <td>
+                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
+                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Phòng A101</td>
+                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
+                                <td>45 người</td>
+                                <td>Máy chiếu, Âm thanh, Máy tính</td>
+                                <td>Đặt 8:00 - 11:30</td>
+                                <td>
+                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
+                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="inuse" role="tabpanel">
+                <!-- Content for in-use rooms tab -->
+                <p class="text-muted">Hiển thị danh sách phòng đang sử dụng</p>
+            </div>
+            <div class="tab-pane fade" id="empty" role="tabpanel">
+                <!-- Content for empty rooms tab -->
+                <p class="text-muted">Hiển thị danh sách phòng trống</p>
+            </div>
+            <div class="tab-pane fade" id="maintenance" role="tabpanel">
+                <!-- Content for maintenance rooms tab -->
+                <p class="text-muted">Hiển thị danh sách phòng đang bảo trì</p>
+            </div>
+        </div>
+    </div>
+</div>

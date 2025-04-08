@@ -1,60 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users Form</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>ADMIN</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f5f7fb;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+        }
+
+        .sidebar-menu a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .stat-card {
+            height: 100%;
+        }
+
+        .badge-success-light {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+
+        .badge-danger-light {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .badge-warning-light {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .badge-info-light {
+            background-color: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+        }
+    </style>
 </head>
+
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">User Information Form</h2>
-        <form action="/home/account" method="POST">
-            <div class="mb-3">
-                <label for="mssv" class="form-label">MSSV</label>
-                <input type="text" class="form-control" id="mssv" name="mssv" maxlength="20" required>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <%- include('partials/sidebar') %>
+
+            <!-- Main content -->
+            <div class="col-md-9 col-lg-10 ms-auto px-md-4">
+                <!-- Account Info Header -->
+                <%- include('partials/header') %>
+
+                <!-- Stats overview -->
+                <%- include('partials/stats') %>
+
+                <!-- Classroom list -->
+                <%- include('dashboard/class') %>
+
+                <!-- acccount -->
+                <%- include('dashboard/account') %>
+
+                <!-- Hỗ trợ -->
+                <%- include('dashboard/support') %>
+
+
+                <!-- Technical issues -->
+                <%- include('dashboard/issues') %>
+
+                <!-- Maintenance schedule -->
+                <%- include('dashboard/device') %>
+
+                <!-- boooking -->
+                <%- include('dashboard/booking') %>
+
+                <!-- feedback -->
+                <%- include('dashboard/feedback') %>
+
             </div>
-            <div class="mb-3">
-                <label for="fullName" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="fullName" name="fullName" maxlength="255" required>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" maxlength="255" required>
-            </div>
-            <div class="mb-3">
-                <label for="pass" class="form-label">Password</label>
-                <input type="pass" class="form-control" id="pass" name="pass" maxlength="255" required>
-            </div>
-            <div class="mb-3">
-                <label for="phone" class="form-label">Phone</label>
-                <input type="text" class="form-control" id="phone" name="phone" maxlength="20">
-            </div>
-            <div class="mb-3">
-                <label for="sex" class="form-label">Sex</label>
-                <select class="form-select" id="sex" name="sex" required>
-                    <option value="" disabled selected>Select your gender</option>
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <select class="form-select" id="role" name="role" required>
-                    <option value="" disabled selected>Select your role</option>
-                    <option value="Admin_IT">Admin_IT</option>
-                    <option value="Student">Student</option>
-                    <option value="School">School</option>
-                    <option value="Admin_IOT">Admin_IOT</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        });
+    </script>
 </body>
+
 </html>
