@@ -47,10 +47,22 @@ const getBookingList = async () => {
                     return reject(err);
                 }
                 resolve(results);
-                console.log(results);
-
             }
-            
+        );
+    });
+};
+
+const getFeedbackList = async () => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            'SELECT * FROM Feedbacks ',
+            (err, results) => {
+                if (err) {
+                    console.log("DB error:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            }
         );
     });
 };
@@ -73,5 +85,6 @@ module.exports ={
     createNewUser,
     getUserList,
     findUserByMSSVOrEmail,
-    getBookingList
+    getBookingList,
+    getFeedbackList
 }

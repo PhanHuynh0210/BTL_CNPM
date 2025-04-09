@@ -41,11 +41,14 @@ const home = async (req, res) => {
         try {
             const accounts = await userService.getUserList(); 
             const bookings = await userService.getBookingList();
+            const feedback = await userService.getFeedbackList();
+
             return res.render("home.ejs", {
                 username: req.session.username,
                 accounts: accounts,
                 bookings: bookings,
-                mssvLogin: req.session.userId
+                mssvLogin: req.session.userId,
+                feedback: feedback
             });
         } catch (error) {
             console.log("Error fetching user accounts:", error);
