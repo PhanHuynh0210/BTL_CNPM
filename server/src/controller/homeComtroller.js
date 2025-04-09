@@ -59,6 +59,17 @@ const home = async (req, res) => {
     }
 };
 
+const logout = (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.log("Lỗi", err);
+            return res.status(500)
+        }
+        res.clearCookie("connect.sid");
+        res.redirect("/"); 
+    });
+};
+
 
 const account = (req, res) => {
     let mssv = req.body.mssv;
@@ -77,5 +88,6 @@ module.exports = {
     login,
     handleLogin,
     home,
-    account
+    account,
+    logout 
 };

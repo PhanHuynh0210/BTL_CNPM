@@ -10,6 +10,7 @@ const iniWebRouter = (app) => {
     router.get("/", homeComtroller.login);router.get("/", homeComtroller.login);
     router.post("/auth", homeComtroller.handleLogin); 
     router.get("/home", homeComtroller.home); 
+    router.post('/logout', homeComtroller.logout);
     
     return app.use("/",router);
 }
