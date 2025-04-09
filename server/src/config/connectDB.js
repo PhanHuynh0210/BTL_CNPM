@@ -7,4 +7,4 @@ const connection = mysql.createConnection({
     database: 'BTL_CNPM'
 })
 
-export default connection;
+module.exports = connection;

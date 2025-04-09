@@ -1,56 +1,73 @@
 <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Tài khoản</h5>
-        <div>
-            <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#addAccountModal">
-                Thêm tài khoản
-            </button>
-            <button class="btn btn-primary btn-sm">Xem tất cả</button>
-        </div>
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Tài khoản</h5>
+    <div>
+      <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#addAccountModal">
+        Thêm tài khoản
+      </button>
+      <button class="btn btn-primary btn-sm">Xem tất cả</button>
     </div>
-    
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>MS</th>
-                        <th>Full name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>sex</th>
-                        <th>Role</th>
-                        <th>Trạng thái</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% accounts.forEach(account => { %>
-                        <tr>
-                            <td><%= account.mssv %></td>
-                            <td><%= account.FullName %></td>
-                            <td><%= account.Email %></td>
-                            <td><%= account.Phone %></td>
-                            <td><%= account.Sex %></td>
-                            <td><%= account.Role %></td>
+  </div>
 
-                            <td>
-                                <% if (account.mssv === mssvLogin) { %>
-                                    <span class="badge bg-success">Online</span>
-                                <% } else { %>
-                                    <span class="badge bg-secondary">Offline</span>
-                                <% } %>
-                            </td>
-                            <td>
-                                <button class="btn btn-danger btn-sm me-1">Xóa</button>
-                                <button class="btn btn-warning btn-sm">Chỉnh sửa</button>
-                            </td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>MS</th>
+            <th>Full name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>sex</th>
+            <th>Role</th>
+            <th>Trạng thái</th>
+            <th>Hành Động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% accounts.forEach(account=> { %>
+            <tr>
+              <td>
+                <%= account.mssv %>
+              </td>
+              <td>
+                <%= account.FullName %>
+              </td>
+              <td>
+                <%= account.Email %>
+              </td>
+              <td>
+                <%= account.Phone %>
+              </td>
+              <td>
+                <%= account.Sex %>
+              </td>
+              <td>
+                <%= account.Role %>
+              </td>
+
+              <td>
+                <% if (account.mssv===mssvLogin) { %>
+                  <span class="badge bg-success">Online</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Offline</span>
+                    <% } %>
+              </td>
+              <td>
+                <button class="btn btn-danger btn-sm me-1">Xóa</button>
+                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAccountModal"
+                  data-mssv="<%= account.mssv %>" data-fullname="<%= account.FullName %>"
+                  data-email="<%= account.Email %>" data-phone="<%= account.Phone %>" data-sex="<%= account.Sex %>"
+                  data-role="<%= account.Role %>">
+                  Chỉnh sửa
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
 <!-- Modal thêm tài khoản -->
@@ -66,18 +83,19 @@
           <div class="mb-2"><input name="mssv" class="form-control" placeholder="MSSV" required></div>
           <div class="mb-2"><input name="fullName" class="form-control" placeholder="Họ tên" required></div>
           <div class="mb-2"><input name="email" type="email" class="form-control" placeholder="Email" required></div>
-          <div class="mb-2"><input name="pass" type="password" class="form-control" placeholder="Mật khẩu" required></div>
+          <div class="mb-2"><input name="pass" type="password" class="form-control" placeholder="Mật khẩu" required>
+          </div>
           <div class="mb-2"><input name="phone" class="form-control" placeholder="SĐT" required></div>
           <div class="mb-2">
             <select name="sex" class="form-control" required>
-            <option value="Other">Other</option>
-            <option value="F">Nam</option>
-            <option value="M">Nữ</option>
+              <option value="Other">Other</option>
+              <option value="F">Nam</option>
+              <option value="M">Nữ</option>
             </select>
           </div>
           <div class="mb-2">
             <select name="role" class="form-control" required>
-                <option value="Admin">Chọn</option>
+              <option value="Admin">Chọn</option>
               <option value="Admin_IT">Admin_IT</option>
               <option value="Admin_IOT">Admin_IOT</option>
               <option value="School">School</option>
@@ -93,3 +111,54 @@
   </div>
 </div>
 
+<div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="/update-account" method="POST">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Chỉnh sửa tài khoản</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="mssv" id="edit-mssv">
+          <div class="mb-2"><input name="fullName" id="edit-fullname" class="form-control" placeholder="Họ tên" required></div>
+          <div class="mb-2"><input name="email" id="edit-email" type="email" class="form-control" placeholder="Email" required></div>
+          <div class="mb-2"><input name="phone" id="edit-phone" class="form-control" placeholder="SĐT" required></div>
+          <div class="mb-2">
+            <select name="sex" id="edit-sex" class="form-control" required>
+              <option value="Other">Other</option>
+              <option value="F">Nam</option>
+              <option value="M">Nữ</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <select name="role" id="edit-role" class="form-control" required>
+              <option value="Admin_IT">Admin_IT</option>
+              <option value="Admin_IOT">Admin_IOT</option>
+              <option value="School">School</option>
+              <option value="Student">Student</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  const editModal = document.getElementById('editAccountModal');
+  editModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+
+    document.getElementById('edit-mssv').value = button.getAttribute('data-mssv');
+    document.getElementById('edit-fullname').value = button.getAttribute('data-fullname');
+    document.getElementById('edit-email').value = button.getAttribute('data-email');
+    document.getElementById('edit-phone').value = button.getAttribute('data-phone');
+    document.getElementById('edit-sex').value = button.getAttribute('data-sex');
+    document.getElementById('edit-role').value = button.getAttribute('data-role');
+  });
+</script>

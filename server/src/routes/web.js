@@ -1,5 +1,5 @@
 import express from "express";
-import homeComtroller from '../controller/homeComtroller'
+import * as homeComtroller from '../controller/homeComtroller.js';
 const router = express.Router();
 
 /**
@@ -12,6 +12,10 @@ const iniWebRouter = (app) => {
     router.get("/home", homeComtroller.home); 
     router.post('/logout', homeComtroller.logout);
     router.post('/add-account', homeComtroller.account);
+    router.post('/update-account', homeComtroller.updateAccount);
+
+module.exports = router;
+
     
     return app.use("/",router);
 }

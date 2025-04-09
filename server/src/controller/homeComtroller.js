@@ -1,5 +1,7 @@
 import userService from '../service/userService'
 import bcrypt from 'bcryptjs';
+const db = require('../config/connectDB');
+
 
 const login = (req, res) => {
     return res.render("login.ejs");
@@ -46,6 +48,29 @@ const handleLogin = async (req, res) => {
    
 
 };
+
+
+const updateAccount = async (req, res) => {
+    const { mssv, fullName, email, phone, sex, role } = req.body;
+
+    const sql = `
+        UPDATE Users 
+        SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?
+        WHERE mssv = ?
+    `;
+
+    const values = [fullName, email, phone, sex, role, mssv];
+
+    db.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Lỗi khi cập nhật tài khoản:', err);
+            return res.status(500).send('Lỗi khi cập nhật tài khoản');
+        }
+
+        res.redirect("/home");
+    });
+};
+
 
 const home = async (req, res) => {
     if (req.session.loggedin) {
@@ -97,5 +122,6 @@ module.exports = {
     handleLogin,
     home,
     account,
-    logout 
+    logout,
+    updateAccount
 };
