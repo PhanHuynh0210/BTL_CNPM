@@ -1,14 +1,7 @@
 import bcrypt from "bcryptjs";
 const salt = bcrypt.genSaltSync(10);
-import mysql from 'mysql2';
-import { INSERT, SELECT } from 'sequelize/lib/query-types';
+import connection from "../config/connectDB"
 
-
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    database: 'BTL_CNPM'
-})
 const hashuserpass = (userpass) =>{
   return bcrypt.hashSync(userpass, salt);
 }
@@ -19,7 +12,7 @@ const createNewUser = (mssv, fullName, email, pass, phone, sex, role) =>{
     VALUES (?, ?, ?, ?, ?, ?, ?)`;
     connection.query(query, [mssv, fullName, email, hashpass, phone, sex, role], (err, results) => {
         if (err) {
-        console.error("Insert error:", err); // ➕ log lỗi
+        console.error("Insert error:", err); 
     } else {
         console.log("Insert success!");
     }
