@@ -11,6 +11,7 @@ const iniWebRouter = (app) => {
     router.post("/auth", homeComtroller.handleLogin); 
     router.get("/home", homeComtroller.home); 
     router.post('/logout', homeComtroller.logout);
+    router.post('/add-account', homeComtroller.account);
     
     return app.use("/",router);
 }

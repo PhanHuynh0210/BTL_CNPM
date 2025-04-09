@@ -18,6 +18,11 @@ const createNewUser = (mssv, fullName, email, pass, phone, sex, role) =>{
     const query = `INSERT INTO Users (mssv, fullName, email, pass, phone, sex, role)
     VALUES (?, ?, ?, ?, ?, ?, ?)`;
     connection.query(query, [mssv, fullName, email, hashpass, phone, sex, role], (err, results) => {
+        if (err) {
+            console.error("Insert error:", err); // ➕ log lỗi
+        } else {
+            console.log("Insert success!");
+        }
     });
 }
 

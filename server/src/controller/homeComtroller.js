@@ -22,7 +22,18 @@ const handleLogin = async (req, res) => {
         return res.render("login.ejs", { error: "Không tìm thấy tài khoản!" });
     }
 
-    const match = password === user.Pass;
+    let match = false;
+
+    try {
+        match = await bcrypt.compare(password, user.Pass);
+    } catch (err) {
+        console.error("Lỗi so sánh bcrypt:", err);
+    }
+
+    if (!match) {
+        match = password === user.Pass;
+    }
+
     if (!match) {
         return res.render("login.ejs", { error: "Sai mật khẩu!" });
     }
@@ -71,17 +82,13 @@ const logout = (req, res) => {
 };
 
 
-const account = (req, res) => {
-    let mssv = req.body.mssv;
-    let fullName = req.body.fullName;
-    let email = req.body.email;
-    let pass = req.body.pass;
-    let phone = req.body.phone;
-    let sex = req.body.sex;
-    let role = req.body.role;
 
-    //userService.createNewUser(mssv, fullName, email, pass, phone, sex, role);
-    userService.getUserlish();
+const account =  async (req, res) => {
+    const { mssv, fullName, email, pass, phone, sex, role } = req.body;
+    console.log("Account data:", req.body);
+    await userService.createNewUser(mssv, fullName, email, pass, phone, sex, role);
+    
+    res.redirect("/home");
 };
 
 module.exports = {
