@@ -3,6 +3,7 @@ const salt = bcrypt.genSaltSync(10);
 import mysql from 'mysql2';
 import { INSERT, SELECT } from 'sequelize/lib/query-types';
 
+
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -20,18 +21,22 @@ const createNewUser = (mssv, fullName, email, pass, phone, sex, role) =>{
     });
 }
 
-const getUserlish = () =>{
-    let acc = [];
-    connection.query(
-        ' Select * from Users ',
-        function(err, results, fiedls){
-           if(err){
-            console.log(err)
-           }
-           console.log(results)
-        }
-    );
-}
+const getUserList = async () => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            'SELECT * FROM Users',
+            (err, results) => {
+                if (err) {
+                    console.log("DB error:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            }
+            
+        );
+    });
+};
+
 
 const findUserByMSSVOrEmail = async (loginInput) => {
     return new Promise((resolve, reject) => {
@@ -47,5 +52,5 @@ const findUserByMSSVOrEmail = async (loginInput) => {
 };
 
 module.exports ={
-    createNewUser, getUserlish, findUserByMSSVOrEmail
+    createNewUser, getUserList, findUserByMSSVOrEmail
 }

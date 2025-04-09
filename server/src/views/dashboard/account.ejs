@@ -1,8 +1,12 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Tài khoảng </h5>
-        <button class="btn btn-primary btn-sm">Xem tất cả</button>
+        <h5 class="mb-0">Tài khoản</h5>
+        <div>
+            <button class="btn btn-success btn-sm me-2">Thêm tài khoản</button>
+            <button class="btn btn-primary btn-sm">Xem tất cả</button>
+        </div>
     </div>
+    
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover">
@@ -20,70 +24,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>2211xxx</td>
-                        <td>Nguyễn văn rớt môn</td>
-                        <td>11213@hcmu.edu.vn</td>
-                        <td>210930923</span></td>
-                        <td>0999999999</td>
-                        <td>Nam</td>
-                        <td>Sinh viên</td>
-                        <td>
-                            <span class="badge bg-info">Đăng nhập</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                            <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                        </td>
-                    </tr>
+                    <% accounts.forEach(account => { %>
+                        <tr>
+                            <td><%= account.mssv %></td>
+                            <td><%= account.FullName %></td>
+                            <td><%= account.Email %></td>
+                            <td><%= account.Pass %></td>
+                            <td><%= account.Phone %></td>
+                            <td><%= account.Sex %></td>
+                            <td><%= account.Role %></td>
 
-                    <tr>
-                        <td>2211xxx</td>
-                        <td>Nguyễn văn rớt môn</td>
-                        <td>11213@hcmu.edu.vn</td>
-                        <td>210930923</span></td>
-                        <td>0999999999</td>
-                        <td>Nam</td>
-                        <td>Sinh viên</td>
-                        <td>
-                            <span class="badge bg-info">Đăng nhập</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                            <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                        </td>
-                    </tr><tr>
-                        <td>2211xxx</td>
-                        <td>Nguyễn văn rớt môn</td>
-                        <td>11213@hcmu.edu.vn</td>
-                        <td>210930923</span></td>
-                        <td>0999999999</td>
-                        <td>Nam</td>
-                        <td>Sinh viên</td>
-                        <td>
-                            <span class="badge bg-info">Đăng nhập</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                            <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                        </td>
-                    </tr><tr>
-                        <td>2211xxx</td>
-                        <td>Nguyễn văn rớt môn</td>
-                        <td>11213@hcmu.edu.vn</td>
-                        <td>210930923</span></td>
-                        <td>0999999999</td>
-                        <td>Nam</td>
-                        <td>Sinh viên</td>
-                        <td>
-                            <span class="badge bg-info">Đăng nhập</span>
-                        </td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                            <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                        </td>
-                    </tr>
-                    </tr>
+                            <td>
+                                <% if (account.mssv === mssvLogin) { %>
+                                    <span class="badge bg-success">Online</span>
+                                <% } else { %>
+                                    <span class="badge bg-secondary">Offline</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm me-1">Xóa</button>
+                                <button class="btn btn-warning btn-sm">Chỉnh sửa</button>
+                            </td>
+                        </tr>
+                    <% }) %>
                 </tbody>
             </table>
         </div>

@@ -30,18 +30,30 @@ const handleLogin = async (req, res) => {
     // Đăng nhập thành công
     req.session.loggedin = true;
     req.session.username = user.fullName;
+    req.session.userId = user.mssv; 
     res.redirect("/home");
    
 
 };
 
-const home = (req, res) => {
+const home = async (req, res) => {
     if (req.session.loggedin) {
-        return res.render("home.ejs", { username: req.session.username });
+        try {
+            const accounts = await userService.getUserList(); 
+            return res.render("home.ejs", {
+                username: req.session.username,
+                accounts: accounts,
+                mssvLogin: req.session.userId
+            });
+        } catch (error) {
+            console.log("Error fetching user accounts:", error);
+            return res.status(500).send("Server error!");
+        }
     } else {
         return res.redirect("/");
     }
 };
+
 
 const account = (req, res) => {
     let mssv = req.body.mssv;
