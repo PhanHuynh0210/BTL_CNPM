@@ -32,7 +32,20 @@ const getUserlish = () =>{
         }
     );
 }
-module.exports ={
-    createNewUser, getUserlish
-}
 
+const findUserByMSSVOrEmail = async (loginInput) => {
+    return new Promise((resolve, reject) => {
+        connection.query(
+            'SELECT * FROM Users WHERE mssv = ? OR email = ?',
+            [loginInput, loginInput],
+            (err, results) => {
+                if (err) return reject(err);
+                resolve(results.length > 0 ? results[0] : null);
+            }
+        );
+    });
+};
+
+module.exports ={
+    createNewUser, getUserlish, findUserByMSSVOrEmail
+}

@@ -4,9 +4,20 @@ import initWebRoutes from "./routes/web";
 import checkconnect from "./config/connectDB";
 import { CHAR } from "sequelize";
 import bodyParser from "body-parser";
+import session from 'express-session';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+
+app.use(session({
+    secret: 'yourSecretKey',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 60 * 60 * 1000 } 
+}));
+
+
+
 
 //config view engine
 configViewEngine(app);
