@@ -79,7 +79,6 @@
                 <!-- Hỗ trợ -->
                 <%- include('dashboard/support') %>
 
-
                 <!-- Technical issues -->
                 <%- include('dashboard/issues') %>
 
@@ -87,7 +86,7 @@
                 <%- include('dashboard/device') %>
 
                 <!-- boooking -->
-                <%- include('dashboard/booking') %>
+                <%- include('dashboard/booking', { bookings: bookings }) %>
 
                 <!-- feedback -->
                 <%- include('dashboard/feedback') %>

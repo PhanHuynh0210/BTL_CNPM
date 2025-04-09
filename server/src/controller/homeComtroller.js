@@ -40,9 +40,11 @@ const home = async (req, res) => {
     if (req.session.loggedin) {
         try {
             const accounts = await userService.getUserList(); 
+            const bookings = await userService.getBookingList();
             return res.render("home.ejs", {
                 username: req.session.username,
                 accounts: accounts,
+                bookings: bookings,
                 mssvLogin: req.session.userId
             });
         } catch (error) {

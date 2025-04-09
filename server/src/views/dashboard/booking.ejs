@@ -11,43 +11,30 @@
                         <th>ID</th>
                         <th>Room</th>
                         <th>MSSV</th>
-                        <th>Email</th>
                         <th>Thời gian</th>
                         <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#SV-1023</td>
-                        <td>A102</td>
-                        <td>Máy chiếu không hiển thị hình ảnh</td>
-                        <td><span class="badge bg-danger">Cao</span></td>
-                        <td>Hôm nay, 09:15</td>
-                        <td><span class="badge badge-warning-light">Check in</span></td>
-                    </tr>
-
-                    <tr>
-                        <td>#SV-1023</td>
-                        <td>A102</td>
-                        <td>Máy chiếu không hiển thị hình ảnh</td>
-                        <td><span class="badge bg-danger">Cao</span></td>
-                        <td>Hôm nay, 09:15</td>
-                        <td><span class="badge badge-warning-light">Check in</span></td>
-                    </tr><tr>
-                        <td>#SV-1023</td>
-                        <td>A102</td>
-                        <td>Máy chiếu không hiển thị hình ảnh</td>
-                        <td><span class="badge bg-danger">Cao</span></td>
-                        <td>Hôm nay, 09:15</td>
-                        <td><span class="badge badge-warning-light">Check in</span></td>
-                    </tr><tr>
-                        <td>#SV-1023</td>
-                        <td>A102</td>
-                        <td>Máy chiếu không hiển thị hình ảnh</td>
-                        <td><span class="badge bg-danger">Cao</span></td>
-                        <td>Hôm nay, 09:15</td>
-                        <td><span class="badge badge-warning-light">Check in</span></td>
-                    </tr>
+                    <% bookings.forEach(bookings => { %>
+                        <tr>
+                            <td><%= bookings.id %></td>
+                            <td><%= bookings.room_id %></td>
+                            <td><%= bookings.mssv %></td>
+                            <td><%= bookings.Day %>, <%= bookings.start_time %> - <%= bookings.end_time %></td>
+                            <td>
+                                <% if (bookings.status === 'Confirmed') { %>
+                                    <span class="badge bg-success">Confirmed</span>
+                                <% } else if (bookings.status === 'Pending') { %>
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                <% } else if (bookings.status === 'Rejected') { %>
+                                    <span class="badge bg-danger">Rejected</span>
+                                <% } else { %>
+                                    <span class="badge bg-secondary"><%= bookings.status %></span>
+                                <% } %>
+                            </td>                            
+                        </tr>
+                    <% }) %>
                 </tbody>
             </table>
         </div>
