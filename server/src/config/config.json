@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": null,
+    "password": "Jacuby@123",
     "database": "BTL_CNPM",
     "host": "127.0.0.1",
     "dialect": "mysql"
