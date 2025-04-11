@@ -8,6 +8,12 @@ import CurrentRoom from './CurrentRoom';
 import RoomHistory from './RoomHistory';
 import BookingManager from './BookingManager';
 import RoomDetails from './RoomDetails';
+import FindingRoom from './FindingRoom';
+import BookingSelfStudy from './BookingSelfStudy';
+import UserDashboard from './UserDashboard';
+import UserProfile from './UserProfile';
+import FeedbackForm from './FeedbackForm';
+import FeedbackSuccess from './FeedbackSuccess';
 // Placeholder - sẽ tạo sau
 const RoomSearch = () => <div className="p-5 text-center">🔍 Tìm phòng</div>;
 const Profile = () => <div className="p-5 text-center">👤 Hồ sơ cá nhân</div>;
@@ -26,9 +32,15 @@ function App() {
       <Route path="/history" element={<RoomHistory />} />
       <Route path="/room-details" element={<RoomDetails />} />
       <Route path="/search" element={<RoomSearch />} />
-      <Route path="/profile" element={<Profile />} />
+      {/* <Route path="/profile" element={<Profile />} /> */}
       <Route path="/reports" element={<Reports />} />
       <Route path="/support" element={<Support />} />
+      <Route path="/finding-room" element={<FindingRoom />} />
+      <Route path="/booking-self-study" element={<BookingSelfStudy />} />
+      <Route path="/UserDashboard" element={<UserDashboard />} />
+      <Route path="/UserProfile" element={<UserProfile />} />
+      <Route path="/FeedbackForm" element={<FeedbackForm />} />
+      <Route path="/FeedbackSuccess" element={<FeedbackSuccess />} />
     </Routes>
   );
 }
