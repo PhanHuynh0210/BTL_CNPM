@@ -13,7 +13,6 @@ const handleLogin = async (req, res) => {
     console.log("Username (MSSV/Email):", username);
     console.log("Password:", password);
 
-
     if (!username || !password) {
         return res.render("login.ejs", { error: "Vui lòng nhập đầy đủ thông tin!" });
     }
@@ -49,28 +48,21 @@ const handleLogin = async (req, res) => {
 
 };
 
-
 const updateAccount = async (req, res) => {
     const { mssv, fullName, email, phone, sex, role } = req.body;
-
     const sql = `
         UPDATE Users 
         SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?
-        WHERE mssv = ?
-    `;
-
-    const values = [fullName, email, phone, sex, role, mssv];
-
+        WHERE mssv = ?`;
+ values = [fullName, email, phone, sex, role, mssv];
     db.query(sql, values, (err, result) => {
         if (err) {
             console.error('Lỗi khi cập nhật tài khoản:', err);
             return res.status(500).send('Lỗi khi cập nhật tài khoản');
         }
-
         res.redirect("/home");
     });
 };
-
 
 const home = async (req, res) => {
     if (req.session.loggedin) {

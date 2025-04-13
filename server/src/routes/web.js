@@ -1,5 +1,6 @@
 import express from "express";
 import * as homeComtroller from '../controller/homeComtroller.js';
+import apiController from '../controller/apiController.js'
 const router = express.Router();
 
 /**
@@ -13,6 +14,7 @@ const iniWebRouter = (app) => {
     router.post('/logout', homeComtroller.logout);
     router.post('/add-account', homeComtroller.account);
     router.post('/update-account', homeComtroller.updateAccount);
+    router.get("/api/test-api",apiController.testapi);
 
 module.exports = router;
 
