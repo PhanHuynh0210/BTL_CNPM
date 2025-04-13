@@ -1,12 +1,12 @@
 import express from 'express';
-import userController from '../controller/api/userController.js';
-import bookingController from '../controller/api/bookingController.js';
-import checkinoutController from '../controller/api/checkinoutController.js';
-import deviceController from '../controller/api/deviceController.js';
-import feedbackController from '../controller/api/feedbackController.js';
-import inforController from '../controller/api/inforController.js';
-import roomController from '../controller/api/roomController.js';
-import supportController from '../controller/api/supportController.js';
+import userController from '../controller/userController.js';
+import bookingController from '../controller/bookingController.js';
+import checkinoutController from '../controller/checkinoutController.js';
+import deviceController from '../controller/deviceController.js';
+import feedbackController from '../controller/feedbackController.js';
+import inforController from '../controller/inforController.js';
+import roomController from '../controller/roomController.js';
+import supportController from '../controller/supportController.js';
 
 const router = express.Router();
 
