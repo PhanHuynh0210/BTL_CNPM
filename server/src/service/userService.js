@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
+import db from '..models/index.js'
 const salt = bcrypt.genSaltSync(10);
-import mysql from 'mysql2';
+
 import { INSERT, SELECT } from 'sequelize/lib/query-types';
 
 
