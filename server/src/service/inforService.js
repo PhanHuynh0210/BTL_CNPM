@@ -11,7 +11,7 @@ const getAllInfors = async () => {
 
 const getInforById = async (id) => {
   try {
-    return await db.Infor.findByPk(id);
+    return await db.Infor.findOne({ where: { infor_id: id } });
   } catch (err) {
     console.error('DB error:', err);
     throw err;
@@ -29,7 +29,7 @@ const createInfor = async (inforData) => {
 
 const updateInfor = async (id, inforData) => {
   try {
-    const infor = await db.Infor.findByPk(id);
+    return await db.Infor.findOne({ where: { infor_id: id } });
     if (!infor) throw new Error('Infor not found');
     return await infor.update(inforData);
   } catch (err) {
@@ -40,7 +40,7 @@ const updateInfor = async (id, inforData) => {
 
 const deleteInfor = async (id) => {
   try {
-    const infor = await db.Infor.findByPk(id);
+    return await db.Infor.findOne({ where: { infor_id: id } });
     if (!infor) throw new Error('Infor not found');
     return await infor.destroy();
   } catch (err) {

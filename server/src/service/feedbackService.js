@@ -1,4 +1,7 @@
+import { where } from 'sequelize';
 import db from '../models/index.js';
+import { Where } from 'sequelize/lib/utils';
+import feedback from '../models/feedback.js';
 
 const getAllFeedbacks = async () => {
   try {
@@ -13,7 +16,8 @@ const getAllFeedbacks = async () => {
 
 const getFeedbackById = async (id) => {
   try {
-    return await db.Feedback.findByPk(id, {
+    return await db.Feedback.findOne({
+      where: {feedback_id: id},
       include: [{ model: db.Users, as: 'user' }],
     });
   } catch (err) {
@@ -33,7 +37,7 @@ const createFeedback = async (feedbackData) => {
 
 const updateFeedback = async (id, feedbackData) => {
   try {
-    const feedback = await db.Feedback.findByPk(id);
+    const feedback = await db.Feedback.findOne({ where: { feedback_id: id } });
     if (!feedback) throw new Error('Feedback not found');
     return await feedback.update(feedbackData);
   } catch (err) {
@@ -44,7 +48,7 @@ const updateFeedback = async (id, feedbackData) => {
 
 const deleteFeedback = async (id) => {
   try {
-    const feedback = await db.Feedback.findByPk(id);
+    const feedback = await db.Feedback.findOne({ where: { feedback_id: id } });
     if (!feedback) throw new Error('Feedback not found');
     return await feedback.destroy();
   } catch (err) {

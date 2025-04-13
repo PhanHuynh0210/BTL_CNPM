@@ -1,3 +1,4 @@
+import { where } from 'sequelize';
 import db from '../models/index.js';
 
 const getAllDevices = async () => {
@@ -33,7 +34,7 @@ const createDevice = async (deviceData) => {
 
 const updateDevice = async (id, deviceData) => {
   try {
-    const device = await db.Device.findByPk(id);
+    const device = await db.Device.findOne({ where: { devide_id: id } });
     if (!device) throw new Error('Device not found');
     return await device.update(deviceData);
   } catch (err) {
@@ -44,7 +45,7 @@ const updateDevice = async (id, deviceData) => {
 
 const deleteDevice = async (id) => {
   try {
-    const device = await db.Device.findByPk(id);
+    const device = await db.Device.findOne({ where: { device_id: id } });
     if (!device) throw new Error('Device not found');
     return await device.destroy();
   } catch (err) {
