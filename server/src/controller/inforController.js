@@ -1,4 +1,4 @@
-import inforService from '../../service/inforService.js';
+import inforService from '../service/inforService.js';
 
 const getAllInfors = async (req, res) => {
   try {

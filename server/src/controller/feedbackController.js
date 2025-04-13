@@ -1,4 +1,4 @@
-import feedbackService from '../../service/feedbackService.js';
+import feedbackService from '../service/feedbackService.js';
 
 const getAllFeedbacks = async (req, res) => {
   try {

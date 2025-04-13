@@ -1,4 +1,4 @@
-import supportService from '../../service/supportService.js';
+import supportService from '../service/supportService.js';
 
 const getAllSupports = async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-import bookingService from '../../service/bookingService.js';
+import bookingService from '../service/bookingService.js';
 
 const getAllBookings = async (req, res) => {
   try {

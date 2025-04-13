@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
-import db from '..models/index.js'
+// import db from '../models/index.js'
+const db = require('../models/index.js')
 const salt = bcrypt.genSaltSync(10);
-
-import { INSERT, SELECT } from 'sequelize/lib/query-types';
+import QueryTypes from "sequelize/lib/query-types";
+const { INSERT, SELECT } = QueryTypes;
 
 
 const connection = mysql.createConnection({

@@ -1,4 +1,4 @@
-import checkinoutService from '../../service/checkinoutService.js';
+import checkinoutService from '../service/checkinoutService.js';
 
 const getAllCheckinouts = async (req, res) => {
   try {
