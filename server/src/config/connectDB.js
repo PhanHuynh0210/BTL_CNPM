@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('BTL_CNPM', 'root', 'Jacuby@123', {
+const sequelize = new Sequelize('BTL_CNPM', 'root', '123456', {
     host: 'localhost',
     dialect: 'mysql' 
   });
@@ -14,3 +14,4 @@ const sequelize = new Sequelize('BTL_CNPM', 'root', 'Jacuby@123', {
       }
   }
   export default checkconnect;
+module.exports = sequelize;

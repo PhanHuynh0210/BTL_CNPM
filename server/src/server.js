@@ -1,5 +1,5 @@
 import express from "express";
-import configViewEngine from "./config/viewEngine";
+import configViewEngine from "./config/viewEngine.js";
 import initWebRoutes from "./routes/web";
 import checkconnect from "./config/connectDB";
 import { CHAR } from "sequelize";
