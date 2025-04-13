@@ -1,6 +1,6 @@
 import express from "express";
 import ejs from "ejs";
-
+    
 /**
  * @param {*} app : express app
  */

@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       // Define association with the Users model
       Feedback.belongsTo(models.User, {
         foreignKey: 'mssv',
+        as: 'user',
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
       });
@@ -21,6 +22,11 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   Feedback.init({
+    feedback_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     mssv: {
       type: DataTypes.STRING,
       allowNull: false

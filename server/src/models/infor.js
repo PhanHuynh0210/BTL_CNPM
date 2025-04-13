@@ -1,7 +1,5 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class Infor extends Model {
@@ -16,6 +14,11 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   Infor.init({
+    infor_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     contact_info: {
       type: DataTypes.TEXT,
       allowNull: false  // Ensure contact_info is required

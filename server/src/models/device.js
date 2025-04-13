@@ -11,10 +11,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // Define associations here if needed
-      // For example: Device.belongsTo(models.Room, { foreignKey: 'room_id' });
+      Device.belongsTo(models.Room, { foreignKey: 'room_id', as: 'Room' });
     }
   }
   Device.init({
+    device_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     device_name: {
       type: DataTypes.STRING,
       allowNull: false
