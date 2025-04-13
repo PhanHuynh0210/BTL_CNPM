@@ -1,8 +1,8 @@
 import express from "express";
 import configViewEngine from "./config/viewEngine.js";
-import initWebRoutes from "./routes/web";
+import initWebRoutes from "./routes/web.js";
 import initApiRoutes from "./routes/api.js";
-import checkconnect from "./config/connectDB";
+import checkconnect from "./config/connectDB.js";
 import { CHAR } from "sequelize";
 import bodyParser from "body-parser";
 import session from 'express-session';
