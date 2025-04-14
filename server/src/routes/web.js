@@ -14,11 +14,11 @@ const iniWebRouter = (app) => {
     router.post('/logout', homeComtroller.logout);
     router.post('/add-account', homeComtroller.account);
     router.post('/update-account', homeComtroller.updateAccount);
+    router.post("/delete-user/:mssv", homeComtroller.deleteAccount);
     router.get("/api/test-api",apiController.testapi);
 
 module.exports = router;
 
-    
     return app.use("/",router);
 }
 

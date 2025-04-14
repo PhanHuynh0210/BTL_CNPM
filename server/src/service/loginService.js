@@ -25,35 +25,34 @@ const checkLoginCredentials = async (username, password) => {
             console.log("User found:", user); // Log thông tin user lấy được từ DB
 
             // Kiểm tra nếu `user.Pass` không tồn tại
-            if (!user.Pass) { // Sửa từ `user.pass` thành `user.Pass`
-                console.log("Password field is missing for user:", username); // Log khi không có mật khẩu
+            if (!user.Pass) { 
+                console.log("Password field is missing for user:", username); 
                 return reject({ status: 401, message: 'Invalid username or password' });
             }
 
             try {
                 // So sánh mật khẩu với mật khẩu đã mã hóa trong database
-                console.log("Comparing passwords..."); // Log trước khi so sánh mật khẩu
-                const isPasswordValid = await bcrypt.compare(password, user.Pass); // Sửa từ `user.pass` thành `user.Pass`
-                console.log("Password comparison result:", isPasswordValid); // Log kết quả so sánh mật khẩu mã hóa
+                const isPasswordValid = await bcrypt.compare(password, user.Pass);
+                console.log("Password comparison result:", isPasswordValid); 
                 if (isPasswordValid) {
-                    console.log("Password is valid for user:", username); // Log khi mật khẩu hợp lệ
+                    console.log("Password is valid for user:", username);
                     return resolve({
                         mssv: user.mssv,
-                        fullName: user.FullName, // Sửa từ `user.fullName` thành `user.FullName`
-                        email: user.Email, // Sửa từ `user.email` thành `user.Email`
-                        role: user.Role // Sửa từ `user.role` thành `user.Role`
+                        fullName: user.FullName,
+                        email: user.Email, 
+                        role: user.Role 
                     });
                 }
 
                 // Nếu mật khẩu không khớp với mã hóa, kiểm tra mật khẩu dạng không mã hóa
-                console.log("Checking plain text password..."); // Log trước khi kiểm tra mật khẩu không mã hóa
-                if (password === user.Pass) { // Sửa từ `user.pass` thành `user.Pass`
-                    console.log("Plain text password is valid for user:", username); // Log khi mật khẩu không mã hóa hợp lệ
+                console.log("Checking plain text password..."); 
+                if (password === user.Pass) { 
+                    console.log("Plain text password is valid for user:", username); 
                     return resolve({
                         mssv: user.mssv,
-                        fullName: user.FullName, // Sửa từ `user.fullName` thành `user.FullName`
-                        email: user.Email, // Sửa từ `user.email` thành `user.Email`
-                        role: user.Role // Sửa từ `user.role` thành `user.Role`
+                        fullName: user.FullName,
+                        email: user.Email,
+                        role: user.Role 
                     });
                 }
 

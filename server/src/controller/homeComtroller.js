@@ -48,21 +48,45 @@ const handleLogin = async (req, res) => {
 
 };
 
+
 const updateAccount = async (req, res) => {
-    const { mssv, fullName, email, phone, sex, role } = req.body;
-    const sql = `
-        UPDATE Users 
-        SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?
-        WHERE mssv = ?`;
- values = [fullName, email, phone, sex, role, mssv];
-    db.query(sql, values, (err, result) => {
-        if (err) {
-            console.error('Lỗi khi cập nhật tài khoản:', err);
-            return res.status(500).send('Lỗi khi cập nhật tài khoản');
+    const { mssv, fullName, email, phone, sex, role, pass } = req.body;
+
+    let sql = '';
+    let values = [];
+
+    try {
+        if (pass && pass.trim() !== '') {
+            // Mã hóa mật khẩu nếu có nhập mới
+            const hashedPassword = await bcrypt.hash(pass, 10);
+
+            sql = `
+                UPDATE Users 
+                SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?, Pass = ?
+                WHERE mssv = ?`;
+            values = [fullName, email, phone, sex, role, hashedPassword, mssv];
+        } else {
+            // Không cập nhật mật khẩu
+            sql = `
+                UPDATE Users 
+                SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?
+                WHERE mssv = ?`;
+            values = [fullName, email, phone, sex, role, mssv];
         }
-        res.redirect("/home");
-    });
+
+        db.query(sql, values, (err, result) => {
+            if (err) {
+                console.error('Lỗi khi cập nhật tài khoản:', err);
+                return res.status(500).send('Lỗi khi cập nhật tài khoản');
+            }
+            res.redirect("/home");
+        });
+    } catch (error) {
+        console.error('Lỗi khi mã hóa mật khẩu:', error);
+        res.status(500).send('Đã xảy ra lỗi khi xử lý mật khẩu');
+    }
 };
+
 
 const home = async (req, res) => {
     if (req.session.loggedin) {
@@ -109,11 +133,29 @@ const account =  async (req, res) => {
     res.redirect("/home");
 };
 
+const deleteAccount = async (req, res) => {
+    const { mssv } = req.params;
+    if (mssv === req.session.userId) {
+        return res.status(400).send("Không thể xóa chính mình.");
+    }
+    const sql = "DELETE FROM Users WHERE mssv = ?";
+
+    db.query(sql, [mssv], (err, result) => {
+        if (err) {
+            console.error("Lỗi khi xóa người dùng:", err);
+            return res.status(500).send("Lỗi khi xóa người dùng");
+        }
+        res.redirect("/home");
+    });
+};
+
+
 module.exports = {
     login,
     handleLogin,
     home,
     account,
     logout,
-    updateAccount
+    updateAccount,
+    deleteAccount
 };

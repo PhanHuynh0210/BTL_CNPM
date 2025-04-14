@@ -54,7 +54,10 @@
                     <% } %>
               </td>
               <td>
-                <button class="btn btn-danger btn-sm me-1">Xóa</button>
+                <form action="/delete-user/<%= account.mssv %>" method="POST" style="display:inline-block;">
+                  <button class="btn btn-danger btn-sm me-1" onclick="return confirm('Bạn có chắc muốn xóa người này?')">Xóa</button>
+                </form>
+                
                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAccountModal"
                   data-mssv="<%= account.mssv %>" data-fullname="<%= account.FullName %>"
                   data-email="<%= account.Email %>" data-phone="<%= account.Phone %>" data-sex="<%= account.Sex %>"
@@ -124,6 +127,10 @@
           <div class="mb-2"><input name="fullName" id="edit-fullname" class="form-control" placeholder="Họ tên" required></div>
           <div class="mb-2"><input name="email" id="edit-email" type="email" class="form-control" placeholder="Email" required></div>
           <div class="mb-2"><input name="phone" id="edit-phone" class="form-control" placeholder="SĐT" required></div>
+          <div class="mb-2">
+            <input name="pass" id="edit-pass" type="password" class="form-control" placeholder="Mật khẩu (bỏ trống nếu không đổi)">
+          </div>
+          
           <div class="mb-2">
             <select name="sex" id="edit-sex" class="form-control" required>
               <option value="Other">Other</option>
