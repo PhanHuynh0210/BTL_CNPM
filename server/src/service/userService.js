@@ -19,50 +19,44 @@ const createNewUser = (mssv, fullName, email, pass, phone, sex, role) =>{
     });
 }
 
+const updateUser = async (mssv, fullName, email, phone, sex, role, pass = null) => {
+    return new Promise(async (resolve, reject) => {
+      let sql = '';
+      let values = [];
+  
+      if (pass && pass.trim() !== '') {
+        const hashedPassword = await bcrypt.hash(pass, 10);
+        sql = `UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?, Pass = ? WHERE mssv = ?`;
+        values = [fullName, email, phone, sex, role, hashedPassword, mssv];
+      } else {
+        sql = `UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ? WHERE mssv = ?`;
+        values = [fullName, email, phone, sex, role, mssv];
+      }
+  
+      connection.query(sql, values, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  };
+
+const deleteUser = (mssv) => {
+    return new Promise((resolve, reject) => {
+      const sql = "DELETE FROM Users WHERE mssv = ?";
+      connection.query(sql, [mssv], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  };
+
 const getUserList = async () => {
-    return new Promise((resolve, reject) => {
-        connection.query(
-            'SELECT * FROM Users',
-            (err, results) => {
-                if (err) {
-                    console.log("DB error:", err);
-                    return reject(err);
-                }
-                resolve(results);
-            }
-            
-        );
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM Users', (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
     });
-};
-
-const getBookingList = async () => {
-    return new Promise((resolve, reject) => {
-        connection.query(
-            'SELECT * FROM Bookings ',
-            (err, results) => {
-                if (err) {
-                    console.log("DB error:", err);
-                    return reject(err);
-                }
-                resolve(results);
-            }
-        );
-    });
-};
-
-const getFeedbackList = async () => {
-    return new Promise((resolve, reject) => {
-        connection.query(
-            'SELECT * FROM Feedbacks ',
-            (err, results) => {
-                if (err) {
-                    console.log("DB error:", err);
-                    return reject(err);
-                }
-                resolve(results);
-            }
-        );
-    });
+  });
 };
 
 
@@ -79,10 +73,11 @@ const findUserByMSSVOrEmail = async (loginInput) => {
     });
 };
 
-module.exports ={
+module.exports = {
     createNewUser,
+    updateUser,
+    deleteUser,
     getUserList,
     findUserByMSSVOrEmail,
-    getBookingList,
-    getFeedbackList
-}
+  };
+  
