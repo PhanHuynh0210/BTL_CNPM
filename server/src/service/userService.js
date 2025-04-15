@@ -19,26 +19,35 @@ const createNewUser = (mssv, fullName, email, pass, phone, sex, role) =>{
     });
 }
 
-const updateUser = async (mssv, fullName, email, phone, sex, role, pass = null) => {
-    return new Promise(async (resolve, reject) => {
-      let sql = '';
-      let values = [];
-  
-      if (pass && pass.trim() !== '') {
-        const hashedPassword = await bcrypt.hash(pass, 10);
-        sql = `UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?, Pass = ? WHERE mssv = ?`;
-        values = [fullName, email, phone, sex, role, hashedPassword, mssv];
-      } else {
-        sql = `UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ? WHERE mssv = ?`;
-        values = [fullName, email, phone, sex, role, mssv];
-      }
-  
+const updateUser = async (mssv, fullName, email, phone, sex, role, pass = null, status = 'Offline') => {
+  try {
+    let sql = '';
+    let values = [];
+
+    if (pass && pass.trim() !== '') {
+      // Mã hóa mật khẩu nếu có
+      const hashedPassword = await bcrypt.hash(pass, 10);
+      sql = `UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?, Pass = ?, status = ? WHERE mssv = ?`;
+      values = [fullName, email, phone, sex, role, hashedPassword, status, mssv];
+    } else {
+      sql = `UPDATE Users SET FullName = ?, Email = ?, Phone = ?, Sex = ?, Role = ?, status = ? WHERE mssv = ?`;
+      values = [fullName, email, phone, sex, role, status, mssv];
+    }
+
+    return new Promise((resolve, reject) => {
       connection.query(sql, values, (err, result) => {
-        if (err) return reject(err);
-        resolve(result);
+        if (err) {
+          reject('Error updating user: ' + err);
+        } else {
+          resolve(result);
+        }
       });
     });
-  };
+  } catch (err) {
+    throw new Error('Error in updateUser: ' + err);
+  }
+};
+
 
 const deleteUser = (mssv) => {
     return new Promise((resolve, reject) => {
@@ -72,6 +81,16 @@ const findUserByMSSVOrEmail = async (loginInput) => {
         );
     });
 };
+const updateUserStatus = async (mssv, status) => {
+  return new Promise((resolve, reject) => {
+    const sql = "UPDATE Users SET status = ? WHERE mssv = ?";
+    connection.query(sql, [status, mssv], (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+};
+
 
 module.exports = {
     createNewUser,
@@ -79,5 +98,6 @@ module.exports = {
     deleteUser,
     getUserList,
     findUserByMSSVOrEmail,
+    updateUserStatus
   };
   

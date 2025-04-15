@@ -12,6 +12,7 @@ const initApiRouter = (app) => {
     router.post("/register",apiController.handleRegister);
 
     router.post("/login", apiController.handleLoginapi);
+    router.post('/logout', apiController.logoutUser)
 
     module.exports = router;
     return app.use("/api/v1/",router);

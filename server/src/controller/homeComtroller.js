@@ -13,8 +13,7 @@ const login = (req, res) => {
 
 const handleLogin = async (req, res) => {
     const { username, password } = req.body;
-    console.log(" Dữ liệu người dùng nhập:");
-    console.log("Username (MSSV/Email):", username);
+    console.log("MSSV/Email:", username);
     console.log("Password:", password);
 
     if (!username || !password) {
@@ -22,7 +21,6 @@ const handleLogin = async (req, res) => {
     }
 
     const user = await userService.findUserByMSSVOrEmail(username);
-    console.log(" Dữ liệu người dùng từ DB:", user);
     if (!user) {
         return res.render("login.ejs", { error: "Không tìm thấy tài khoản!" });
     }
@@ -43,23 +41,36 @@ const handleLogin = async (req, res) => {
         return res.render("login.ejs", { error: "Sai mật khẩu!" });
     }
 
+    try {
+        await userService.updateUserStatus(user.mssv, 'Online'); 
+    } catch (err) {
+        console.error("Lỗi khi cập nhật trạng thái:", err);
+    }
+
     req.session.loggedin = true;
     req.session.username = user.fullName;
     req.session.userId = user.mssv; 
     res.redirect("/home");
-   
 };
 
 const logout = (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.log("Lỗi", err);
-            return res.status(500)
-        }
-        res.clearCookie("connect.sid");
-        res.redirect("/"); 
+    const userId = req.session.userId;
+
+    userService.updateUserStatus(userId, 'Offline').then(() => {
+        req.session.destroy(err => {
+            if (err) {
+                console.log("Lỗi", err);
+                return res.status(500);
+            }
+            res.clearCookie("connect.sid");
+            res.redirect("/"); 
+        });
+    }).catch((err) => {
+        console.error('Lỗi khi cập nhật trạng thái khi đăng xuất:', err);
+        res.status(500).send('Lỗi khi đăng xuất');
     });
 };
+
 
 const updateAccount = async (req, res) => {
     const { mssv, fullName, email, phone, sex, role, pass } = req.body;

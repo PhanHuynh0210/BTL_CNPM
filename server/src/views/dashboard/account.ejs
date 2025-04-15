@@ -25,49 +25,37 @@
           </tr>
         </thead>
         <tbody>
-          <% accounts.forEach(account=> { %>
+          <% accounts.forEach(account => { %>
             <tr>
+              <td><%= account.mssv %></td>
+              <td><%= account.FullName %></td>
+              <td><%= account.Email %></td>
+              <td><%= account.Phone %></td>
+              <td><%= account.Sex %></td>
+              <td><%= account.Role %></td>
+        
               <td>
-                <%= account.mssv %>
-              </td>
-              <td>
-                <%= account.FullName %>
-              </td>
-              <td>
-                <%= account.Email %>
-              </td>
-              <td>
-                <%= account.Phone %>
-              </td>
-              <td>
-                <%= account.Sex %>
-              </td>
-              <td>
-                <%= account.Role %>
-              </td>
-
-              <td>
-                <% if (account.mssv===mssvLogin) { %>
+                <% if (account.status === 'Online') { %>
                   <span class="badge bg-success">Online</span>
-                  <% } else { %>
-                    <span class="badge bg-secondary">Offline</span>
-                    <% } %>
+                <% } else { %>
+                  <span class="badge bg-secondary">Offline</span>
+                <% } %>
               </td>
+        
               <td>
                 <form action="/delete-user/<%= account.mssv %>" method="POST" style="display:inline-block;">
                   <button class="btn btn-danger btn-sm me-1" onclick="return confirm('Bạn có chắc muốn xóa người này?')">Xóa</button>
                 </form>
-                
                 <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAccountModal"
                   data-mssv="<%= account.mssv %>" data-fullname="<%= account.FullName %>"
-                  data-email="<%= account.Email %>" data-phone="<%= account.Phone %>" data-sex="<%= account.Sex %>"
-                  data-role="<%= account.Role %>">
+                  data-email="<%= account.Email %>" data-phone="<%= account.Phone %>"
+                  data-sex="<%= account.Sex %>" data-role="<%= account.Role %>">
                   Chỉnh sửa
                 </button>
               </td>
             </tr>
-            <% }) %>
-        </tbody>
+          <% }) %>
+        </tbody>        
       </table>
     </div>
   </div>
