@@ -1,16 +1,17 @@
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import bg from "./assets/bg.png";
 import { useState } from "react";
 
-const LoginPage = () => {
- const navigate = useNavigate();
-  const [username, setUsername] = useState("student1@hcmut.edu.vn");
-  const [password, setPassword] = useState("student123");
+const Register = () => {
+ // const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
+    // Giả lập đăng nhập thành công, sau này thay bằng gọi API HCMUT_SSO
     e.preventDefault(); 
     
-    const res = await fetch("http://localhost:8080/api/v1/login",{
+    const res = await fetch("http://localhost:8080/api/v1/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,13 +21,11 @@ const LoginPage = () => {
         password
       }),
     });
-    if(!res.ok) console.log("Login Failed");
+    if(!res.ok) console.log("Register failed");
     const data = await res.json();
-    if(res.ok){
-    console.log(data);///////////////////////// LOG CHECK DATA TRONG CONSOLE
-    localStorage.setItem("access_token", data.access_token);
-    navigate("/main");
-    }
+    console.log(data);
+
+    
   };
 
   return (
@@ -126,4 +125,4 @@ p-12 shadow-2xl w-full max-w-lg z-10 mb-4 rounded-3xl border-2 border-gray-600"
   );
 };
 
-export default LoginPage;
+export default Register;
