@@ -1,6 +1,7 @@
 import userService from '../service/userService'
 import bookingService from '../service/bookingService'
 import feedbackService from '../service/feedbackService'
+import roomService from '../service/roomService'; 
 
 
 import bcrypt from 'bcryptjs';
@@ -90,13 +91,15 @@ const home = async (req, res) => {
             const accounts = await userService.getUserList(); 
             const bookings = await bookingService.getBookingList();
             const feedback = await feedbackService.getFeedbackList();
+            const rooms = await roomService.getRoomList();
 
             return res.render("home.ejs", {
                 username: req.session.username,
                 accounts: accounts,
                 bookings: bookings,
                 mssvLogin: req.session.userId,
-                feedback: feedback
+                feedback: feedback,
+                rooms: rooms
             });
         } catch (error) {
             console.log("Error fetching user accounts:", error);
@@ -129,7 +132,6 @@ const account = async (req, res) => {
     }
   };
   
-
 
 module.exports = {
     login,

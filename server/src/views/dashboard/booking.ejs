@@ -13,13 +13,15 @@
                         <th>MSSV</th>
                         <th>Thời gian</th>
                         <th>Trạng thái</th>
+                        <th>QR Code</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     <% bookings.forEach(bookings => { %>
                         <tr>
                             <td><%= bookings.id %></td>
-                            <td><%= bookings.room_id %></td>
+                            <td><%= bookings.room_name %></td>
                             <td><%= bookings.mssv %></td>
                             <td><%= bookings.Day %>, <%= bookings.start_time %> - <%= bookings.end_time %></td>
                             <td>

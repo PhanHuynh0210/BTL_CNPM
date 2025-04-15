@@ -1,104 +1,224 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Danh sách Phòng học</h5>
-        <button class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i>Thêm phòng mới
-        </button>
+      <h5 class="mb-0">Danh sách Phòng học</h5>
+      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+        <i class="bi bi-plus-lg me-1"></i>Thêm phòng mới
+      </button>
+      
     </div>
     <div class="card-body">
-        <ul class="nav nav-tabs" id="roomTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all"
-                    type="button" role="tab">Tất cả phòng</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse"
-                    type="button" role="tab">Đang sử dụng</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="empty-tab" data-bs-toggle="tab" data-bs-target="#empty"
-                    type="button" role="tab">Trống</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab"
-                    data-bs-target="#maintenance" type="button" role="tab">Bảo trì</button>
-            </li>
-        </ul>
-        <div class="tab-content mt-3" id="roomTabsContent">
-            <div class="tab-pane fade show active" id="all" role="tabpanel">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Trạng thái</th>
-                                <th>Sức chứa</th>
-                                <th>Thiết bị</th>
-                                <th>Vị trí</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Phòng A101</td>
-                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
-                                <td>45 người</td>
-                                <td>Máy chiếu, Âm thanh, Máy tính</td>
-                                <td>Đặt 8:00 - 11:30</td>
-                                <td>
-                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Phòng A101</td>
-                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
-                                <td>45 người</td>
-                                <td>Máy chiếu, Âm thanh, Máy tính</td>
-                                <td>Đặt 8:00 - 11:30</td>
-                                <td>
-                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Phòng A101</td>
-                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
-                                <td>45 người</td>
-                                <td>Máy chiếu, Âm thanh, Máy tính</td>
-                                <td>Đặt 8:00 - 11:30</td>
-                                <td>
-                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Phòng A101</td>
-                                <td><span class="badge badge-success-light">Đang sử dụng</span></td>
-                                <td>45 người</td>
-                                <td>Máy chiếu, Âm thanh, Máy tính</td>
-                                <td>Đặt 8:00 - 11:30</td>
-                                <td>
-                                    <button class="btn btn-outline-secondary btn-sm">Xóa</button>
-                                    <button class="btn btn-outline-secondary btn-sm">Chỉnh sửa</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="inuse" role="tabpanel">
-                <!-- Content for in-use rooms tab -->
-                <p class="text-muted">Hiển thị danh sách phòng đang sử dụng</p>
-            </div>
-            <div class="tab-pane fade" id="empty" role="tabpanel">
-                <!-- Content for empty rooms tab -->
-                <p class="text-muted">Hiển thị danh sách phòng trống</p>
-            </div>
-            <div class="tab-pane fade" id="maintenance" role="tabpanel">
-                <!-- Content for maintenance rooms tab -->
-                <p class="text-muted">Hiển thị danh sách phòng đang bảo trì</p>
-            </div>
+      <ul class="nav nav-tabs" id="roomTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">Tất cả phòng</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse" type="button" role="tab">Đang sử dụng</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="empty-tab" data-bs-toggle="tab" data-bs-target="#empty" type="button" role="tab">Trống</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">Bảo trì</button>
+        </li>
+      </ul>
+  
+      <div class="tab-content mt-3" id="roomTabsContent">
+        <!-- TAB: TẤT CẢ -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Trạng thái</th>
+                  <th>Sức chứa</th>
+                  <th>Thiết bị</th>
+                  <th>Vị trí</th>
+                  <th>QR Code</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% rooms.forEach(room => { %>
+                  <tr>
+                    <td>Phòng <%= room.room_id %></td>
+                    <td>
+                      <% if (room.room_status === 'Occupied') { %>
+                        <span class="badge bg-success">Đang sử dụng</span>
+                      <% } else if (room.room_status === 'Available') { %>
+                        <span class="badge bg-primary">Trống</span>
+                      <% } else { %>
+                        <span class="badge bg-warning text-dark">Bảo trì</span>
+                      <% } %>
+                    </td>
+                    <td><%= room.capacity %> người</td>
+                    <td><%= room.devices || "Không có thiết bị" %></td>
+                    <td><%= room.location %></td>
+                    <td>
+                      <% if (room.qr_code) { %>
+                        <img src="/uploads/qr/<%= room.qr_code %>" alt="QR Code" width="40" height="40">
+                      <% } else { %>
+                        <span class="text-muted">Không có</span>
+                      <% } %>
+                    </td>
+                    <td>
+                        <form action="/delete-room/<%= room.room_id %>" method="POST" style="display:inline-block;">
+                          <button class="btn btn-danger btn-sm me-1" onclick="return confirm('Xóa phòng này?')">Xóa</button>
+                        </form>
+                      
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editRoomModal"
+                          data-roomid="<%= room.room_id %>"
+                          data-status="<%= room.room_status %>"
+                          data-capacity="<%= room.capacity %>"
+                          data-devices="<%= room.devices %>"
+                          data-location="<%= room.location %>">
+                          Chỉnh sửa
+                        </button>
+                      </td>
+                      
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
         </div>
+  
+        <!-- TAB: Đang sử dụng -->
+        <div class="tab-pane fade" id="inuse" role="tabpanel">
+          <% const inUseRooms = rooms.filter(r => r.room_status === 'Occupied'); %>
+          <% if (inUseRooms.length === 0) { %>
+            <p class="text-muted">Không có phòng đang sử dụng.</p>
+          <% } else { %>
+            <ul class="list-group">
+              <% inUseRooms.forEach(r => { %>
+                <li class="list-group-item">Phòng <%= r.room_id %> - <%= r.location %> - <%= r.devices %></li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </div>
+  
+        <!-- TAB: Trống -->
+        <div class="tab-pane fade" id="empty" role="tabpanel">
+          <% const availableRooms = rooms.filter(r => r.room_status === 'Available'); %>
+          <% if (availableRooms.length === 0) { %>
+            <p class="text-muted">Không có phòng trống.</p>
+          <% } else { %>
+            <ul class="list-group">
+              <% availableRooms.forEach(r => { %>
+                <li class="list-group-item">Phòng <%= r.room_id %> - <%= r.location %> - <%= r.devices %></li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </div>
+  
+        <!-- TAB: Bảo trì -->
+        <div class="tab-pane fade" id="maintenance" role="tabpanel">
+          <% const maintenanceRooms = rooms.filter(r => r.room_status === 'Maintenance'); %>
+          <% if (maintenanceRooms.length === 0) { %>
+            <p class="text-muted">Không có phòng đang bảo trì.</p>
+          <% } else { %>
+            <ul class="list-group">
+              <% maintenanceRooms.forEach(r => { %>
+                <li class="list-group-item">Phòng <%= r.room_id %> - <%= r.location %> - <%= r.devices %></li>
+              <% }) %>
+            </ul>
+          <% } %>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+  
+  <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form action="/update-room" method="POST">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Chỉnh sửa phòng học</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="room_id" id="edit-room-id">
+  
+            <div class="mb-2">
+              <label for="edit-room-status" class="form-label">Trạng thái</label>
+              <select name="room_status" id="edit-room-status" class="form-control" required>
+                <option value="Available">Trống</option>
+                <option value="Occupied">Đang sử dụng</option>
+                <option value="Maintenance">Bảo trì</option>
+              </select>
+            </div>
+  
+            <div class="mb-2">
+              <label for="edit-capacity" class="form-label">Sức chứa</label>
+              <input name="capacity" id="edit-capacity" class="form-control" placeholder="Sức chứa" required>
+            </div>
+  
+            <div class="mb-2">
+              <label for="edit-devices" class="form-label">Thiết bị</label>
+              <input name="devices" id="edit-devices" class="form-control" placeholder="Thiết bị">
+            </div>
+  
+            <div class="mb-2">
+              <label for="edit-location" class="form-label">Vị trí</label>
+              <input name="location" id="edit-location" class="form-control" placeholder="Vị trí" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    const editRoomModal = document.getElementById('editRoomModal');
+    editRoomModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      document.getElementById('edit-room-id').value = button.getAttribute('data-roomid');
+      document.getElementById('edit-room-status').value = button.getAttribute('data-status');
+      document.getElementById('edit-capacity').value = button.getAttribute('data-capacity');
+      document.getElementById('edit-devices').value = button.getAttribute('data-devices');
+      document.getElementById('edit-location').value = button.getAttribute('data-location');
+    });
+  </script>
+  <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form action="/add-room" method="POST">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Thêm phòng học mới</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label for="add-room-status" class="form-label">Trạng thái</label>
+              <select name="room_status" id="add-room-status" class="form-control" required>
+                <option value="Available">Trống</option>
+                <option value="Occupied">Đang sử dụng</option>
+                <option value="Maintenance">Bảo trì</option>
+              </select>
+            </div>
+  
+            <div class="mb-2">
+              <label for="add-capacity" class="form-label">Sức chứa</label>
+              <input name="capacity" id="add-capacity" class="form-control" placeholder="Sức chứa" required>
+            </div>
+  
+            <div class="mb-2">
+              <label for="add-devices" class="form-label">Thiết bị</label>
+              <input name="devices" id="add-devices" class="form-control" placeholder="Thiết bị">
+            </div>
+  
+            <div class="mb-2">
+              <label for="add-location" class="form-label">Vị trí</label>
+              <input name="location" id="add-location" class="form-control" placeholder="Vị trí" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Thêm phòng</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
