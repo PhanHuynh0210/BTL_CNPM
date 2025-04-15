@@ -6,6 +6,7 @@ const LoginPage = () => {
  const navigate = useNavigate();
   const [username, setUsername] = useState("student1@hcmut.edu.vn");
   const [password, setPassword] = useState("student123");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault(); 
@@ -20,7 +21,11 @@ const LoginPage = () => {
         password
       }),
     });
-    if(!res.ok) console.log("Login Failed");
+    if(!res.ok) {console.log("Login Failed");
+    setErrorMessage("Sai tài khoản hoặc mật khẩu!"); // Hiển thị thông báo lỗi
+    return; // Dừng lại ở đây nếu lỗi
+
+    }    
     const data = await res.json();
     if(res.ok){
     console.log(data);///////////////////////// LOG CHECK DATA TRONG CONSOLE
@@ -35,7 +40,7 @@ const LoginPage = () => {
         className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url(${bg})`,
-          filter: "blur(3px)",
+          filter: "blur(0px)",
           zIndex: 1,
         }}
       ></div>
@@ -44,6 +49,11 @@ const LoginPage = () => {
 p-12 shadow-2xl w-full max-w-lg z-10 mb-4 rounded-3xl border-2 border-gray-600"
       >
         <h2 className="text-5xl font-semibold text-center mb-6">Đăng nhập </h2>
+        {errorMessage && (
+          <div className="bg-red-500 text-white p-3 rounded-lg mb-4 text-center">
+            {errorMessage} {/* Hiển thị thông báo lỗi */}
+          </div>
+        )}
 
         <div className="bg-white bg-opacity-90 p-8 rounded-2xl shadow-xl w-full relative z-10">
           <div className="bg-gray-500"></div>
