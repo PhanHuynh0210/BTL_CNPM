@@ -55,8 +55,9 @@
                     <td><%= room.devices || "Không có thiết bị" %></td>
                     <td><%= room.location %></td>
                     <td>
+                      
                       <% if (room.qr_code) { %>
-                        <img src="/uploads/qr/<%= room.qr_code %>" alt="QR Code" width="40" height="40">
+                        <img src="<%= room.qr_code %>" alt="QR Code">
                       <% } else { %>
                         <span class="text-muted">Không có</span>
                       <% } %>
@@ -75,7 +76,6 @@
                           Chỉnh sửa
                         </button>
                       </td>
-                      
                   </tr>
                 <% }) %>
               </tbody>
