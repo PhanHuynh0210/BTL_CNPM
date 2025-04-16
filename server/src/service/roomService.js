@@ -106,11 +106,29 @@ const lockRoom = (roomId) => {
     });
 };
 
+const getAvailableRooms = () => {
+    return new Promise((resolve, reject) => {
+        const query = `
+            SELECT
+                r.ID AS room_id, r.capacity, r.location, r.status AS room_status, r.qr_code,
+                GROUP_CONCAT(d.device_name SEPARATOR ', ') AS devices
+            FROM Rooms r
+            LEFT JOIN Devices d ON r.ID = d.room_id
+            WHERE r.status = 'Available' -- Chỉ lấy phòng có trạng thái 'Available'
+            GROUP BY r.ID
+        `;
+        connection.query(query, (err, results) => {
+            if (err) return reject("Lỗi truy vấn danh sách phòng trống: " + err.message);
+            resolve(results); // Trả về danh sách phòng trống
+        });
+    });
+};
 
 export default {
     addRoom,
     getRoomList,
     getRoomById,
     updateRoom,
-    lockRoom
+    lockRoom,
+    getAvailableRooms
 };

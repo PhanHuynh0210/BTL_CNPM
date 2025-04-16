@@ -75,12 +75,28 @@ const editRoom = async (req, res) => {
     }
 };
 
-  
+const listAvailableRooms = async (req, res) => {
+    try {
+        // Gọi hàm getAvailableRooms từ service
+        const availableRooms = await roomService.getAvailableRooms();
+        res.status(200).json({
+            message: "Lấy danh sách phòng trống thành công",
+            data: availableRooms // Gửi danh sách phòng trống về client
+        });
+    } catch (error) {
+        console.error("Error fetching available rooms:", error);
+        res.status(500).json({
+            message: "Lỗi máy chủ khi lấy danh sách phòng trống",
+            error: error.message || error
+        });
+    }
+};
 
 export default {
     createRoom,
     getAllRooms,
     getRoom,
     editRoom,
-    lockRoom
+    lockRoom,
+    listAvailableRooms
 };
