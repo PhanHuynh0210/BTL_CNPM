@@ -3,12 +3,12 @@ import QRCode from "qrcode";
 import path from "path";
 
 const addRoom = async (room) => {
-    const { capacity, location, status, devices = [] } = room;
+    const { capacity, location, room_status, devices = [] } = room;
 
     return new Promise((resolve, reject) => {
         const insertRoomQuery = `INSERT INTO Rooms (capacity, location, status) VALUES (?, ?, ?)`;
 
-        connection.query(insertRoomQuery, [capacity, location, status], async (err, result) => {
+        connection.query(insertRoomQuery, [capacity, location, room_status], async (err, result) => {
             if (err) return reject("Lỗi thêm phòng: " + err.message);
 
             const roomId = result.insertId;
@@ -95,22 +95,22 @@ const updateRoom = async (roomId, updatedRoom) => {
     });
 };
 
-
-
-const deleteRoom = (roomId) => {
+const lockRoom = (roomId) => {
     return new Promise((resolve, reject) => {
-        const deleteRoomQuery = `DELETE FROM Rooms WHERE ID = ?`;
-        connection.query(deleteRoomQuery, [roomId], (err) => {
-            if (err) return reject("Lỗi xóa phòng: " + err.message);
-            resolve("Xóa phòng thành công");
+        const query = `UPDATE Rooms SET status = 'Maintenance' WHERE ID = ?`;
+        connection.query(query, [roomId], (err, result) => {
+            if (err) return reject("Lỗi khi cập nhật trạng thái phòng: " + err.message);
+            if (result.affectedRows === 0) return resolve(false);
+            resolve(true);
         });
     });
 };
+
 
 export default {
     addRoom,
     getRoomList,
     getRoomById,
     updateRoom,
-    deleteRoom
+    lockRoom
 };

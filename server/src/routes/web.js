@@ -19,7 +19,7 @@ const iniWebRouter = (app) => {
     router.get("/api/test-api",apiController.testapi);
 
     router.post('/add-room', roomController.createRoom); 
-    router.post("/delete-room/:id", roomController.removeRoom);
+    router.post("/lock-room/:id", roomController.lockRoom);
     router.post("/update-room", roomController.editRoom);
     
 module.exports = router;

@@ -40,11 +40,10 @@ const getRoom = async (req, res) => {
 const editRoom = async (req, res) => {
     try {
       const roomId = req.body.room_id;
-      // Đảm bảo req.body có trường status đúng
       const updatedRoomData = {
         capacity: req.body.capacity,
         location: req.body.location,
-        status: req.body.room_status // Sử dụng room_status từ form thay vì status
+        status: req.body.room_status 
       };
       
       const updatedRoom = await roomService.updateRoom(roomId, updatedRoomData);
@@ -52,8 +51,7 @@ const editRoom = async (req, res) => {
       if (!updatedRoom) {
         return res.status(404).json({ error: "Phòng không tồn tại hoặc không có thay đổi." });
       }
-      
-      res.status(200).json({ message: "Cập nhật phòng thành công", room: updatedRoom });
+      res.redirect("/home"); 
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: error.message || "Lỗi khi cập nhật phòng." });
@@ -61,26 +59,28 @@ const editRoom = async (req, res) => {
   };
 
 
-const removeRoom = async (req, res) => {
+  const lockRoom = async (req, res) => {
     try {
         const roomId = req.params.id;
-        const result = await roomService.deleteRoom(roomId);
+        const result = await roomService.lockRoom(roomId);
         if (!result) {
-            return res.status(404).json({ error: "Room not found" });
+            return res.status(404).json({ error: "Không tìm thấy phòng." });
         }
-    res.redirect("/home"); 
+        res.redirect("/home");
     } catch (error) {
-        console.error(error);
+        console.error("Lỗi khi khóa phòng:", error);
         if (!res.headersSent) {
-            res.status(500).json({ error: error.message || "An error occurred while deleting the room." });
+            res.status(500).json({ error: error.message || "Lỗi xảy ra khi khóa phòng." });
         }
     }
 };
+
+  
 
 export default {
     createRoom,
     getAllRooms,
     getRoom,
     editRoom,
-    removeRoom
+    lockRoom
 };

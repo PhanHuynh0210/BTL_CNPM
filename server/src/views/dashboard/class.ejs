@@ -12,7 +12,7 @@
           <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">Tất cả phòng</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse" type="button" role="tab">Đang sử dụng</button>
+          <button class="nav-link" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse" type="button" role="tab">Đầy</button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="empty-tab" data-bs-toggle="tab" data-bs-target="#empty" type="button" role="tab">Trống</button>
@@ -44,7 +44,7 @@
                     <td>Phòng <%= room.room_id %></td>
                     <td>
                       <% if (room.room_status === 'Occupied') { %>
-                        <span class="badge bg-success">Đang sử dụng</span>
+                        <span class="badge bg-success">Đầy</span>
                       <% } else if (room.room_status === 'Available') { %>
                         <span class="badge bg-primary">Trống</span>
                       <% } else { %>
@@ -63,19 +63,20 @@
                       <% } %>
                     </td>
                     <td>
-                        <form action="/delete-room/<%= room.room_id %>" method="POST" style="display:inline-block;">
-                          <button class="btn btn-danger btn-sm me-1" onclick="return confirm('Xóa phòng này?')">Xóa</button>
-                        </form>
-                      
-                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editRoomModal"
-                          data-roomid="<%= room.room_id %>"
-                          data-status="<%= room.room_status %>"
-                          data-capacity="<%= room.capacity %>"
-                          data-devices="<%= room.devices %>"
-                          data-location="<%= room.location %>">
-                          Chỉnh sửa
-                        </button>
-                      </td>
+                      <form action="/lock-room/<%= room.room_id %>" method="POST" style="display:inline-block;">
+                        <button class="btn btn-secondary btn-sm me-1" onclick="return confirm('Khóa phòng này?')">Khóa</button>
+                      </form>
+                    
+                      <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editRoomModal"
+                        data-roomid="<%= room.room_id %>"
+                        data-status="<%= room.room_status %>"
+                        data-capacity="<%= room.capacity %>"
+                        data-devices="<%= room.devices %>"
+                        data-location="<%= room.location %>">
+                        Chỉnh sửa
+                      </button>
+                    </td>
+                    
                   </tr>
                 <% }) %>
               </tbody>
@@ -83,11 +84,11 @@
           </div>
         </div>
   
-        <!-- TAB: Đang sử dụng -->
+        <!-- TAB: Đầy -->
         <div class="tab-pane fade" id="inuse" role="tabpanel">
           <% const inUseRooms = rooms.filter(r => r.room_status === 'Occupied'); %>
           <% if (inUseRooms.length === 0) { %>
-            <p class="text-muted">Không có phòng đang sử dụng.</p>
+            <p class="text-muted">Không có phòng Đầy.</p>
           <% } else { %>
             <ul class="list-group">
               <% inUseRooms.forEach(r => { %>
@@ -143,7 +144,7 @@
               <label for="edit-room-status" class="form-label">Trạng thái</label>
               <select name="room_status" id="edit-room-status" class="form-control" required>
                 <option value="Available">Trống</option>
-                <option value="Occupied">Đang sử dụng</option>
+                <option value="Occupied">Đầy</option>
                 <option value="Maintenance">Bảo trì</option>
               </select>
             </div>
@@ -194,7 +195,7 @@
               <label for="add-room-status" class="form-label">Trạng thái</label>
               <select name="room_status" id="add-room-status" class="form-control" required>
                 <option value="Available">Trống</option>
-                <option value="Occupied">Đang sử dụng</option>
+                <option value="Occupied">Đầy</option>
                 <option value="Maintenance">Bảo trì</option>
               </select>
             </div>
