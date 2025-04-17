@@ -1,26 +1,39 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import bg from "./assets/Mainpage.jpg";
+import bg from "./assets/bg.png";
 
-export default function FeedbackErrol() {
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [Errol, setErrol] = useState(0);
-  const [comment, setComment] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false);
-  
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Xử lý gửi đánh giá
-    setShowSuccess(true);
-    
-    // Sau 3 giây, ẩn thông báo thành công
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
+const Question = () => {
+  const [activeTab, setActiveTab] = useState("faq");
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const questions = [
+    {
+      question: "Làm thế nào để đặt chỗ học tập?",
+      answer: "Bạn có thể đăng nhập vào hệ thống, chọn phòng trống và nhấn 'Đặt chỗ ngay'."
+    },
+    {
+      question: "Tôi có thể huỷ đặt chỗ không?",
+      answer: "Có, bạn có thể huỷ trong phần 'Quản lý đặt chỗ' trước thời gian sử dụng."
+    },
+    {
+      question: "Tôi có thể đặt chỗ trong bao lâu?",
+      answer: "Thời lượng tối đa cho mỗi lần đặt chỗ là 2 giờ."
+    },
+    {
+      question: "Làm thế nào để báo cáo vấn đề về thiết bị trong phòng học?",
+      answer: "Bạn có thể vào mục 'Báo lỗi thiết bị' và điền thông tin sự cố."
+    },
+    {
+      question: "Tôi có thể đặt chỗ cho nhóm học tập không?",
+      answer: "Có, hệ thống hỗ trợ phòng nhóm. Chọn loại phòng 'Nhóm' khi đặt chỗ."
+    }
+  ];
+
+  const toggleOpen = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
   };
-  
+
   return (
-    <div className="justify-center min-h-screen bg-gray-100">
+<div className="justify-center min-h-screen bg-gray-100">
       {/* Background image with blur */}
       <div
         className="inset-0 bg-cover bg-center fixed"
@@ -83,102 +96,83 @@ export default function FeedbackErrol() {
             </Link>
           </div>
         </div>
-        
-        {/* Feedback Form Container */}
-        <div className="mx-auto p-6 bg-gray-800 bg-opacity-70 rounded-lg shadow-lg max-w-4xl mt-4">
+      {/* Content */}
+      <div className="relative z-10 px-6 py-10">
+        <div className="max-w-4xl mx-auto bg-white bg-opacity-20 backdrop-blur-md rounded-xl shadow-lg p-6">
+
           {/* Tabs */}
-          <div className="flex mb-6 border-b border-gray-600">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-t-lg font-medium">
-              Gửi đánh giá
+          <div className="flex space-x-4 mb-6 border-b border-gray-400">
+            <button
+              className={`px-4 py-2 font-semibold ${
+                activeTab === "faq"
+                  ? "border-b-4 border-blue-500 text-white"
+                  : "text-gray-300"
+              }`}
+              onClick={() => setActiveTab("faq")}
+            >
+              Câu hỏi thường gặp
             </button>
-            <button className="px-4 py-2 text-white hover:bg-gray-700 rounded-t-lg font-medium ml-2">
-              Báo lỗi thiết bị
-            </button>
-            <button className="px-4 py-2 text-white hover:bg-gray-700 rounded-t-lg font-medium ml-2">
-              Lịch sử phản hồi
+            <button
+              className={`px-4 py-2 font-semibold ${
+                activeTab === "support"
+                  ? "border-b-4 border-blue-500 text-white"
+                  : "text-gray-300"
+              }`}
+              onClick={() => setActiveTab("support")}
+            >
+              Liên hệ hỗ trợ
             </button>
           </div>
-          
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Location */}
-            <div>
-              <label className="block text-white mb-2">Vị trí:</label>
-              <select
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-md"
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-              >
-                <option value="">-- Chọn vị trí --</option>
-                <option value="h1-334-1">H1 - Phòng 334 - Vị trí 1</option>
-                <option value="h1-334-2">H1 - Phòng 334 - Vị trí 2</option>
-                <option value="h1-334-3">H1 - Phòng 334 - Vị trí 3</option>
-              </select>
-            </div>
-            
-            {/* Errol */}
-            <div>
-              <label className="block text-white mb-2">Errol</label>
-            <select
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-md"
-                value={Errol}
-                onChange={(e) => setErrol(e.target.value)}
+
+          {/* FAQ Content */}
+          {activeTab === "faq" && (
+            <ul className="space-y-4 text-white">
+              {questions.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="border border-white border-opacity-60 rounded-lg p-4 transition duration-200 cursor-pointer hover:bg-white hover:bg-opacity-10"
+                  onClick={() => toggleOpen(idx)}
                 >
-                    <option value="">-- Chọn Lỗi --</option>
-                    <option value=""></option>
-                    <option value=""></option>
-                </select>
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">{item.question}</span>
+                    <span>{openIndex === idx ? "−" : "+"}</span>
+                  </div>
+                  {openIndex === idx && (
+                    <p className="mt-3 text-sm text-gray-200">{item.answer}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Support Info */}
+          {activeTab === "support" && (
+            <div className="text-white">
+              <p>Vui lòng liên hệ: <strong>ddthu@hcmut.edu.vn</strong></p>
+              <p>Điện thoại: (84-8) 38647256 - 5258</p>
+              <p>Phòng 109A5, Trung tâm Dữ liệu & Công nghệ Thông tin</p>
             </div>
-            
-            {/* Comment */}
-            <div>
-              <label className="block text-white mb-2">Nhận xét</label>
-              <textarea
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-md h-32"
-                placeholder="Thêm nhận xét của bạn...."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              ></textarea>
-            </div>
-            
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md"
-              >
-                Gửi đánh giá
-              </button>
-            </div>
-          </form>
+          )}
         </div>
-        
-        {/* Success Popup */}
-        {showSuccess && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-blue-500 text-white p-8 rounded-lg shadow-lg text-center">
-              <h2 className="text-2xl font-bold">Thành công</h2>
-            </div>
-          </div>
-        )}
       </div>
-      
+
       {/* Footer */}
-      <div className="bottom-0 left-0 right-0 text-center text-white z-10 bg-gray-600 mt-12">
-        <br />
-        <p className="text-xs text-left ml-6 text-gray-300">Tổ kỹ thuật P.DT / Technician</p>
-        <p className="text-xs text-left ml-6 text-gray-300">Email : ddthu@hcmut.edu.vn</p>
-        <p className="text-xs text-left ml-6 text-gray-300">ĐT (Tel.) : (84-8) 38647256 - 5258</p>
-        <p className="text-xs text-left ml-6 text-gray-300">
-          Quý Thầy/Cô chưa có tài khoản(hoặc quên mật khẩu) nhà trường vui lòng liên hệ Trung tâm Dữ liệu & Công nghệ
-          Thông tin, phòng 109A5 để được hỗ trợ.
-        </p>
-        <p className="text-xs text-left ml-6 text-gray-300">
-          (For HCMUT account, please contact to : Data and Information Technology Center)
-        </p>
-        <p className="text-xs text-left ml-6 text-gray-300">Email : dl-cntt@hcmut.edu.vn</p>
-        <p className="text-xs text-left ml-6 text-gray-300">ĐT (Tel.) : (84-8) 38647256 - 5200</p>
+      <div className="absolute bottom-0 w-full bg-gray-800 bg-opacity-80 text-gray-300 text-xs p-4">
+        <div className="max-w-4xl mx-auto">
+          <p>Tổ kỹ thuật P.ĐT / Technician</p>
+          <p>Email: ddthu@hcmut.edu.vn</p>
+          <p>ĐT (Tel.): (84-8) 38647256 - 5258</p>
+          <p>
+            Quý Thầy/Cô chưa có tài khoản (hoặc quên mật khẩu) vui lòng liên hệ
+            Trung tâm Dữ liệu & Công nghệ Thông tin, phòng 109A5 để được hỗ trợ.
+          </p>
+          <p>Email: dl-cntt@hcmut.edu.vn</p>
+          <p>ĐT (Tel.): (84-8) 38647256 - 5200</p>
+        </div>
       </div>
+        </div>
     </div>
   );
-}
+};
+
+export default Question;

@@ -63,14 +63,15 @@ export default function FeedbackErrol() {
             </Link>
             <Link
               to="/reports"
-              className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200"
+              className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
+              
             >
               {" "}
               Báo cáo
             </Link>
             <Link
               to="/support"
-              className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
+              className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200"
             >
               {" "}
               Hỗ trợ

@@ -32,10 +32,10 @@ export default function FeedBackHistory() {
             <Link to="/booking-manager" className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200">
               Quản lý đặt chỗ
             </Link>
-            <Link to="/reports" className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200">
+            <Link to="/reports" className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200">
               Báo cáo
             </Link>
-            <Link to="/support" className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200">
+            <Link to="/support" className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200">
               Hỗ trợ
             </Link>
             <Link to="/profile" className="bg-black hover:bg-gray-100 hover:text-black text-white py-2 px-8 rounded-2xl transition duration-200 mr-10">

@@ -17,6 +17,7 @@ import FeedbackSuccess from './FeedbackSuccess';
 import FeedbackErrol from './FeedbackErrol';
 import FeedBackHistory from './FeedBackHistory';
 // Placeholder - sẽ tạo sau
+
 const RoomSearch = () => <div className="p-5 text-center">🔍 Tìm phòng</div>;
 const Profile = () => <div className="p-5 text-center">👤 Hồ sơ cá nhân</div>;
 const Reports = () => <div className="p-5 text-center">📈 Báo cáo</div>;
@@ -45,6 +46,7 @@ function App() {
       <Route path="/FeedbackSuccess" element={<FeedbackSuccess />} />
       <Route path="/FeedbackErrol" element={<FeedbackErrol />} />
       <Route path="/FeedbackHistory" element={<FeedBackHistory />} />
+      
     </Routes>
   );
 }
