@@ -26,6 +26,8 @@ const initApiRouter = (app) => {
     //huy booking 
     router.post('/booking/:bookingId/cancel', bookingController.handleCancelBooking);
     router.post('/booking/book-now', authenticateToken, bookingController.handleBookNow)
+    //booking mssv
+    router.get('/bookings/student/:mssv', bookingController.getStudentBookings);
     return app.use("/api/v1/",router);
 }
 

@@ -87,37 +87,41 @@ const createBooking = async (req, res) => {
 };
 
 // Controller checkAvailability cũng cần cập nhật tương tự
+// Controller checkAvailability - ADJUSTED FOR CONSISTENCY
 const checkAvailability = async (req, res) => {
-     try {
-         // Nhận ngày, giờ riêng
-         const { room_id, date, start_time, end_time } = req.body;
+    try {
+        // Nhận ngày, giờ riêng
+        const { room_id, date, start_time, end_time } = req.body;
 
-         if (!room_id || !date || !start_time || !end_time) {
-             return res.status(400).json({ success: false, message: "Thiếu thông tin phòng, ngày hoặc thời gian." });
-         }
+        // Validation đầu vào cơ bản (giữ nguyên)
+        if (!room_id || !date || !start_time || !end_time) {
+            return res.status(400).json({ success: false, message: "Thiếu thông tin phòng, ngày hoặc thời gian." });
+        }
+         if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}(:\d{2})?$/.test(start_time) || !/^\d{2}:\d{2}(:\d{2})?$/.test(end_time)) {
+           return res.status(400).json({ success: false, message: "Định dạng ngày (YYYY-MM-DD) hoặc giờ (HH:MM hoặc HH:MM:SS) không hợp lệ." });
+       }
 
-         // Kết hợp ngày giờ
-         const fullStartTime = combineDateTime(date, start_time);
-         const fullEndTime = combineDateTime(date, end_time);
+        // KHÔNG cần combineDateTime nữa
+        // const fullStartTime = combineDateTime(date, start_time);
+        // const fullEndTime = combineDateTime(date, end_time);
+        // if (!fullStartTime || !fullEndTime) { ... } // Không cần kiểm tra này
 
-         if (!fullStartTime || !fullEndTime) {
-             return res.status(400).json({ success: false, message: "Định dạng ngày hoặc giờ không hợp lệ." });
-         }
+        const roomIdNum = parseInt(room_id, 10);
+        if (isNaN(roomIdNum)) {
+             return res.status(400).json({ success: false, message: "ID phòng không hợp lệ." });
+        }
 
-         const roomIdNum = parseInt(room_id, 10);
-         if (isNaN(roomIdNum)) {
-              return res.status(400).json({ success: false, message: "ID phòng không hợp lệ." });
-         }
+        // Gọi service với dữ liệu RIÊNG BIỆT
+        const result = await bookingService.checkBookingTimeSlot(roomIdNum, date, start_time, end_time); // <-- Thay đổi ở đây
+        return res.status(200).json({ success: true, available: result.available, message: result.message });
 
-         // Gọi service với dữ liệu đã kết hợp
-         const result = await bookingService.checkBookingTimeSlot(roomIdNum, fullStartTime, fullEndTime);
-         return res.status(200).json({ success: true, available: result.available, message: result.message });
-
-     } catch (error) {
-          console.error("Controller Error: Checking availability:", error);
-          res.status(500).json({ success: false, available: false, message: error.message || "Lỗi máy chủ." });
-     }
- };
+    } catch (error) {
+         console.error("Controller Error: Checking availability:", error);
+         // Nên trả về lỗi chi tiết hơn nếu có thể
+         const errorMessage = error.message || "Lỗi máy chủ khi kiểm tra lịch trống.";
+         res.status(500).json({ success: false, available: false, message: errorMessage });
+    }
+};
  const handleCancelBooking = async (req, res) => {
     // Đặt tên để dễ log lỗi (nếu cần)
     const functionName = 'handleCancelBooking';
@@ -235,8 +239,41 @@ const handleBookNow = async (req, res) => {
         });
     }
 };
+const getStudentBookings = async (req, res) => {
+    try {
+        const mssv = req.params.mssv; // Lấy mssv từ URL parameter
+
+        if (!mssv) {
+            return res.status(400).json({
+                EM: 'Thiếu tham số MSSV.', // Error Message
+                EC: '-1',                // Error Code
+                DT: ''                   // Data
+            });
+        }
+
+        const bookings = await bookingService.getBookingsByMssv(mssv);
+
+        // Nếu không có booking nào, vẫn trả về mảng rỗng (thành công)
+        return res.status(200).json({
+            EM: `Lấy danh sách đặt chỗ cho MSSV ${mssv} thành công.`,
+            EC: '0',
+            DT: bookings // Dữ liệu là mảng các booking
+        });
+
+    } catch (error) {
+        console.error("API Error getting student bookings:", error);
+        return res.status(500).json({
+            EM: 'Lỗi máy chủ khi lấy danh sách đặt chỗ.',
+            EC: '-1',
+            DT: error.message // Có thể gửi message lỗi chi tiết hơn trong môi trường dev
+        });
+    }
+};
 
 export default {
     createBooking,
-    checkAvailability,handleCancelBooking,handleBookNow
+    checkAvailability,
+    handleCancelBooking,
+    handleBookNow,
+    getStudentBookings
 };

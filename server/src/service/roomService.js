@@ -1,20 +1,14 @@
 import connection from "../config/connectDB";
 import QRCode from "qrcode";
 
-
 // Helper function to determine status based on seats, respecting Maintenance
 const calculateStatus = (availableSeats, currentStatus = null) => {
-    // If the current status is Maintenance, it should generally stay Maintenance
-    // unless explicitly changed by other logic (like in updateRoom).
-    // This helper focuses purely on seats vs status logic.
     if (currentStatus === 'Maintenance') {
         return 'Maintenance';
     }
-    // If seats are 0, it's Occupied
     if (availableSeats === 0) {
         return 'Occupied';
     }
-    // Otherwise (seats > 0), it's Available
     return 'Available';
 };
 
@@ -35,13 +29,12 @@ const addRoom = async (room) => {
     const {
         capacity,
         location,
-        room_status: initial_status_input, // Lấy status người dùng nhập (có thể undefined)
+        room_status: initial_status_input,
         room_type,
-        available_seats: initial_available_seats, // Lấy available_seats người dùng nhập (có thể undefined)
+        available_seats: initial_available_seats,
         devices = []
     } = room;
 
-    // --- Validation ---
     if (!capacity || !location || !room_type) {
         throw new Error("Thiếu thông tin bắt buộc: capacity, location, room_type.");
     }
@@ -55,25 +48,20 @@ const addRoom = async (room) => {
          throw new Error("Sức chứa phải là một số dương.");
     }
 
-    // Determine final available_seats
     let final_available_seats = (initial_available_seats !== undefined && initial_available_seats !== null)
-                                ? Number(initial_available_seats) // Convert to number if provided
-                                : capacity; // Default to capacity if not provided
+                                ? Number(initial_available_seats)
+                                : capacity;
 
-    // Validate final_available_seats
     if (isNaN(final_available_seats) || final_available_seats < 0 || final_available_seats > capacity) {
         throw new Error(`Số chỗ còn trống không hợp lệ (phải là số từ 0 đến ${capacity}).`);
     }
 
-    // Determine final room_status
     let final_room_status;
     if (initial_status_input === 'Maintenance') {
-        final_room_status = 'Maintenance'; // Respect explicit Maintenance status
+        final_room_status = 'Maintenance';
     } else {
-        // Calculate status based on final available seats
         final_room_status = calculateStatus(final_available_seats);
     }
-    // --- Kết thúc Validation & Determination ---
 
     return new Promise((resolve, reject) => {
         const insertRoomQuery = `
@@ -103,10 +91,10 @@ const addRoom = async (room) => {
                     connection.query(updateQRQuery, [qrBase64, roomId], (qrErr) => {
                         if (qrErr) {
                             console.error("SQL Error updating QR Code:", qrErr);
+                            // Consider if room should be deleted or marked invalid if QR fails
                             return reject(new Error("Lỗi cập nhật mã QR: " + qrErr.message));
                         }
 
-                        // Process devices
                         let deviceArray = [];
                         if (Array.isArray(devices)) {
                             deviceArray = devices.filter(d => typeof d === 'string' && d.trim() !== '');
@@ -121,6 +109,7 @@ const addRoom = async (room) => {
                             connection.query(insertDevicesQuery, [deviceValues], (devErr) => {
                                 if (devErr) {
                                      console.error("SQL Error inserting devices:", devErr);
+                                    // Consider potential rollback or cleanup if devices fail
                                     return reject(new Error("Lỗi thêm thiết bị: " + devErr.message));
                                 }
                                 resolve({ message: "Thêm phòng và thiết bị thành công", roomId: roomId });
@@ -131,6 +120,7 @@ const addRoom = async (room) => {
                     });
                 } catch (qrGenErr) {
                      console.error("Error generating QR Code:", qrGenErr);
+                     // Consider if room should be deleted or marked invalid if QR fails
                     return reject(new Error("Lỗi tạo mã QR: " + qrGenErr.message));
                 }
             }
@@ -150,29 +140,25 @@ const addRoom = async (room) => {
  */
 const updateRoom = async (roomId, updatedRoomData) => {
      if (!roomId || isNaN(parseInt(roomId, 10))) {
-         // Use reject for async function returning promise
          return Promise.reject(new Error("ID phòng không hợp lệ để cập nhật."));
      }
      if (!updatedRoomData || Object.keys(updatedRoomData).length === 0) {
           console.warn(`Không có dữ liệu cập nhật cho phòng ${roomId}. Trả về dữ liệu hiện tại.`);
+         // Return current data if nothing to update
          return getRoomById(roomId);
      }
 
     try {
-        // 1. Lấy thông tin phòng hiện tại
         const currentRoom = await getRoomById(roomId);
         if (!currentRoom) {
-            return null; // Phòng không tồn tại
+            return null; // Indicate room not found
         }
 
-        // 2. Xác định giá trị cuối cùng cho các trường có thể thay đổi
-        const finalData = { ...currentRoom }; // Bắt đầu với dữ liệu hiện tại
+        const finalData = { ...currentRoom };
 
-        // Fields that can be directly updated if provided
         if (updatedRoomData.location !== undefined) finalData.location = updatedRoomData.location.trim();
         if (updatedRoomData.room_type !== undefined) finalData.room_type = updatedRoomData.room_type;
 
-        // Handle capacity update
         if (updatedRoomData.capacity !== undefined) {
             const newCapacity = Number(updatedRoomData.capacity);
             if (isNaN(newCapacity) || newCapacity <= 0) {
@@ -181,12 +167,10 @@ const updateRoom = async (roomId, updatedRoomData) => {
             finalData.capacity = newCapacity;
         }
 
-        // Handle available_seats update (and adjust based on new capacity)
         if (updatedRoomData.available_seats !== undefined) {
-             // Use provided value, default to current if undefined
             const requestedAvailableSeats = (updatedRoomData.available_seats !== null && updatedRoomData.available_seats !== '')
                                              ? Number(updatedRoomData.available_seats)
-                                             : finalData.available_seats; // Use potentially updated current value if input is empty string/null
+                                             : finalData.available_seats;
 
              if (isNaN(requestedAvailableSeats) || requestedAvailableSeats < 0) {
                 throw new Error("Số chỗ còn trống cập nhật phải là số không âm.");
@@ -194,27 +178,21 @@ const updateRoom = async (roomId, updatedRoomData) => {
              finalData.available_seats = requestedAvailableSeats;
         }
 
-        // Ensure available_seats does not exceed final capacity
         finalData.available_seats = Math.min(finalData.available_seats, finalData.capacity);
-        finalData.available_seats = Math.max(finalData.available_seats, 0); // Ensure non-negative
+        finalData.available_seats = Math.max(finalData.available_seats, 0);
 
-
-        // Handle status update: Respect Maintenance, otherwise calculate based on final seats
         let finalStatus;
-        const requestedStatus = updatedRoomData.status; // Status user wants to set
+        const requestedStatus = updatedRoomData.status;
 
         if (requestedStatus === 'Maintenance') {
             finalStatus = 'Maintenance';
         } else if (currentRoom.status === 'Maintenance' && requestedStatus === undefined) {
-            // If it was Maintenance and user didn't try to change status, keep it Maintenance
             finalStatus = 'Maintenance';
         } else {
-            // Otherwise, calculate based on the final available seats
             finalStatus = calculateStatus(finalData.available_seats);
         }
-        finalData.status = finalStatus; // Update status in finalData
+        finalData.status = finalStatus;
 
-        // 3. Xây dựng câu lệnh UPDATE động (chỉ update các trường thực sự thay đổi)
         let fieldsToUpdate = [];
         let values = [];
         const potentialUpdates = {
@@ -225,36 +203,29 @@ const updateRoom = async (roomId, updatedRoomData) => {
             room_type: finalData.room_type
         };
 
-        // Compare final calculated values with original currentRoom values
         for (const key in potentialUpdates) {
-            // Check if the key exists in updatedRoomData OR if calculated value differs from original
-            // (e.g., available_seats adjusted due to capacity change, or status recalculated)
             if (updatedRoomData.hasOwnProperty(key) || potentialUpdates[key] !== currentRoom[key]) {
-                 // More robust check for status/available_seats which might change implicitly
                  if (key === 'status' && potentialUpdates[key] !== currentRoom.status) {
                     fieldsToUpdate.push("status = ?");
                     values.push(potentialUpdates[key]);
                  } else if (key === 'available_seats' && potentialUpdates[key] !== currentRoom.available_seats) {
                     fieldsToUpdate.push("available_seats = ?");
                     values.push(potentialUpdates[key]);
-                 } else if (updatedRoomData.hasOwnProperty(key)) { // For other fields, only update if explicitly provided
+                 } else if (updatedRoomData.hasOwnProperty(key)) {
                     fieldsToUpdate.push(`${key} = ?`);
                     values.push(potentialUpdates[key]);
                  }
             }
         }
 
-
-        // Nếu không có trường nào hợp lệ để cập nhật (kể cả tính toán lại)
         if (fieldsToUpdate.length === 0) {
             console.warn(`Không có thay đổi nào cần áp dụng cho phòng ${roomId}.`);
-            return currentRoom; // Trả về dữ liệu phòng hiện tại
+            return currentRoom;
         }
 
-        values.push(roomId); // Thêm roomId vào cuối cho điều kiện WHERE
+        values.push(roomId);
         const query = `UPDATE Rooms SET ${fieldsToUpdate.join(', ')} WHERE ID = ?`;
 
-        // 4. Thực thi query
         return new Promise((resolve, reject) => {
             connection.query(query, values, (err, result) => {
                 if (err) {
@@ -263,33 +234,28 @@ const updateRoom = async (roomId, updatedRoomData) => {
                 }
 
                 if (result.affectedRows === 0 && result.changedRows === 0) {
-                     // Should not happen if we checked existence before, but maybe a race condition?
-                     // Or data was identical even after calculations.
                      console.warn(`Phòng ${roomId} không được tìm thấy hoặc không có thay đổi nào được áp dụng.`);
-                     // Re-fetch to be sure of the current state
                      return getRoomById(roomId).then(resolve).catch(reject);
                 }
 
-                // 5. Lấy lại thông tin phòng *sau khi* đã cập nhật thành công
                 getRoomById(roomId)
                     .then(updatedRoom => {
                         if (!updatedRoom) {
                              console.error(`Không thể lấy lại thông tin phòng ${roomId} sau khi cập nhật.`);
                              reject(new Error(`Không thể lấy lại thông tin phòng ${roomId} sau khi cập nhật.`));
                         } else {
-                            resolve(updatedRoom); // Resolve with the fresh data
+                            resolve(updatedRoom);
                         }
                     })
                     .catch(getErr => {
                          console.error(`Lỗi khi lấy lại thông tin phòng ${roomId} sau cập nhật:`, getErr);
-                         reject(getErr); // Lỗi khi get lại phòng sau update
+                         reject(getErr);
                     });
             });
         });
 
     } catch (error) {
         console.error(`Lỗi trong quá trình updateRoom cho ID ${roomId}:`, error);
-        // Propagate the error as a rejection
         return Promise.reject(error);
     }
 };
@@ -306,25 +272,16 @@ const lockRoom = (roomId) => {
          return Promise.reject(new Error("ID phòng không hợp lệ để khóa."));
      }
     return new Promise((resolve, reject) => {
-        // Update status to Maintenance and set available_seats to 0
-        // Only update if it's not already Maintenance
         const query = `UPDATE Rooms SET status = 'Maintenance', available_seats = 0 WHERE ID = ? AND status != 'Maintenance'`;
         connection.query(query, [roomId], (err, result) => {
             if (err) {
                 console.error(`SQL Error locking room ${roomId}:`, err);
                 return reject(new Error("Lỗi khi cập nhật trạng thái phòng: " + err.message));
             }
-            // result.changedRows indicates if the status was actually changed
             resolve(result.changedRows > 0);
         });
     });
 };
-
-// ============================================================
-// Các hàm khác (getRoomList, getRoomById, getAvailableRooms)
-// không cần thay đổi logic cốt lõi, chúng chỉ đọc dữ liệu.
-// Đảm bảo chúng lấy đúng các cột cần thiết (đã có sẵn).
-// ============================================================
 
 /**
  * Lấy danh sách tất cả các phòng cùng thông tin cơ bản và thiết bị.
@@ -347,16 +304,15 @@ const getRoomList = () => {
                  console.error("SQL Error fetching room list:", err);
                  return reject(new Error("Lỗi truy vấn danh sách phòng: " + err.message));
             }
-             // Map results to match expected frontend property names if needed (e.g., room_id, room_status)
              const formattedResults = results.map(room => ({
                 room_id: room.ID,
                 capacity: room.capacity,
                 location: room.location,
-                room_status: room.status, // Map db 'status' to 'room_status'
+                room_status: room.status,
                 available_seats: room.available_seats,
                 room_type: room.room_type,
                 qr_code: room.qr_code,
-                devices: room.devices
+                devices: room.devices // devices is already a comma-separated string from GROUP_CONCAT
              }));
             resolve(formattedResults);
         });
@@ -387,29 +343,31 @@ const getRoomById = (roomId) => {
             }
 
             if (roomResult.length === 0) {
-                return resolve(null);
+                return resolve(null); // Room not found
             }
 
-            const roomData = { // Map to consistent naming if necessary
-                 ID: roomResult[0].ID, // Keep original ID for internal use maybe
-                 room_id: roomResult[0].ID, // For consistency with list view
+            const roomData = {
+                 ID: roomResult[0].ID,
+                 room_id: roomResult[0].ID,
                  capacity: roomResult[0].capacity,
                  location: roomResult[0].location,
-                 status: roomResult[0].status, // DB column name
-                 room_status: roomResult[0].status, // Alias for frontend/consistency
+                 status: roomResult[0].status,
+                 room_status: roomResult[0].status,
                  available_seats: roomResult[0].available_seats,
                  room_type: roomResult[0].room_type,
                  qr_code: roomResult[0].qr_code,
+                 // devices will be added below
             };
-
 
             const devicesQuery = `SELECT device_name FROM Devices WHERE room_id = ? ORDER BY device_name`;
             connection.query(devicesQuery, [roomId], (devErr, devicesResult) => {
                 if (devErr) {
+                     // Log warning but still return room data without devices
                      console.warn(`Không thể lấy danh sách thiết bị cho phòng ${roomId}: ${devErr.message}`);
-                     roomData.devices = []; // Return empty array on error
+                     roomData.devices = [];
                      return resolve(roomData);
                 }
+                // Map device results to an array of strings
                 roomData.devices = devicesResult.map(d => d.device_name);
                 resolve(roomData);
             });
@@ -440,7 +398,6 @@ const getAvailableRooms = () => {
                 console.error("SQL Error fetching available rooms:", err);
                 return reject(new Error("Lỗi truy vấn danh sách phòng trống: " + err.message));
             }
-             // Map results for consistency
             const formattedResults = results.map(room => ({
                 room_id: room.ID,
                 capacity: room.capacity,
@@ -449,7 +406,7 @@ const getAvailableRooms = () => {
                 available_seats: room.available_seats,
                 room_type: room.room_type,
                 qr_code: room.qr_code,
-                devices: room.devices
+                devices: room.devices // Already a comma-separated string
              }));
             resolve(formattedResults);
         });

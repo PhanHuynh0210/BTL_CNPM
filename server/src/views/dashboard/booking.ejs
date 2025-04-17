@@ -29,8 +29,12 @@
                                     <span class="badge bg-success">Confirmed</span>
                                 <% } else if (bookings.status === 'Pending') { %>
                                     <span class="badge bg-warning text-dark">Pending</span>
-                                <% } else if (bookings.status === 'Rejected') { %>
-                                    <span class="badge bg-danger">Rejected</span>
+                                <% } else if (bookings.status === 'CheckedIn') { %>
+                                    <span class="badge bg-danger">CheckedIn</span>
+                                <% } else if (bookings.status === 'CheckedOut') { %>
+                                        <span class="badge bg-secondary">CheckedOut</span>
+                                <% } else if (bookings.status === 'Completed') { %>
+                                        <span class="badge bg-dark">expired</span>
                                 <% } else { %>
                                     <span class="badge bg-secondary"><%= bookings.status %></span>
                                 <% } %>

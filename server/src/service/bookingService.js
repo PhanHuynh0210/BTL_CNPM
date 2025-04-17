@@ -297,39 +297,48 @@ const processCompletedBookings = () => {
         let failedCount = 0;
 
         try {
-            // 1. Tìm các booking 'Confirmed' đã hết hạn
-            const nowUTC = new Date();
-            const nowMySQLFormatUTC = nowUTC.toISOString().slice(0, 19).replace('T', ' ');
-
             const findQuery = `
                 SELECT id, room_id, booked_seats, status AS current_status
                 FROM Bookings
-                WHERE status = 'Confirmed' AND CONCAT(Day, ' ', end_time) < ?`;
-
+                WHERE status IN ('Confirmed', 'CheckedIn')
+                  -- Sử dụng CONVERT_TZ để tính đúng thời gian kết thúc theo giờ địa phương (+07)
+                  AND TIMESTAMP(DATE(CONVERT_TZ(Day, '+00:00', '+07:00')), end_time) < NOW()
+            `;
+            console.log("--- [DEBUG] Cron Job Using findQuery:", findQuery);
             const bookingsToComplete = await new Promise((res, rej) => {
-                connection.query(findQuery, [nowMySQLFormatUTC], (err, results) => {
-                    if (err) return rej(new Error(`[${functionName}] Lỗi tìm booking hết hạn: ${err.message}`));
+                connection.query(findQuery, (err, results) => {
+                    // Thêm log chi tiết vào callback này như đã hướng dẫn trước
+                    if (err) {
+                        console.error("--- [DEBUG] Cron Job ERROR executing findQuery:", err);
+                        return rej(new Error(`[${functionName}] Lỗi tìm booking hết hạn: ${err.message}`));
+                    }
+                    console.log(`--- [DEBUG] Cron Job findQuery results count: ${results ? results.length : 'N/A'}`);
+                    if (results && results.length > 0) {
+                        console.log(`--- [DEBUG] Cron Job Found Booking IDs: ${results.map(b => b.id).join(', ')}`);
+                    }
+                    // --- Kết thúc log debug trong callback ---
                     res(results);
                 });
             });
 
             if (bookingsToComplete.length === 0) {
-                console.log(`[${functionName}] No bookings to complete.`);
+                console.log(`[${functionName}] No active bookings found past their end time.`);
                 return resolve({ completed: 0, room_updates: 0, failed: 0, message: "Không có đặt phòng nào cần hoàn thành." });
             }
             console.log(`[${functionName}] Found ${bookingsToComplete.length} bookings to process.`);
 
-            // 2. Lặp và xử lý từng booking trong transaction riêng
+            // 2. Lặp và xử lý từng booking trong transaction riêng (Logic remains the same)
             for (const booking of bookingsToComplete) {
                 await new Promise((res_inner) => {
                     connection.beginTransaction(async (transactionErr) => {
                         if (transactionErr) {
                             console.error(`[${functionName}] TX Begin Error (Booking ${booking.id}):`, transactionErr);
-                            failedCount++; return res_inner();
+                            failedCount++;
+                            return res_inner();
                         }
 
                         try {
-                            // Lấy phòng & lock
+                            // 3. Lấy thông tin phòng & lock
                             const roomInfo = await new Promise((res_room, rej_room) => {
                                 const q = 'SELECT ID, capacity, available_seats, status FROM Rooms WHERE ID = ? FOR UPDATE';
                                 connection.query(q, [booking.room_id], (err, results) => {
@@ -338,19 +347,23 @@ const processCompletedBookings = () => {
                                 });
                             });
 
-                            // Cập nhật booking -> 'Completed'
+                            // 4. Cập nhật booking status -> 'Completed'
                             let bookingUpdated = false;
                             await new Promise((res_b, rej_b) => {
-                                const q = 'UPDATE Bookings SET status = ? WHERE id = ? AND status = ?';
-                                connection.query(q, ['Completed', booking.id, 'Confirmed'], (err, result) => {
+                                const q = 'UPDATE Bookings SET status = ? WHERE id = ? AND status IN (?, ?)';
+                                connection.query(q, ['Completed', booking.id, 'Confirmed', 'CheckedIn'], (err, result) => {
                                     if (err) return rej_b(new Error(`[${functionName}] Lỗi cập nhật booking ${booking.id}: ${err.message}`));
-                                    if (result.affectedRows > 0) { bookingUpdated = true; completedCount++; }
-                                    else console.warn(`[${functionName}] Booking ${booking.id} không còn 'Confirmed' khi xử lý.`);
+                                    if (result.affectedRows > 0) {
+                                        bookingUpdated = true;
+                                        completedCount++;
+                                    } else {
+                                        console.warn(`[${functionName}] Booking ${booking.id} không còn ở trạng thái 'Confirmed' hoặc 'CheckedIn' khi xử lý.`);
+                                    }
                                     res_b(result);
                                 });
                             });
 
-                            // Nếu booking được cập nhật -> Cập nhật phòng
+                            // 5. Nếu booking được cập nhật -> Cập nhật phòng (giải phóng chỗ)
                             if (bookingUpdated) {
                                 let newAvailableSeats = roomInfo.available_seats;
                                 let newRoomStatus = roomInfo.status;
@@ -360,8 +373,15 @@ const processCompletedBookings = () => {
                                 if (seatsToAddBack > 0 && roomInfo.status !== 'Maintenance') {
                                     newAvailableSeats = roomInfo.available_seats + seatsToAddBack;
                                     newAvailableSeats = Math.min(newAvailableSeats, roomInfo.capacity);
-                                    if (roomInfo.status === 'Occupied' && newAvailableSeats > 0) newRoomStatus = 'Available';
-                                    if (newAvailableSeats !== roomInfo.available_seats || newRoomStatus !== roomInfo.status) roomNeedsUpdate = true;
+
+                                    if (roomInfo.status === 'Occupied' && newAvailableSeats > 0) {
+                                        newRoomStatus = 'Available';
+                                    }
+                                    if (newAvailableSeats !== roomInfo.available_seats || newRoomStatus !== roomInfo.status) {
+                                        roomNeedsUpdate = true;
+                                    }
+                                } else if (seatsToAddBack <= 0) {
+                                     console.warn(`[${functionName}] Booking ${booking.id} has booked_seats = ${seatsToAddBack}. No seats added back.`);
                                 }
 
                                 if (roomNeedsUpdate) {
@@ -377,26 +397,34 @@ const processCompletedBookings = () => {
                                 }
                             } // end if(bookingUpdated)
 
-                            // Commit
+                            // 6. Commit transaction
                             connection.commit((commitErr) => {
                                 if (commitErr) {
                                     console.error(`[${functionName}] TX Commit Error (Booking ${booking.id}):`, commitErr);
-                                    connection.rollback(() => { if (bookingUpdated) completedCount--; failedCount++; res_inner(); });
+                                    connection.rollback(() => {
+                                        if (bookingUpdated) completedCount--;
+                                        failedCount++;
+                                        res_inner();
+                                    });
                                 } else {
-                                    if (bookingUpdated) console.log(`[${functionName}] Booking ${booking.id} -> Completed.`);
+                                    if (bookingUpdated) console.log(`[${functionName}] Booking ${booking.id} (${booking.current_status}) -> Completed. Room ${roomInfo.ID} updated.`);
                                     res_inner();
                                 }
                             });
 
                         } catch (error) {
+                            // 7. Rollback on error
                             console.error(`[${functionName}] Error processing Booking ${booking.id}:`, error);
-                            connection.rollback(() => { failedCount++; res_inner(); });
+                            connection.rollback(() => {
+                                failedCount++;
+                                res_inner();
+                            });
                         }
                     }); // End beginTransaction
                 }); // End new Promise wrapper
             } // End for loop
 
-            resolve({ completed: completedCount, room_updates: roomUpdateCount, failed: failedCount, message: `Hoàn thành ${completedCount}, cập nhật ${roomUpdateCount} phòng, ${failedCount} lỗi.` });
+            resolve({ completed: completedCount, room_updates: roomUpdateCount, failed: failedCount, message: `Hoàn thành ${completedCount} đặt chỗ, cập nhật ${roomUpdateCount} phòng, ${failedCount} lỗi.` });
 
         } catch (error) {
             console.error(`[${functionName}] Job Error:`, error);
@@ -540,14 +568,52 @@ const bookNow = ({ roomId, mssv, duration_minutes, number_of_attendees }) => {
     });
 };
 
+const getBookingsByMssv = (mssv) => {
+    return new Promise((resolve, reject) => {
+        if (!mssv) {
+            return reject(new Error("MSSV là bắt buộc."));
+        }
+
+        const sql = `
+            SELECT
+                b.id AS booking_id,
+                b.mssv,
+                b.Day,
+                DATE_FORMAT(b.start_time, '%H:%i') AS start_time,
+                DATE_FORMAT(b.end_time, '%H:%i') AS end_time,
+                b.status,
+                r.location AS room_name, -- Coi 'location' như thông tin 'thiết bị'/phòng
+                r.qr_code,
+                r.room_type,             -- Thêm loại phòng nếu cần
+                b.booked_seats           -- Thêm số chỗ đã đặt nếu cần
+            FROM
+                Bookings b
+            JOIN
+                Rooms r ON b.room_id = r.ID
+            WHERE
+                b.mssv = ?
+            ORDER BY
+                b.Day DESC, b.start_time ASC;
+        `;
+
+        connection.query(sql, [mssv], (err, results) => {
+            if (err) {
+                console.error(`Database error fetching bookings for MSSV ${mssv}:`, err);
+                return reject(new Error("Lỗi truy vấn cơ sở dữ liệu khi lấy đặt chỗ của sinh viên."));
+            }
+            // Results sẽ là một mảng các object đặt phòng
+            resolve(results);
+        });
+    });
+};
 
 
-// --- Exports ---
 module.exports = {
     getBookingList,
     addBooking,
     checkBookingTimeSlot,
     cancelBooking,
     processCompletedBookings,
-    bookNow
+    bookNow,
+    getBookingsByMssv
 };
