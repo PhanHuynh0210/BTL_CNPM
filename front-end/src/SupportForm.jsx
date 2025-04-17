@@ -3,18 +3,18 @@ import bg from "./assets/bg.png";
 
 
 const SupportForm = () => {
-  const [formData, setFormData] = useState({
-    supportType: "",
+  const [Support, setFormData] = useState({
+    support_type: "",
     title: "",
     description: "",
-    issueDetail: "",
-    contactMethod: "",
+    mssv: "",
+    contact_info: "",
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
   
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ ...Support, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
@@ -23,7 +23,7 @@ const SupportForm = () => {
     setShowSuccess(true);
 
     // Gửi dữ liệu đến backend ở đây
-    console.log("Form submitted:", formData);
+    console.log("Form submitted:", Support);
     
     // Sau 3 giây, ẩn thông báo thành công
     setTimeout(() => {
@@ -54,7 +54,7 @@ const SupportForm = () => {
               <label className="block mb-1">Loại hỗ trợ</label>
               <select
                 name="supportType"
-                value={formData.supportType}
+                value={Support.support_type}
                 onChange={handleChange}
                 className="w-full bg-transparent border border-white rounded p-2 text-white"
               >
@@ -72,7 +72,7 @@ const SupportForm = () => {
               <input
                 type="text"
                 name="title"
-                value={formData.title}
+                value={Support.title}
                 onChange={handleChange}
                 className="w-full bg-transparent border border-white rounded p-2 text-white"
                 placeholder="Nhập tiêu đề"
@@ -84,24 +84,11 @@ const SupportForm = () => {
               <label className="block mb-1">Mô tả chi tiết</label>
               <textarea
                 name="description"
-                value={formData.description}
+                value={Support.description}
                 onChange={handleChange}
                 rows={3}
                 className="w-full bg-transparent border border-white rounded p-2 text-white"
                 placeholder="Nhập nội dung mô tả"
-              />
-            </div>
-
-            {/* Issue Detail */}
-            <div>
-              <label className="block mb-1">Mô tả lỗi chi tiết</label>
-              <textarea
-                name="issueDetail"
-                value={formData.issueDetail}
-                onChange={handleChange}
-                rows={3}
-                className="w-full bg-transparent border border-white rounded p-2 text-white"
-                placeholder="Mô tả chi tiết lỗi gặp phải"
               />
             </div>
 
@@ -111,7 +98,7 @@ const SupportForm = () => {
               <input
                 type="text"
                 name="contactMethod"
-                value={formData.contactMethod}
+                value={Support.contact_info}
                 onChange={handleChange}
                 className="w-full bg-transparent border border-white rounded p-2 text-white"
                 placeholder="Email hoặc số điện thoại"
