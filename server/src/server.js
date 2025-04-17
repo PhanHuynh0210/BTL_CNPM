@@ -5,6 +5,7 @@ import initApiRoutes from "./routes/api";
 import bodyParser from "body-parser";
 import session from 'express-session';
 import configCors from "./config/cors";
+import cron from 'node-cron';
 require("dotenv").config();
 
 const app = express();
@@ -12,6 +13,16 @@ const PORT = process.env.PORT || 8080;
 
 //configCors
 configCors(app);
+
+cron.schedule('*/5 * * * *', () => {
+    console.log('--- Running Scheduled Job: Process Completed Bookings ---');
+    bookingService.processCompletedBookings()
+      .then(result => console.log('--- Completion Job Finished:', result, '---'))
+      .catch(error => console.error('--- Completion Job Failed:', error, '---'));
+  }, {
+    scheduled: true,
+    timezone: "Asia/Ho_Chi_Minh"
+  });
 
 app.use(session({
     secret: 'yourSecretKey',

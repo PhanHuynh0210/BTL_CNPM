@@ -2,6 +2,8 @@ import express from "express";
 const router = express.Router();
 import apiController from '../controller/apiController.js'
 import roomController from '../controller/roomController.js'
+import bookingController from "../controller/bookingController.js";
+import authenticateToken from "../controller/authenticateToken.js";
 
 
 /**
@@ -18,8 +20,12 @@ const initApiRouter = (app) => {
     router.get('/available', roomController.listAvailableRooms);
     // tất cả room
     router.get('/allroom', roomController.getAllRooms);
-
-    module.exports = router;
+    // booking
+    router.post('/booking', authenticateToken, bookingController.createBooking);
+    router.post('/check-availability', authenticateToken, bookingController.checkAvailability);
+    //huy booking 
+    router.post('/booking/:bookingId/cancel', bookingController.handleCancelBooking);
+    router.post('/booking/book-now', authenticateToken, bookingController.handleBookNow)
     return app.use("/api/v1/",router);
 }
 

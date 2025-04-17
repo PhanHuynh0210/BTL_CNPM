@@ -34,7 +34,14 @@
                                 <% } else { %>
                                     <span class="badge bg-secondary"><%= bookings.status %></span>
                                 <% } %>
-                            </td>                            
+                            </td>
+                            <td>
+                                <% if (bookings.qr_code) { %>
+                                  <img src="<%= bookings.qr_code %>" alt="QR Code phòng <%= bookings.room_name %>" class="img-thumbnail" style="width: 50px; height: 50px;">
+                                <% } else { %>
+                                  <span class="text-muted">Không có</span>
+                                <% } %>
+                              </td>        
                         </tr>
                     <% }) %>
                 </tbody>
