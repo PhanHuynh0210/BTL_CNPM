@@ -8,14 +8,17 @@ import CurrentRoom from './CurrentRoom';
 import RoomHistory from './RoomHistory';
 import BookingManager from './BookingManager';
 import RoomDetails from './RoomDetails';
+import { Toaster } from 'react-hot-toast';
 // Placeholder - sẽ tạo sau
-const RoomSearch = () => <div className="p-5 text-center">🔍 Tìm phòng</div>;
-const Profile = () => <div className="p-5 text-center">👤 Hồ sơ cá nhân</div>;
-const Reports = () => <div className="p-5 text-center">📈 Báo cáo</div>;
-const Support = () => <div className="p-5 text-center">🛠️ Hỗ trợ</div>;
+const RoomSearch = () => <div className="p-5 text-center"> Tìm phòng</div>;
+const Profile = () => <div className="p-5 text-center"> Hồ sơ cá nhân</div>;
+const Reports = () => <div className="p-5 text-center"> Báo cáo</div>;
+const Support = () => <div className="p-5 text-center"> Hỗ trợ</div>;
 
 function App() {
   return (
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/logininfo" element={<LoginInfo />} />
@@ -30,6 +33,7 @@ function App() {
       <Route path="/reports" element={<Reports />} />
       <Route path="/support" element={<Support />} />
     </Routes>
+    </>
   );
 }
 
