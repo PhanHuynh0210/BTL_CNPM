@@ -81,10 +81,28 @@ const createSupport = ({ mssv, support_type, title, description, contact_info })
         }
     });
 };
+const getStatusesByMssv = async (mssv) => {
+    return new Promise(async (resolve, reject) => {
+        const sql = `
+            SELECT support_id, title, status 
+            FROM Support 
+            WHERE mssv = ?
+        `;
+
+        try {
+            const [rows] = await connection.promise().query(sql, [mssv]);
+            resolve(rows);
+        } catch (error) {
+            console.error("DB error khi lấy trạng thái yêu cầu:", error);
+            reject(error);
+        }
+    });
+};
 
 
 module.exports = {
     getSupportList,
     updateSupportStatus,
-    createSupport
+    createSupport,
+    getStatusesByMssv
 };

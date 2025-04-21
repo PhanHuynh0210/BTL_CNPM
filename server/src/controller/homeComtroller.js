@@ -3,6 +3,7 @@ import bookingService from '../service/bookingService'
 import feedbackService from '../service/feedbackService'
 import roomService from '../service/roomService'; 
 import SupportService from '../service/supportService';
+import deviceService from '../service/deviceService';
 
 
 
@@ -95,6 +96,7 @@ const home = async (req, res) => {
             const feedback = await feedbackService.getFeedbackList();
             const rooms = await roomService.getRoomList();
             const supports = await SupportService.getSupportList();
+            const devices = await deviceService.getDevices();
 
             return res.render("home.ejs", {
                 username: req.session.username,
@@ -103,7 +105,8 @@ const home = async (req, res) => {
                 mssvLogin: req.session.userId,
                 feedback: feedback,
                 rooms: rooms,
-                supports: supports
+                supports: supports,
+                devices: devices
                 
             });
         } catch (error) {

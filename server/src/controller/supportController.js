@@ -38,10 +38,25 @@ const createSupport = async (req, res) => {
         res.status(500).json({ message: "Lỗi máy chủ" });
     }
 };
-
+const getSupportStatusByMssv = async (req, res) => {
+    try {
+      const { mssv } = req.params;
+      const statuses = await supportService.getStatusesByMssv(mssv);
+  
+      if (statuses.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy yêu cầu nào.' });
+      }
+  
+      res.status(200).json({ supports: statuses });
+    } catch (error) {
+      console.error('Lỗi:', error);
+      res.status(500).json({ message: 'Lỗi server.' });
+    }
+  };
 export default {
     updateStatus,
-    createSupport
+    createSupport,
+    getSupportStatusByMssv
 };
 
 

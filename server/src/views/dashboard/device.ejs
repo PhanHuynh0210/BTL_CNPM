@@ -12,46 +12,15 @@
                     <tr>
                         <th>Thiết bị</th>
                         <th>Phòng</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <% devices.forEach(device => { %>
                     <tr>
-                        <td>Máy chiếu Epson EB-X41</td>
-                        <td>A101</td>
-                        <td><span class="badge badge-info-light">Bình thường</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiếc</button>
-                        </td>
+                        <td><%= device.device_name %></td>
+                        <td><%= device.room_id %></td>
                     </tr>
-                <tbody>
-                    <tr>
-                        <td>Máy chiếu Epson EB-X41</td>
-                        <td>A101</td>
-                        <td><span class="badge badge-info-light">Bình thường</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiếc</button>
-                        </td>
-                    </tr>
-                <tbody>
-                    <tr>
-                        <td>Máy chiếu Epson EB-X41</td>
-                        <td>A101</td>
-                        <td><span class="badge badge-info-light">Bình thường</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiếc</button>
-                        </td>
-                    </tr>
-                <tbody>
-                    <tr>
-                        <td>Máy chiếu Epson EB-X41</td>
-                        <td>A101</td>
-                        <td><span class="badge badge-info-light">Bình thường</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiếc</button>
-                        </td>
-                    </tr>
+                    <% }); %>
                 </tbody>
             </table>
         </div>

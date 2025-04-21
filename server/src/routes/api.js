@@ -32,6 +32,8 @@ const initApiRouter = (app) => {
     router.get('/bookings/student/:mssv', bookingController.getStudentBookings);
     //sp
     router.post('/support', supportController.createSupport);
+    router.get('/support/user/:mssv/status', supportController.getSupportStatusByMssv);
+
     //fb
     router.post('/feedback', feedbackController.createFeedback);
 
