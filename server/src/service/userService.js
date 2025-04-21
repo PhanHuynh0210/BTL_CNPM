@@ -90,7 +90,19 @@ const updateUserStatus = async (mssv, status) => {
     });
   });
 };
-
+const findUserByMSSV = async (mssv) => {
+  return new Promise((resolve, reject) => {
+      // Chọn các trường cần thiết, loại bỏ mật khẩu
+      connection.query(
+          'SELECT mssv, fullName, email, phone, sex, role, status FROM Users WHERE mssv = ?',
+          [mssv],
+          (err, results) => {
+              if (err) return reject(err);
+              resolve(results.length > 0 ? results[0] : null);
+          }
+      );
+  });
+};
 
 module.exports = {
     createNewUser,
@@ -98,6 +110,7 @@ module.exports = {
     deleteUser,
     getUserList,
     findUserByMSSVOrEmail,
-    updateUserStatus
+    updateUserStatus,
+    findUserByMSSV
   };
   

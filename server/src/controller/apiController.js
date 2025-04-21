@@ -1,4 +1,5 @@
 import { checkLoginCredentials, updateStatusOffline } from "../service/loginService.js";
+import userService from "../service/userService.js"
 import jwt from "jsonwebtoken";
 
 // API Login
@@ -75,10 +76,45 @@ const testapi = (req, res) => {
 const handleRegister = (req, res) => {
     return res.status(200).json({ message: "Register endpoint" });
 };
+const getCurrentUserProfile = async (req, res) => {
+    try {
+        // Middleware authenticateToken đã xác thực và gắn thông tin user vào req.user
+        const mssv = req.user?.mssv;
 
+        if (!mssv) {
+            // Trường hợp này không nên xảy ra nếu middleware hoạt động đúng
+            console.error("Error in getCurrentUserProfile: Missing mssv in req.user after authentication.");
+            return res.status(401).json({ success: false, message: "Thông tin xác thực không hợp lệ." });
+        }
+
+        // Gọi service để lấy thông tin user (không lấy mật khẩu)
+        const userProfile = await userService.findUserByMSSV(mssv);
+
+        if (!userProfile) {
+            // User có token hợp lệ nhưng không tìm thấy trong DB? (Trường hợp lạ)
+            console.error(`Error in getCurrentUserProfile: User with mssv ${mssv} not found in DB despite valid token.`);
+            return res.status(404).json({ success: false, message: "Không tìm thấy thông tin người dùng." });
+        }
+
+        // Trả về thông tin user
+        return res.status(200).json({
+            success: true,
+            message: "Lấy thông tin người dùng thành công.",
+            data: userProfile
+        });
+
+    } catch (error) {
+        console.error("Controller Error: Getting current user profile:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Lỗi máy chủ khi lấy thông tin người dùng."
+        });
+    }
+};
 export default {
     handleLoginapi,
     testapi,
     handleRegister,
-    logoutUser
+    logoutUser,
+    getCurrentUserProfile
 };
