@@ -606,6 +606,121 @@ const getBookingsByMssv = (mssv) => {
         });
     });
 };
+const checkInBooking = (bookingId, mssv, roomId = null) => {
+    return new Promise((resolve, reject) => {
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) return reject(new Error("Booking ID không hợp lệ."));
+        if (!mssv) return reject(new Error("MSSV là bắt buộc để check-in."));
+
+        connection.beginTransaction(async (transactionErr) => {
+            if (transactionErr) return reject(new Error("Lỗi khi bắt đầu giao dịch check-in."));
+            try {
+                const bookingInfo = await new Promise((res, rej) => {
+                    const query = `SELECT id, room_id, mssv, status, start_time, end_time, Day FROM Bookings WHERE id = ? FOR UPDATE`;
+                    connection.query(query, [bookingIdInt], (err, results) => {
+                        if (err) return rej(new Error("Lỗi lấy thông tin đặt phòng: " + err.message));
+                        if (results.length === 0) return rej(new Error(`Không tìm thấy đặt phòng ID: ${bookingIdInt}.`));
+                        res(results[0]);
+                    });
+                });
+
+                if (bookingInfo.mssv !== mssv) throw new Error(`Người dùng ${mssv} không có quyền check-in cho đặt phòng này.`);
+                if (roomId !== null) {
+                    const roomIdInt = parseInt(roomId, 10);
+                    if (isNaN(roomIdInt) || bookingInfo.room_id !== roomIdInt) throw new Error(`Check-in không đúng phòng (Yêu cầu: ${roomIdInt}, Đặt phòng: ${bookingInfo.room_id}).`);
+                }
+                if (bookingInfo.status !== 'Confirmed') throw new Error(`Chỉ có thể check-in khi đặt phòng ở trạng thái 'Confirmed'. Trạng thái hiện tại: '${bookingInfo.status}'.`);
+
+                await new Promise((res, rej) => {
+                    const query = 'UPDATE Bookings SET status = ? WHERE id = ? AND status = ?';
+                    connection.query(query, ['CheckedIn', bookingIdInt, 'Confirmed'], (err, result) => {
+                         if (err) return rej(new Error("Lỗi cập nhật trạng thái check-in: " + err.message));
+                         if (result.affectedRows === 0) return rej(new Error("Không thể cập nhật trạng thái check-in (có thể trạng thái đã thay đổi)."));
+                         res(result);
+                    });
+                });
+
+                connection.commit((commitErr) => {
+                    if (commitErr) return connection.rollback(() => reject(new Error("Lỗi xác nhận giao dịch check-in.")));
+                    resolve({ message: `Check-in thành công cho đặt phòng ID ${bookingIdInt}.` });
+                });
+            } catch (error) {
+                connection.rollback(() => reject(error));
+            }
+        });
+    });
+};
+
+const checkOutBooking = (bookingId, mssv) => {
+     return new Promise((resolve, reject) => {
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) return reject(new Error("Booking ID không hợp lệ."));
+        if (!mssv) return reject(new Error("MSSV là bắt buộc để check-out."));
+
+        connection.beginTransaction(async (transactionErr) => {
+            if (transactionErr) return reject(new Error("Lỗi khi bắt đầu giao dịch check-out."));
+            try {
+                const bookingInfo = await new Promise((res, rej) => {
+                    const query = `SELECT id, room_id, mssv, status, booked_seats FROM Bookings WHERE id = ? FOR UPDATE`;
+                    connection.query(query, [bookingIdInt], (err, results) => {
+                        if (err) return rej(new Error("Lỗi lấy thông tin đặt phòng: " + err.message));
+                        if (results.length === 0) return rej(new Error(`Không tìm thấy đặt phòng ID: ${bookingIdInt}.`));
+                        res(results[0]);
+                    });
+                });
+
+                if (bookingInfo.mssv !== mssv) throw new Error(`Người dùng ${mssv} không có quyền check-out cho đặt phòng này.`);
+                if (bookingInfo.status !== 'CheckedIn') throw new Error(`Chỉ có thể check-out khi đặt phòng ở trạng thái 'CheckedIn'. Trạng thái hiện tại: '${bookingInfo.status}'.`);
+
+                 const roomInfo = await new Promise((res_room, rej_room) => {
+                    const q = 'SELECT ID, capacity, available_seats, status FROM Rooms WHERE ID = ? FOR UPDATE';
+                    connection.query(q, [bookingInfo.room_id], (err, results) => {
+                         if (err || results.length === 0) return rej_room(new Error(`Lỗi/Không tìm thấy phòng ${bookingInfo.room_id}.`));
+                         res_room(results[0]);
+                    });
+                });
+
+                await new Promise((res, rej) => {
+                    const query = 'UPDATE Bookings SET status = ? WHERE id = ? AND status = ?';
+                    connection.query(query, ['Completed', bookingIdInt, 'CheckedIn'], (err, result) => {
+                         if (err) return rej(new Error("Lỗi cập nhật trạng thái check-out: " + err.message));
+                         if (result.affectedRows === 0) return rej(new Error("Không thể cập nhật trạng thái check-out (có thể trạng thái đã thay đổi)."));
+                         res(result);
+                    });
+                });
+
+                let newAvailableSeats = roomInfo.available_seats;
+                let newRoomStatus = roomInfo.status;
+                const seatsToAddBack = bookingInfo.booked_seats || 0;
+                let roomNeedsUpdate = false;
+
+                if (seatsToAddBack > 0 && roomInfo.status !== 'Maintenance') {
+                    newAvailableSeats = Math.min(roomInfo.available_seats + seatsToAddBack, roomInfo.capacity);
+                    if (roomInfo.status === 'Occupied' && newAvailableSeats > 0) newRoomStatus = 'Available';
+                    if (newAvailableSeats !== roomInfo.available_seats || newRoomStatus !== roomInfo.status) roomNeedsUpdate = true;
+                }
+
+                if (roomNeedsUpdate) {
+                    await new Promise((res_r, rej_r) => {
+                        const q = 'UPDATE Rooms SET available_seats = ?, status = ? WHERE ID = ?';
+                        connection.query(q, [newAvailableSeats, newRoomStatus, roomInfo.ID], (err, result) => {
+                            if (err) return rej_r(new Error("Lỗi cập nhật phòng sau khi check-out: " + err.message));
+                            if (result.affectedRows === 0) return rej_r(new Error("Lỗi không cập nhật được phòng sau check-out."));
+                            res_r(result);
+                        });
+                    });
+                }
+
+                connection.commit((commitErr) => {
+                    if (commitErr) return connection.rollback(() => reject(new Error("Lỗi xác nhận giao dịch check-out.")));
+                    resolve({ message: `Check-out và hoàn thành thành công cho đặt phòng ID ${bookingIdInt}.` });
+                });
+            } catch (error) {
+                connection.rollback(() => reject(error));
+            }
+        });
+    });
+};
 
 
 module.exports = {
@@ -615,5 +730,7 @@ module.exports = {
     cancelBooking,
     processCompletedBookings,
     bookNow,
-    getBookingsByMssv
+    getBookingsByMssv,
+    checkOutBooking,
+    checkInBooking
 };

@@ -269,11 +269,62 @@ const getStudentBookings = async (req, res) => {
         });
     }
 };
+const handleCheckIn = async (req, res) => {
+    const functionName = 'handleCheckIn';
+    try {
+        const mssv = req.user?.mssv;
+        if (!mssv) return res.status(401).json({ success: false, message: "Yêu cầu xác thực không hợp lệ hoặc thiếu MSSV." });
+        const { bookingId } = req.params;
+        const { roomId } = req.body;
+        if (!bookingId) return res.status(400).json({ success: false, message: "Thiếu Booking ID trong URL." });
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) return res.status(400).json({ success: false, message: "Booking ID không hợp lệ." });
+        const roomIdInt = roomId ? parseInt(roomId, 10) : null;
+        if (roomId && isNaN(roomIdInt)) return res.status(400).json({ success: false, message: "Room ID không hợp lệ." });
+        const result = await bookingService.checkInBooking(bookingIdInt, mssv, roomIdInt);
+        return res.status(200).json({ success: true, message: result.message });
+    } catch (error) {
+        let statusCode = 500;
+        const errorMessage = error.message || "Lỗi không xác định khi check-in.";
+        if (errorMessage.includes("không hợp lệ") || errorMessage.includes("là bắt buộc")) statusCode = 400;
+        else if (errorMessage.includes("không có quyền")) statusCode = 403;
+        else if (errorMessage.includes("Không tìm thấy đặt phòng")) statusCode = 404;
+        else if (errorMessage.includes("không đúng phòng") || errorMessage.includes("Chỉ có thể check-in khi đặt phòng")) statusCode = 409;
+        else if (errorMessage.includes("Yêu cầu xác thực")) statusCode = 401;
+        return res.status(statusCode).json({ success: false, message: errorMessage });
+    }
+};
+
+const handleCheckOut = async (req, res) => {
+    const functionName = 'handleCheckOut';
+     try {
+        const mssv = req.user?.mssv;
+        if (!mssv) return res.status(401).json({ success: false, message: "Yêu cầu xác thực không hợp lệ hoặc thiếu MSSV." });
+        const { bookingId } = req.params;
+        if (!bookingId) return res.status(400).json({ success: false, message: "Thiếu Booking ID trong URL." });
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) return res.status(400).json({ success: false, message: "Booking ID không hợp lệ." });
+        const result = await bookingService.checkOutBooking(bookingIdInt, mssv);
+        return res.status(200).json({ success: true, message: result.message });
+    } catch (error) {
+        let statusCode = 500;
+        const errorMessage = error.message || "Lỗi không xác định khi check-out.";
+        if (errorMessage.includes("không hợp lệ") || errorMessage.includes("là bắt buộc")) statusCode = 400;
+        else if (errorMessage.includes("không có quyền")) statusCode = 403;
+        else if (errorMessage.includes("Không tìm thấy đặt phòng")) statusCode = 404;
+        else if (errorMessage.includes("Chỉ có thể check-out khi đặt phòng")) statusCode = 409;
+        else if (errorMessage.includes("Yêu cầu xác thực")) statusCode = 401;
+        return res.status(statusCode).json({ success: false, message: errorMessage });
+    }
+};
+
 
 export default {
     createBooking,
     checkAvailability,
     handleCancelBooking,
     handleBookNow,
-    getStudentBookings
+    getStudentBookings,
+    handleCheckOut,
+    handleCheckIn
 };

@@ -36,6 +36,9 @@ const initApiRouter = (app) => {
 
     //fb
     router.post('/feedback', feedbackController.createFeedback);
+    //chen in,out
+    router.post('/bookings/:bookingId/checkin',  authenticateToken, bookingController.handleCheckIn);
+    router.post('/bookings/:bookingId/checkout',  authenticateToken, bookingController.handleCheckOut);
 
     return app.use("/api/v1/",router);
 }
