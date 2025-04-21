@@ -2,6 +2,7 @@ import express from "express";
 import * as homeComtroller from '../controller/homeComtroller.js';
 import roomController from "../controller/roomController";
 import apiController from '../controller/apiController.js'
+import supportController from '../controller/supportController.js'
 const router = express.Router();
 
 /**
@@ -18,6 +19,7 @@ const iniWebRouter = (app) => {
     router.post("/delete-user/:mssv", homeComtroller.deleteAccount);
     router.get("/api/test-api",apiController.testapi);
 
+    router.post('/support/:supportId', supportController.updateStatus);
     router.post('/add-room', roomController.createRoom); 
     router.post("/lock-room/:id", roomController.lockRoom);
     router.post("/update-room", roomController.editRoom);

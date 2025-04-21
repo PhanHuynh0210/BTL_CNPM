@@ -4,6 +4,8 @@ import apiController from '../controller/apiController.js'
 import roomController from '../controller/roomController.js'
 import bookingController from "../controller/bookingController.js";
 import authenticateToken from "../controller/authenticateToken.js";
+import supportController from '../controller/supportController.js';
+import feedbackController from "../controller/feedbackController.js";
 
 
 /**
@@ -28,6 +30,11 @@ const initApiRouter = (app) => {
     router.post('/booking/book-now', authenticateToken, bookingController.handleBookNow)
     //booking mssv
     router.get('/bookings/student/:mssv', bookingController.getStudentBookings);
+    //sp
+    router.post('/support', supportController.createSupport);
+    //fb
+    router.post('/feedback', feedbackController.createFeedback);
+
     return app.use("/api/v1/",router);
 }
 

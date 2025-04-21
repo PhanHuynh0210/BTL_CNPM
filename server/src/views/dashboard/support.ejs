@@ -1,69 +1,96 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Hỗ trợ</h5>
-        <button class="btn btn-primary btn-sm">Xem tất cả</button>
+        <a href="#" class="btn btn-primary btn-sm">Xem tất cả</a>
     </div>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>MS</th>
-                        <th>Tên</th>
-                        <th>Loại</th>
+                        <th>MSSV</th>
+                        <th>Loại hỗ trợ</th> 
+                        <th>Tiêu đề</th>
                         <th>Nội dung</th>
                         <th>Thời gian</th>
                         <th>Trạng thái</th>
-                        <th>Chi tiếc</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#SV-1023</td>
-                        <td>A102</td>
-                        <td>Máy chiếu không hiển thị hình ảnh</td>
-                        <td><span class="badge bg-danger">Cao</span></td>
-                        <td>Hôm nay, 09:15</td>
-                        <td><span class="badge badge-warning-light">Đang xử lý</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiết</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>#SV-1022</td>
-                        <td>C310</td>
-                        <td>Hệ thống âm thanh bị rè</td>
-                        <td><span class="badge bg-danger">Cao</span></td>
-                        <td>Hôm qua, 15:30</td>
-                        <td><span class="badge badge-warning-light">Đang xử lý</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiết</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>#SV-1021</td>
-                        <td>B205</td>
-                        <td>Bàn ghế hư hỏng</td>
-                        <td><span class="badge bg-info">Thấp</span></td>
-                        <td>22/03/2025, 10:45</td>
-                        <td><span class="badge badge-warning-light">Chờ phê duyệt</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiết</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>#SV-1020</td>
-                        <td>A105</td>
-                        <td>Điều hòa không mát</td>
-                        <td><span class="badge bg-warning text-dark">Trung bình</span></td>
-                        <td>21/03/2025, 14:20</td>
-                        <td><span class="badge badge-success-light">Đã xử lý</span></td>
-                        <td>
-                            <button class="btn btn-outline-secondary btn-sm">Chi tiết</button>
-                        </td>
-                    </tr>
+                    <% if (supports && supports.length > 0) { %>
+                        <% supports.forEach(support => { %>
+                            <tr id="support-row-<%= support.support_id %>">
+                                <td><%= support.mssv %></td>
+                                <td><%= support.support_type %></td> 
+                                <td><%= support.title %></td>
+                                <td><%= support.description %></td>
+                                <td><%= support.time_sent %></td>
+                                <td class="status-cell">
+                                    <span class="badge <%= support.statusClass %>"><%= support.status %></span>
+                                </td>
+                                <td class="action-cell">
+                                    <% if (support.status === 'Pending') { %>
+                                        <button class="btn btn-info btn-sm btn-update-status"
+                                                data-id="<%= support.support_id %>"
+                                                data-new-status="In Progress">
+                                            Bắt đầu xử lý
+                                        </button>
+                                    <% } else if (support.status === 'In Progress') { %>
+                                        <button class="btn btn-success btn-sm btn-update-status"
+                                                data-id="<%= support.support_id %>"
+                                                data-new-status="Resolved">
+                                            Đánh dấu Resolved
+                                        </button>
+                                    <% } else if (support.status === 'Resolved') { %>
+
+                                        <span class="text-muted">Đã giải quyết</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <!-- Updated colspan to 7 -->
+                            <td colspan="7" class="text-center">Không có yêu cầu hỗ trợ nào.</td>
+                        </tr>
+                    <% } %>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".btn-update-status");
+    
+        buttons.forEach(button => {
+            button.addEventListener("click", async function () {
+                const supportId = this.getAttribute("data-id");
+                const newStatus = this.getAttribute("data-new-status");
+    
+                try {
+                    const res = await fetch(`/support/${supportId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ newStatus })
+                    });
+    
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message);
+                        location.reload(); // Tải lại để cập nhật giao diện
+                    } else {
+                        alert(data.message);
+                    }
+                } catch (err) {
+                    console.error("Lỗi khi gửi yêu cầu:", err);
+                    alert("Đã xảy ra lỗi khi cập nhật trạng thái.");
+                }
+            });
+        });
+    });
+    </script>
+    
