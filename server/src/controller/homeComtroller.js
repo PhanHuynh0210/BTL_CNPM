@@ -4,6 +4,7 @@ import feedbackService from '../service/feedbackService'
 import roomService from '../service/roomService'; 
 import SupportService from '../service/supportService';
 import deviceService from '../service/deviceService';
+import statisticsService from '../service/statisticsService';
 
 
 
@@ -97,6 +98,7 @@ const home = async (req, res) => {
             const rooms = await roomService.getRoomList();
             const supports = await SupportService.getSupportList();
             const devices = await deviceService.getDevices();
+            const tq = await statisticsService.getDashboardStats();
 
             return res.render("home.ejs", {
                 username: req.session.username,
@@ -106,8 +108,8 @@ const home = async (req, res) => {
                 feedback: feedback,
                 rooms: rooms,
                 supports: supports,
-                devices: devices
-                
+                devices: devices,
+                tq: tq
             });
         } catch (error) {
             console.log("Error fetching user accounts:", error);

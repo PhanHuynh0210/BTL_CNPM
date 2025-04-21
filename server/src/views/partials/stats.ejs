@@ -1,34 +1,73 @@
 <div class="row mb-4">
+    <!-- Card: Phòng đang sử dụng / Trống -->
     <div class="col-md-4 mb-3">
-        <div class="card stat-card shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Tổng số phòng đang sử dụng</h6>
-                <h2 class="card-title mb-3">18/25</h2>
-                <p class="card-text text-success mb-0">
-                    <i class="bi bi-check-circle-fill me-1"></i>72% đang hoạt động
+        <div class="card stat-card shadow-sm h-100">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <h6 class="card-subtitle mb-2 text-muted">Phòng Đang Sử Dụng / Tổng Số</h6>
+                    <h2 class="card-title mb-1">
+                        <%# Kiểm tra biến tq thay vì stats %>
+                        <% if (typeof tq !== 'undefined' && tq !== null) { %>
+                            <span class="text-primary"><%= tq.occupiedRooms %></span> / <%= tq.totalRooms %>
+                        <% } else { %>
+                            <span class="text-primary">N/A</span> / N/A
+                        <% } %>
+                    </h2>
+                    <h6 class="card-subtitle mb-3 text-muted">
+                        Phòng Trống: <% if (typeof tq !== 'undefined' && tq !== null) { %><%= tq.availableRooms %><% } else { %>N/A<% } %>
+                    </h6>
+                </div>
+                <%
+                    let occupancyRate = 0;
+                    // Sử dụng biến tq
+                    if (typeof tq !== 'undefined' && tq !== null && tq.totalRooms > 0) {
+                        occupancyRate = ((tq.occupiedRooms / tq.totalRooms) * 100).toFixed(1);
+                    }
+                %>
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: <%= occupancyRate %>%;" aria-valuenow="<%= occupancyRate %>" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="card-text text-muted small mt-2 mb-0">
+                    Tỷ lệ sử dụng: <%= occupancyRate %>%
                 </p>
             </div>
         </div>
     </div>
+
+    <!-- Card: Yêu cầu Hỗ trợ -->
     <div class="col-md-4 mb-3">
-        <div class="card stat-card shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Tỷ lệ đặt chỗ thành công</h6>
-                <h2 class="card-title mb-3">92.5%</h2>
-                <p class="card-text text-success mb-0">
-                    <i class="bi bi-arrow-up-right me-1"></i>+2.3% so với tuần trước
-                </p>
+        <div class="card stat-card shadow-sm h-100">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                <i class="bi bi-tools display-4 text-warning mb-3"></i>
+                <h6 class="card-subtitle mb-2 text-muted text-center">Yêu cầu Hỗ trợ cần xử lý</h6>
+                <h2 class="card-title mb-0 text-warning">
+                     <%# Sử dụng biến tq %>
+                     <% if (typeof tq !== 'undefined' && tq !== null) { %>
+                         <%= tq.pendingSupportRequests %>
+                     <% } else { %>
+                         N/A
+                     <% } %>
+                </h2>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card stat-card shadow-sm">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Sự cố kỹ thuật cần xử lý</h6>
-                <h2 class="card-title mb-3">4</h2>
-                <h6 class="card-subtitle mb-2 text-muted">Hỗ trợ</h6>
-                <h2 class="card-title mb-3">4</h2>
-            </div>
-        </div>
-    </div>
-</div>
+
+    <%# Card Đánh giá - Cập nhật điều kiện kiểm tra %>
+ <div class="col-md-4 mb-3">
+     <div class="card stat-card shadow-sm h-100">
+         <div class="card-body d-flex flex-column justify-content-center align-items-center">
+             <i class="bi bi-star-half display-4 text-success mb-3"></i>
+             <h6 class="card-subtitle mb-2 text-muted text-center">Đánh giá Trung bình</h6>
+              <h2 class="card-title mb-0 text-success">
+                 <%# Kiểm tra xem tq.averageRating có phải là kiểu number không %>
+                 <% if (typeof tq !== 'undefined' && tq !== null && typeof tq.averageRating === 'number') { %>
+                     <%# Nếu là số, thì hiển thị và dùng toFixed %>
+                     <%= tq.averageRating.toFixed(1) %> <i class="bi bi-star-fill" style="font-size: 0.9em;"></i>
+                 <% } else { %>
+                     <%# Nếu không phải số (null, undefined, hoặc kiểu khác), hiển thị N/A %>
+                     N/A
+                 <% } %>
+             </h2>
+         </div>
+     </div>
+ </div>
