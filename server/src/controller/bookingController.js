@@ -318,6 +318,66 @@ const handleCheckOut = async (req, res) => {
     }
 };
 
+const updateBooking = async (req, res) => {
+    const functionName = 'updateBooking';
+    try {
+        const mssv = req.user?.mssv; // Lấy từ token đã xác thực
+        if (!mssv) {
+            return res.status(401).json({ success: false, message: "Yêu cầu xác thực không hợp lệ hoặc thiếu MSSV." });
+        }
+
+        const { bookingId } = req.params;
+        const updateData = req.body; // Dữ liệu cần cập nhật từ client
+
+        if (!bookingId) {
+            return res.status(400).json({ success: false, message: "Thiếu Booking ID trong URL." });
+        }
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) {
+             return res.status(400).json({ success: false, message: "Booking ID không hợp lệ." });
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return res.status(400).json({ success: false, message: "Không có dữ liệu nào được cung cấp để cập nhật." });
+        }
+
+        // (Tùy chọn) Validate các trường trong updateData ở đây nếu cần trước khi gửi vào service
+
+        console.log(`[${functionName}] User ${mssv} attempting update for booking ${bookingIdInt} with data:`, updateData);
+
+        const result = await bookingService.updateBookingDetails(bookingIdInt, mssv, updateData);
+
+        return res.status(200).json({
+            success: true,
+            message: result.message,
+            updatedFields: result.updatedFields // Trả về các trường đã được cập nhật
+        });
+
+    } catch (error) {
+        console.error(`[${functionName}] Controller Error:`, error);
+        let statusCode = 500;
+        const errorMessage = error.message || "Lỗi không xác định khi cập nhật đặt phòng.";
+
+        // Phân loại lỗi từ service để trả về status code phù hợp
+        if (errorMessage.includes("không hợp lệ") || errorMessage.includes("Thiếu thông tin") || errorMessage.includes("Không có thông tin")) {
+             statusCode = 400;
+        } else if (errorMessage.includes("không có quyền")) {
+            statusCode = 403; // Forbidden
+        } else if (errorMessage.includes("Không tìm thấy")) {
+            statusCode = 404; // Not Found
+        } else if (errorMessage.includes("Không thể sửa đổi") || errorMessage.includes("bị trùng lịch") || errorMessage.includes("Không đủ chỗ trống")) {
+            statusCode = 409; // Conflict
+        } else if (errorMessage.includes("Yêu cầu xác thực")) {
+             statusCode = 401; // Unauthorized
+        }
+
+        return res.status(statusCode).json({
+            success: false,
+            message: errorMessage
+        });
+    }
+};
+
 
 export default {
     createBooking,
@@ -326,5 +386,6 @@ export default {
     handleBookNow,
     getStudentBookings,
     handleCheckOut,
-    handleCheckIn
+    handleCheckIn,
+    updateBooking
 };

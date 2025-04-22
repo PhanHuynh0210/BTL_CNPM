@@ -46,21 +46,26 @@ const getBookingList = () => {
  * Kiểm tra xem khung giờ đã có lượt đặt nào khác đã xác nhận ('Confirmed')
  * chiếm dụng hay chưa.
  */
-const checkBookingTimeSlot = (roomId, date, startTime, endTime) => {
+const checkBookingTimeSlot = (roomId, date, startTime, endTime, excludeBookingId = null) => { // Thêm excludeBookingId
     return new Promise((resolve, reject) => {
-        const overlapQuery = `
+        let overlapQuery = `
             SELECT COUNT(*) AS conflict_count
             FROM Bookings
             WHERE room_id = ?
               AND Day = ?
-              AND status = 'Confirmed' -- Chỉ kiểm tra trạng thái Confirmed
+              AND status = 'Confirmed'
               AND start_time < ?
               AND end_time > ?
         `;
-        const values = [roomId, date, endTime, startTime];
+        const values = [roomId, date, endTime, startTime]; 
+        if (excludeBookingId !== null && !isNaN(parseInt(excludeBookingId, 10))) {
+            overlapQuery += ` AND id != ?`;
+            values.push(parseInt(excludeBookingId, 10));
+        }
+
         connection.query(overlapQuery, values, (err, results) => {
             if (err) {
-                console.error(`Service Error: Checking time slot for room ${roomId} on ${date}:`, err);
+                console.error(`Service Error: Checking time slot for room ${roomId} on ${date} (excluding ${excludeBookingId}):`, err);
                 return reject(new Error("Lỗi kiểm tra lịch đặt phòng."));
             }
             const isAvailable = results[0].conflict_count === 0;
@@ -72,18 +77,7 @@ const checkBookingTimeSlot = (roomId, date, startTime, endTime) => {
     });
 };
 
-/**
- * Thêm một đặt phòng mới với trạng thái 'Confirmed', lưu số chỗ đã đặt,
- * và cập nhật số chỗ trống của phòng.
- * @param {object} bookingData - Dữ liệu đặt phòng.
- * @param {number} bookingData.room_id
- * @param {string} bookingData.mssv
- * @param {string} bookingData.date
- * @param {string} bookingData.start_time
- * @param {string} bookingData.end_time
- * @param {number} [bookingData.number_of_attendees]
- * @returns {Promise<{bookingId: number, message: string}>}
- */
+
 const addBooking = (bookingData) => {
     return new Promise((resolve, reject) => {
         connection.beginTransaction(async (transactionErr) => {
@@ -184,11 +178,166 @@ const addBooking = (bookingData) => {
     });
 };
 
-/**
- * Hủy một lượt đặt phòng đã xác nhận ('Confirmed') và cộng lại số chỗ trống.
- * @param {number} bookingId - ID của lượt đặt phòng cần hủy.
- * @returns {Promise<{message: string}>}
- */
+const updateBookingDetails = (bookingId, mssv, updateData) => {
+    return new Promise((resolve, reject) => {
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) return reject(new Error("Booking ID không hợp lệ."));
+        if (!mssv) return reject(new Error("Yêu cầu thông tin người dùng để cập nhật."));
+        if (Object.keys(updateData).length === 0) return reject(new Error("Không có thông tin nào được cung cấp để cập nhật."));
+
+        connection.beginTransaction(async (transactionErr) => {
+            if (transactionErr) return reject(new Error("Lỗi khi bắt đầu giao dịch cập nhật booking."));
+
+            try {
+                // 1. Lấy thông tin booking hiện tại & lock
+                const bookingInfo = await new Promise((res, rej) => {
+                    const query = `SELECT * FROM Bookings WHERE id = ? FOR UPDATE`;
+                    connection.query(query, [bookingIdInt], (err, results) => {
+                        if (err) return rej(new Error("Lỗi lấy thông tin đặt phòng hiện tại: " + err.message));
+                        if (results.length === 0) return rej(new Error(`Không tìm thấy đặt phòng ID: ${bookingIdInt}.`));
+                        res(results[0]);
+                    });
+                });
+
+                // 2. Kiểm tra quyền sở hữu
+                if (bookingInfo.mssv !== mssv) {
+                    throw new Error("Bạn không có quyền sửa đổi đặt phòng này.");
+                }
+
+                // 3. Kiểm tra trạng thái booking (Chỉ cho sửa khi Confirmed?)
+                if (bookingInfo.status !== 'Confirmed') {
+                    throw new Error(`Không thể sửa đổi đặt phòng đã ở trạng thái '${bookingInfo.status}'.`);
+                }
+
+                // 4. Chuẩn bị dữ liệu mới và kiểm tra thay đổi
+                const newBookingData = { ...bookingInfo }; // Copy dữ liệu cũ
+                const fieldsToUpdate = [];
+                const updatedFieldNames = [];
+
+                // Kiểm tra và cập nhật từng trường nếu có trong updateData
+                if (updateData.date && updateData.date !== format(new Date(bookingInfo.Day), 'yyyy-MM-dd')) { // So sánh date đúng định dạng
+                    // Validate date format if needed
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(updateData.date)) throw new Error("Định dạng ngày không hợp lệ (YYYY-MM-DD).");
+                    newBookingData.Day = updateData.date;
+                    fieldsToUpdate.push('Day = ?');
+                    updatedFieldNames.push('Day');
+                }
+                if (updateData.start_time && updateData.start_time !== bookingInfo.start_time.substring(0, 5)) { // So sánh HH:MM
+                     if (!/^\d{2}:\d{2}(:\d{2})?$/.test(updateData.start_time)) throw new Error("Định dạng giờ bắt đầu không hợp lệ (HH:MM).");
+                    newBookingData.start_time = updateData.start_time.padEnd(8, ':00'); // Đảm bảo có giây
+                    fieldsToUpdate.push('start_time = ?');
+                    updatedFieldNames.push('start_time');
+                }
+                 if (updateData.end_time && updateData.end_time !== bookingInfo.end_time.substring(0, 5)) { // So sánh HH:MM
+                     if (!/^\d{2}:\d{2}(:\d{2})?$/.test(updateData.end_time)) throw new Error("Định dạng giờ kết thúc không hợp lệ (HH:MM).");
+                     if (newBookingData.start_time >= updateData.end_time.padEnd(8, ':00')) throw new Error("Giờ bắt đầu phải trước giờ kết thúc.");
+                     newBookingData.end_time = updateData.end_time.padEnd(8, ':00');
+                     fieldsToUpdate.push('end_time = ?');
+                     updatedFieldNames.push('end_time');
+                }
+
+                let seatsChanged = false;
+                let seatDifference = 0;
+                let newBookedSeats = bookingInfo.booked_seats;
+
+                if (updateData.number_of_attendees !== undefined) {
+                    const requestedAttendees = parseInt(updateData.number_of_attendees, 10);
+                    if (isNaN(requestedAttendees) || requestedAttendees <= 0) throw new Error("Số lượng người tham gia không hợp lệ.");
+
+                    if (requestedAttendees !== bookingInfo.booked_seats) {
+                         // Lấy thông tin phòng để kiểm tra capacity và available_seats
+                         const roomInfo = await new Promise((res, rej) => {
+                            const query = 'SELECT capacity, available_seats, room_type FROM Rooms WHERE ID = ? FOR UPDATE';
+                            connection.query(query, [bookingInfo.room_id], (err, results) => {
+                                if (err || results.length === 0) return rej(new Error("Không thể lấy thông tin phòng để kiểm tra chỗ ngồi."));
+                                res(results[0]);
+                            });
+                        });
+
+                        if(roomInfo.room_type !== 'group' && requestedAttendees > 1) {
+                            throw new Error(`Phòng đơn không thể cập nhật số lượng người tham gia lớn hơn 1.`);
+                        }
+                        if(roomInfo.room_type === 'single') newBookedSeats = 1; // Phòng đơn luôn là 1
+                        else newBookedSeats = requestedAttendees;
+
+
+                        if (newBookedSeats > roomInfo.capacity) throw new Error(`Số lượng mới (${newBookedSeats}) vượt quá sức chứa (${roomInfo.capacity}).`);
+
+                        seatDifference = newBookedSeats - bookingInfo.booked_seats;
+                        const requiredAvailableSeatsForChange = seatDifference > 0 ? seatDifference : 0; // Chỉ cần check nếu số người tăng
+
+                        if (roomInfo.available_seats < requiredAvailableSeatsForChange) {
+                             throw new Error(`Không đủ chỗ trống để tăng số người tham gia. Phòng còn ${roomInfo.available_seats} chỗ.`);
+                        }
+
+                        newBookingData.booked_seats = newBookedSeats;
+                        fieldsToUpdate.push('booked_seats = ?');
+                        updatedFieldNames.push('booked_seats');
+                        seatsChanged = true;
+                    }
+                }
+
+                // Nếu không có gì thay đổi -> báo thành công nhưng không làm gì
+                 if (fieldsToUpdate.length === 0) {
+                     connection.commit(); // Vẫn commit để giải phóng lock
+                     return resolve({ message: "Không có thông tin nào cần cập nhật.", updatedFields: [] });
+                 }
+
+                // 5. Kiểm tra xung đột thời gian nếu thời gian thay đổi
+                const timeChanged = updatedFieldNames.includes('Day') || updatedFieldNames.includes('start_time') || updatedFieldNames.includes('end_time');
+                if (timeChanged) {
+                    const timeSlotCheck = await checkBookingTimeSlot(
+                        bookingInfo.room_id,
+                        newBookingData.Day, // Ngày đã cập nhật (nếu có)
+                        newBookingData.start_time, // Giờ bắt đầu đã cập nhật (nếu có)
+                        newBookingData.end_time,   // Giờ kết thúc đã cập nhật (nếu có)
+                        bookingIdInt // Loại trừ booking hiện tại khỏi kiểm tra
+                    );
+                    if (!timeSlotCheck.available) {
+                        throw new Error(`Khung thời gian mới (${newBookingData.Day} ${newBookingData.start_time}-${newBookingData.end_time}) bị trùng lịch.`);
+                    }
+                }
+
+                // 6. Thực hiện cập nhật Booking
+                const updateBookingQuery = `UPDATE Bookings SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
+                const updateBookingValues = updatedFieldNames.map(field => newBookingData[field]); // Lấy giá trị mới tương ứng
+                updateBookingValues.push(bookingIdInt);
+
+                await new Promise((res, rej) => {
+                    connection.query(updateBookingQuery, updateBookingValues, (err, result) => {
+                        if (err) return rej(new Error("Lỗi cập nhật thông tin đặt phòng: " + err.message));
+                        if (result.affectedRows === 0) return rej(new Error("Không thể cập nhật đặt phòng (ID không tìm thấy hoặc không có gì thay đổi)."));
+                        res(result);
+                    });
+                });
+
+                // 7. Cập nhật Room nếu số chỗ thay đổi
+                if (seatsChanged && seatDifference !== 0) {
+                     await new Promise((res, rej) => {
+                        // Giảm available_seats nếu seatDifference > 0 (thêm người)
+                        // Tăng available_seats nếu seatDifference < 0 (bớt người)
+                        const q = 'UPDATE Rooms SET available_seats = available_seats - ? WHERE ID = ?';
+                        connection.query(q, [seatDifference, bookingInfo.room_id], (err, result) => {
+                            if (err) return rej(new Error("Lỗi cập nhật số chỗ trống của phòng: " + err.message));
+                            if (result.affectedRows === 0) return rej(new Error("Không thể cập nhật phòng (ID không tìm thấy?)."));
+                             // Cần cập nhật lại trạng thái phòng Available/Occupied nếu cần (logic phức tạp hơn, tạm bỏ qua)
+                            res(result);
+                        });
+                    });
+                }
+
+                // 8. Commit transaction
+                connection.commit((commitErr) => {
+                    if (commitErr) return connection.rollback(() => reject(new Error("Lỗi xác nhận giao dịch cập nhật booking.")));
+                    resolve({ message: `Cập nhật đặt phòng ID ${bookingIdInt} thành công.`, updatedFields: updatedFieldNames });
+                });
+
+            } catch (error) {
+                connection.rollback(() => reject(error)); // reject với lỗi gốc
+            }
+        });
+    });
+};
 const cancelBooking = (bookingId) => {
     return new Promise((resolve, reject) => {
         const bookingIdInt = parseInt(bookingId, 10);
@@ -732,5 +881,6 @@ module.exports = {
     bookNow,
     getBookingsByMssv,
     checkOutBooking,
-    checkInBooking
+    checkInBooking,
+    updateBookingDetails
 };
