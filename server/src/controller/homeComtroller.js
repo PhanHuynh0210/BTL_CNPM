@@ -30,6 +30,10 @@ const handleLogin = async (req, res) => {
         return res.render("login.ejs", { error: "Không tìm thấy tài khoản!" });
     }
 
+    if (user.Role === 'Student') {
+        return res.render("login.ejs", { error: "Tài khoản không được phép đăng nhập!" });
+    }
+
     let match = false;
 
     try {
@@ -57,6 +61,7 @@ const handleLogin = async (req, res) => {
     req.session.userId = user.mssv; 
     res.redirect("/home");
 };
+
 
 const logout = (req, res) => {
     const userId = req.session.userId;
