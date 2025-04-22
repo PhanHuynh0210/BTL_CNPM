@@ -18,7 +18,25 @@ const getDevices = async () => {
         throw new Error("Failed to fetch devices");
     }
 };
+const getDevicesByRoomId = (roomId) => {
+    return new Promise((resolve, reject) => {
+        const roomIdInt = parseInt(roomId, 10);
+        if (isNaN(roomIdInt)) {
+            return reject(new Error("Room ID không hợp lệ để lấy thiết bị."));
+        }
+
+        const sql = `SELECT id, device_name, status FROM Devices WHERE room_id = ?`;
+        connection.query(sql, [roomIdInt], (err, results) => {
+            if (err) {
+                console.error(`Error fetching devices for room ${roomIdInt}:`, err);
+                return reject(new Error("Lỗi truy vấn danh sách thiết bị phòng."));
+            }
+            resolve(results); 
+        });
+    });
+};
 
 export default {
-    getDevices
+    getDevices,
+    getDevicesByRoomId
 };

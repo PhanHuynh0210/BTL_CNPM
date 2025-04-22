@@ -377,7 +377,44 @@ const updateBooking = async (req, res) => {
         });
     }
 };
+const getBookingDetails = async (req, res) => {
+    const functionName = 'getBookingDetails';
+    try {
+        const { bookingId } = req.params;
 
+        if (!bookingId) {
+            return res.status(400).json({
+                EM: 'Thiếu Booking ID trong URL.', EC: '-1', DT: '' });
+        }
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) {
+             return res.status(400).json({
+                EM: 'Booking ID không hợp lệ.', EC: '-1', DT: '' });
+        }
+
+        // Gọi service để lấy chi tiết booking
+        const bookingDetails = await bookingService.getBookingDetailsById(bookingIdInt);
+
+        // Kiểm tra nếu không tìm thấy booking
+        if (!bookingDetails) {
+            return res.status(404).json({
+                EM: `Không tìm thấy đặt phòng với ID: ${bookingIdInt}.`, EC: '-1', DT: null });
+        }
+        return res.status(200).json({
+            EM: `Thôn tin ${bookingIdInt} thành công.`,
+            EC: '0',
+            DT: bookingDetails 
+        });
+
+    } catch (error) {
+        console.error(`[${functionName}] Controller Error:`, error);
+        return res.status(500).json({
+            EM: 'Lỗi máy chủ khi lấy chi tiết đặt phòng.',
+            EC: '-1',
+            DT: error.message
+        });
+    }
+};
 
 export default {
     createBooking,
@@ -387,5 +424,6 @@ export default {
     getStudentBookings,
     handleCheckOut,
     handleCheckIn,
-    updateBooking
+    updateBooking,
+    getBookingDetails
 };

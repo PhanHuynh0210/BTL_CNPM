@@ -40,9 +40,11 @@ const initApiRouter = (app) => {
     router.post('/bookings/:bookingId/checkin',  authenticateToken, bookingController.handleCheckIn);
     router.post('/bookings/:bookingId/checkout',  authenticateToken, bookingController.handleCheckOut);
     //update booking
-    router.patch('/bookings/:bookingId', authenticateToken, bookingController.updateBooking);
+    router.patch('/bookings/update/:bookingId', authenticateToken, bookingController.updateBooking);
     //INFOR
     router.get("/users/me", authenticateToken, apiController.getCurrentUserProfile); 
+    // bkID
+    router.get('/bookings/ID/:bookingId', authenticateToken, bookingController.getBookingDetails);
     return app.use("/api/v1/",router);
 }
 

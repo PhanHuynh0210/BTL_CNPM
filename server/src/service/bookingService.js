@@ -1,6 +1,7 @@
 // src/service/bookingService.js
 import connection from "../config/connectDB";
 import { format } from 'date-fns';
+import deviceService from '../service/deviceService'
 
 
 // --- Updated Constants ---
@@ -870,6 +871,70 @@ const checkOutBooking = (bookingId, mssv) => {
         });
     });
 };
+const getBookingDetailsById = (bookingId) => {
+    return new Promise(async (resolve, reject) => {
+        const bookingIdInt = parseInt(bookingId, 10);
+        if (isNaN(bookingIdInt)) {
+            return reject(new Error("Booking ID không hợp lệ."));
+        }
+
+        const sql = `
+            SELECT
+                b.id AS booking_id,
+                b.status AS booking_status,
+                b.Day AS booking_day, -- Giữ nguyên kiểu DATE/DATETIME
+                b.start_time,       -- Giữ nguyên kiểu TIME
+                b.end_time,         -- Giữ nguyên kiểu TIME
+                b.booked_seats,
+                b.createdAt AS booking_createdAt,
+                u.mssv,
+                u.fullName AS user_fullName,
+                u.email AS user_email,
+                u.phone AS user_phone,
+                r.ID AS room_id,
+                r.location AS room_location,
+                r.capacity AS room_capacity,
+                r.available_seats AS room_available_seats,
+                r.room_type,
+                r.status AS room_status,
+                r.qr_code AS room_qr_code
+            FROM
+                Bookings b
+            JOIN
+                Users u ON b.mssv = u.mssv
+            JOIN
+                Rooms r ON b.room_id = r.ID
+            WHERE
+                b.id = ?;
+        `;
+
+        try {
+            const bookingDetails = await new Promise((res, rej) => {
+                connection.query(sql, [bookingIdInt], (err, results) => {
+                    if (err) {
+                        console.error(`Database error fetching details for booking ${bookingIdInt}:`, err);
+                        return rej(new Error("Lỗi truy vấn chi tiết đặt phòng."));
+                    }
+                    if (results.length === 0) {
+                        return res(null); 
+                    }
+                    res(results[0]); 
+                });
+            });
+
+            if (!bookingDetails) {
+                return resolve(null);
+            }
+            const devices = await deviceService.getDevicesByRoomId(bookingDetails.room_id);
+            bookingDetails.room_devices = devices;
+
+            resolve(bookingDetails); 
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
 
 
 module.exports = {
@@ -882,5 +947,6 @@ module.exports = {
     getBookingsByMssv,
     checkOutBooking,
     checkInBooking,
-    updateBookingDetails
+    updateBookingDetails,
+    getBookingDetailsById
 };
