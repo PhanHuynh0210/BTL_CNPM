@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import bg from "./assets/Mainpage.jpg";
 import room from "./assets/Room.jpg";
+import { useNavigate } from "react-router-dom";
 
 export default function CurrentRoom() {
+  const [isLightOn, setIsLightOn] = useState(false);
+  const [isFanOn, setIsFanOn] = useState(false);
+  const [isWiFiOn, setIsWiFiOn] = useState(false);
+  const [isPowerOn, setIsPowerOn] = useState(false);
+  const navigate = useNavigate();
   return (
     <div
       className="h-screen w-screen bg-cover bg-center"
@@ -11,8 +17,8 @@ export default function CurrentRoom() {
       {/* Top Bar */}
       <div className="bg-gray-500 text-white py-4 px-8 flex justify-between items-center relative">
         <h1 className="text-3xl font-bold text-center flex-1">Quản lý phòng</h1>
-        <button className="absolute right-8 text-gray-900 px-4 hover:text-white rounded-lg font-medium text-2xl">
-          <i className="fas fa-home"></i>
+        <button className="absolute right-8 text-gray-900 px-4 hover:text-white rounded-lg font-medium text-2xl" onClick={()=>navigate("/main")}>
+          <i className="fas fa-home" ></i>
         </button>
       </div>
 
@@ -34,16 +40,36 @@ export default function CurrentRoom() {
           <div className="w-1/3 flex justify-center items-center">
             <div className="grid grid-cols-2 grid-rows-2 gap-4">
               {" "}
-              <button className="flex items-center bg-green-500 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+              <button
+                className={`flex items-center ${
+                  isLightOn ? "bg-blue-700" : "bg-green-500"
+                } hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200`}
+                onClick={() => setIsLightOn(!isLightOn)}
+              >
                 <i className="fas fa-lightbulb mr-2"></i> Light
               </button>
-              <button className="flex items-center bg-green-500 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+              <button
+                className={`flex items-center ${
+                  isFanOn ? "bg-blue-700" : "bg-green-500"
+                } hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200`}
+                onClick={() => setIsFanOn(!isFanOn)}
+              >
                 <i className="fas fa-fan mr-2"></i> Fan
               </button>
-              <button className="flex items-center bg-green-500 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+              <button
+                className={`flex items-center ${
+                  isWiFiOn ? "bg-blue-700" : "bg-green-500"
+                } hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200`}
+                onClick={() => setIsWiFiOn(!isWiFiOn)}
+              >
                 <i className="fas fa-wifi mr-2"></i> WiFi
               </button>
-              <button className="flex items-center bg-green-500 active:bg-red-900 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+              <button
+                className={`flex items-center ${
+                  isPowerOn ? "bg-blue-700" : "bg-green-500"
+                } hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200`}
+                onClick={() => setIsPowerOn(!isPowerOn)}
+              >
                 <i className="fas fa-plug mr-2"></i> Power
               </button>
             </div>
@@ -52,14 +78,13 @@ export default function CurrentRoom() {
           {/* Third Column: */}
           <div className="w-1/3 flex justify-center items-center ">
             <div className="bg-gray-300 flex flex-col justify-between items-center  h-[90%] w-[90%] bg-opacity-50 py-8">
-            <text className="font-medium"> Check In/ Check out</text>
-            <i className="fas fa-camera text-9xl text-gray-700"></i>
-            <text className="font-medium"> Scan QR code</text>
-            <button className="bg-blue-500 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
-              Check-in/Out
-            </button>
+              <text className="font-medium"> Check In/ Check out</text>
+              <i className="fas fa-camera text-9xl text-gray-700"></i>
+              <text className="font-medium"> Scan QR code</text>
+              <button className="bg-blue-500 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+                Check-in/Out
+              </button>
             </div>
-            
           </div>
         </div>
       </div>

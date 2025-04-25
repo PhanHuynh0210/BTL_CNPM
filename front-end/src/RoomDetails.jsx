@@ -5,7 +5,9 @@ import bg from "./assets/Mainpage.jpg";
 import roomImage from "./assets/Room.jpg";
 import { registerLocale } from "react-datepicker";
 import vi from "date-fns/locale/vi";
+import toast from "react-hot-toast";
 registerLocale("vi", vi);
+import { useNavigate } from "react-router-dom";
 
 function ConfirmModal({ show, onClose, onConfirm }) {
   if (!show) return null;
@@ -46,6 +48,7 @@ export default function RoomDetails() {
     start: null,
     end: null,
   });
+  const navigate = useNavigate();
 
   const toggleEditMode = () => {
     setIsEditing((prev) => !prev);
@@ -64,7 +67,7 @@ export default function RoomDetails() {
 
   const confirmCancel = () => {
     setShowCancelModal(false);
-    alert("Bạn đã hủy thao tác.");
+    toast.success("Đã hủy chỉnh sửa !");
     // Thực hiện hành động hủy ở đây nếu cần
   };
 
@@ -101,7 +104,7 @@ export default function RoomDetails() {
       {/* Top Bar */}
       <div className="bg-gray-600 text-white py-4 px-8 flex justify-between items-center relative z-10">
         <h1 className="text-3xl font-bold flex-1 text-center">Chi tiết phòng</h1>
-        <button className="absolute right-8 text-gray-900 px-4 hover:text-white rounded-lg font-medium text-2xl">
+        <button className="absolute right-8 text-gray-900 px-4 hover:text-white rounded-lg font-medium text-2xl"onClick={()=>navigate("/main")}>
           <i className="fas fa-home"></i>
         </button>
       </div>

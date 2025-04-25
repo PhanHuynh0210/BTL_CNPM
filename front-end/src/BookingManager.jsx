@@ -1,13 +1,71 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import bg from "./assets/Mainpage.jpg";
+import { useNavigate } from "react-router-dom";
 
 export default function BookingManager() {
+  const [bookedData, setBookedData] = useState([]);
+
+  useEffect(() => {
+    const fetchBooked = async () => {
+      try {
+        const mssv = JSON.parse(localStorage.getItem("user_info"))?.mssv;
+
+        const res = await fetch(
+          `http://localhost:8080/api/v1/bookings/student/${mssv}`
+        );
+
+        const respond = await res.json();
+        setBookedData(respond.DT);
+        console.log(respond);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+    fetchBooked();
+  }, []);
+
+  const handleCancel = async (bookingId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/v1/booking/${bookingId}/cancel`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Đã hủy đặt chỗ thành công.");
+        const mssv = JSON.parse(localStorage.getItem("user_info"))?.mssv;
+        const updatedRes = await fetch(
+          `http://localhost:8080/api/v1/bookings/student/${mssv}`
+        );
+        const updatedData = await updatedRes.json();
+        setBookedData(updatedData.DT);
+      } else {
+        alert(data?.EM || "Hủy đặt chỗ thất bại.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi hủy đặt chỗ:", error);
+      alert("Đã xảy ra lỗi khi hủy đặt chỗ.");
+    }
+  };
+
+  const navigate = useNavigate();
   return (
     <div className="h-screen w-screen relative">
       {/* Background */}
       <div
         className="h-screen w-screen absolute bg-cover bg-center"
-        style={{ backgroundImage: `url(${bg})`, filter: "blur(3px)", zIndex: -1 }}
+        style={{
+          backgroundImage: `url(${bg})`,
+          filter: "blur(0px)",
+          zIndex: -1,
+        }}
       ></div>
 
       {/* Top Bar */}
@@ -18,13 +76,19 @@ export default function BookingManager() {
             <p className="font-bold text-2xl">Reservation System at HCMUT</p>
           </div>
           <div className="flex-grow flex">
-            <button className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200">
+            <button
+              className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
+              onClick={() => navigate("/main")}
+            >
               Trang chủ
             </button>
             <button className="ml-4 flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200">
               Tìm chỗ
             </button>
-            <button className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200">
+            <button
+              className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200"
+              onClick={() => navigate("/booking-manager")}
+            >
               Quản lý đặt chỗ
             </button>
             <button className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200">
@@ -42,40 +106,63 @@ export default function BookingManager() {
 
       {/* Middle  */}
       <div className="flex justify-center items-center h-[80%]">
-        <div className="bg-gray-200 bg-opacity-60 shadow-lg rounded-lg w-3/4 h-[80%] p-6 overflow-y-auto">
-          <h2 className="text-xl font-bold mb-4 text-center">Quản lý đặt chỗ</h2>
+        <div className="bg-gray-400 bg-opacity-80 shadow-lg rounded-lg w-3/4 h-[80%] p-6 overflow-y-auto">
+          <h2 className="text-xl font-bold mb-4 text-center">
+            Quản lý đặt chỗ
+          </h2>
           <div className="overflow-hidden rounded-2xl font-medium">
             <table className="table-auto w-full rounded-lg">
               <thead>
                 <tr className="bg-blue-500">
                   <th className="px-4 py-2 text-left">Thời điểm</th>
-            
+                  <th className="px-4 py-2 text-left">Tên phòng</th>
+                  <th className="px-4 py-2 text-left">Giờ bắt đầu</th>
+
                   <th className="px-4 py-2 text-left">Check In</th>
                   <th className="px-4 py-2 text-left">Thông tin</th>
                 </tr>
               </thead>
               <tbody>
-                {/* temp */}
-                <tr className="rounded-lg my-2">
-                  <td className="px-4 py-2">01/01/2023 10:00</td>
-
-                  <td className="px-4 py-2 text-green-500">Đã xác nhận</td>
-                  <td className="px-4 py-2">
-                    <button className="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded">
-                      Chi tiết
-                    </button>
-                  </td>
-                </tr>
-                <tr className="rounded-lg my-2">
-                  <td className="px-4 py-2">02/01/2023 14:00</td>
-
-                  <td className="px-4 py-2 text-black-500">Chưa</td>
-                  <td className="px-4 py-2">
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded">
-                      Chi tiết
-                    </button>
-                  </td>
-                </tr>
+                {bookedData.filter((booking) => booking.status === "Confirmed")
+                  .length > 0 ? (
+                  bookedData
+                    .filter((booking) => booking.status === "Confirmed")
+                    .map((booking, index) => {
+                      const date = new Date(booking.Day);
+                      const formattedDate = date.toLocaleDateString("vi-VN");
+                      return (
+                        <tr
+                          key={index}
+                          className="bg-white bg-opacity-40 border-b "
+                        >
+                          <td className="px-4 py-2">{formattedDate}</td>
+                          <td className="px-4 py-2">{booking.room_name}</td>
+                          <td className="px-4 py-2">{booking.start_time}</td>
+                          <td className="px-4 py-2">{booking.status}</td>
+                          <td className="px-4 py-2">
+                            <button
+                              className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
+                              onClick={() => navigate("/current-room")}
+                            >
+                              Chi tiết
+                            </button>
+                            <button
+                              className="bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded"
+                              onClick={() => handleCancel(booking.booking_id)} // Gọi API sau
+                            >
+                              Hủy
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4 text-white">
+                      Không có đặt chỗ đã xác nhận nào.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
