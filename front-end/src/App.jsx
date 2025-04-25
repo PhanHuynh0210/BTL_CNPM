@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+
 import LoginPage from './LoginPage';
 import LoginInfo from './LoginInfo';
 import MainPage from './MainPage';
@@ -32,7 +33,7 @@ function App() {
       <Route path="/main" element={<MainPage />} />
       <Route path="/current-room" element={<CurrentRoom />} />
       <Route path="/history" element={<RoomHistory />} />
-      <Route path="/room-details" element={<RoomDetails />} />
+      <Route path="/room-details/:bookingId" element={<RoomDetails />} />
       <Route path="/search" element={<RoomSearch />} />
       {/* <Route path="/profile" element={<Profile />} /> */}
       <Route path="/reports" element={<Reports />} />

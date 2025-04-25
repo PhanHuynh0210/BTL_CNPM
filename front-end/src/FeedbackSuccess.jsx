@@ -1,18 +1,24 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import bg from "./assets/Mainpage.jpg";
 
 export default function FeedbackSuccess() {
   const navigate = useNavigate();
+  const [countdown, setCountdown] = useState(3);
   
   // Tự động chuyển hướng sau 3 giây
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate("/feedback");
-    }, 3000);
+    if (countdown <= 0) {
+      navigate("/FeedbackForm");
+      return;
+    }
     
+    const timer = setTimeout(() => {
+      setCountdown(countdown - 1);
+    }, 1000);
+
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [countdown, navigate]);
   
   return (
     <div className="justify-center min-h-screen bg-gray-100">
@@ -25,7 +31,6 @@ export default function FeedbackSuccess() {
           zIndex: 1,
         }}
       ></div>
-      
       {/* Main content */}
       <div className="relative z-10">
         {/* Header */}
@@ -79,12 +84,20 @@ export default function FeedbackSuccess() {
           </div>
         </div>
         
-        {/* Success Message */}
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-blue-500 text-white p-12 rounded-lg shadow-lg text-center w-96">
-            <h2 className="text-3xl font-bold">Thành công</h2>
-          </div>
+      {/* Success Message - Cập nhật để hiển thị đếm ngược */}
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="bg-blue-500 text-white p-12 rounded-lg shadow-lg text-center w-96">
+          <h2 className="text-3xl font-bold mb-4">Thành công!</h2>
+          <p className="text-lg">Cảm ơn bạn đã gửi đánh giá</p>
+          <p className="mt-4">Quay lại trang đánh giá sau {countdown} giây...</p>
+          <button 
+            onClick={() => navigate("/FeedbackForm")} 
+            className="mt-4 bg-white text-blue-500 px-4 py-2 rounded-md font-medium hover:bg-gray-100"
+          >
+            Quay lại ngay
+          </button>
         </div>
+      </div>
         
         {/* Feedback Form Container (blurred in background) */}
         <div className="mx-auto p-6 bg-gray-800 bg-opacity-70 rounded-lg shadow-lg max-w-4xl mt-4 filter blur-sm">

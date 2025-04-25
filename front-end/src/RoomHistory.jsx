@@ -1,6 +1,7 @@
 import React, {useState,useEffect} from "react";
 import bg from "./assets/Mainpage.jpg";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 
 
@@ -19,26 +20,65 @@ const calculateDuration = (start, end) => {
 
 export default function RoomHistory() {
   const [bookedData, setBookedData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
 useEffect(() => {
   const fetchBooked = async () => {
-    try {
-      const mssv = JSON.parse(localStorage.getItem("user_info"))?.mssv;
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
 
-      const res = await fetch(
-        `http://localhost:8080/api/v1/bookings/student/${mssv}`
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/users/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        toast.error("Không thể tải thông tin người dùng");
+        return;
+      }
+
+      const userData = await response.json();
+      const mssv = userData.studentId;
+
+      const bookingsResponse = await fetch(
+        `http://localhost:8080/api/v1/bookings/student/${mssv}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
-      const respond = await res.json();
-      setBookedData(respond.DT);
-      console.log(respond);
+      if (bookingsResponse.ok) {
+        const respond = await bookingsResponse.json();
+        setBookedData(respond.DT);
+      } else {
+        toast.error("Không thể tải lịch sử đặt phòng");
+      }
     } catch (error) {
       console.error("Error fetching data:", error.message);
+      toast.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false);
     }
   };
   fetchBooked();
-}, []);
+}, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="text-white text-2xl">Đang tải...</div>
+      </div>
+    );
+  }
+
   return (
 
     <div
