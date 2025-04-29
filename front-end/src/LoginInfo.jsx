@@ -4,8 +4,8 @@ import { useState } from "react";
 
 const LoginPage = () => {
  const navigate = useNavigate();
-  const [username, setUsername] = useState("student1@hcmut.edu.vn");
-  const [password, setPassword] = useState("student123");
+  const [username, setUsername] = useState("huynh.phan0210cm@hcmut.edu.vn");
+  const [password, setPassword] = useState("$2b$10$y2QYUi5VSyZ43GWeXf4HX.SuAyVabSefEx2vjTJ6xX1jqnDjpbg3.");
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async (e) => {
@@ -30,6 +30,7 @@ const LoginPage = () => {
     if(res.ok){
     console.log(data);///////////////////////// LOG CHECK DATA TRONG CONSOLE
     localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("user_info", JSON.stringify(data.user));
     navigate("/main");
     }
   };

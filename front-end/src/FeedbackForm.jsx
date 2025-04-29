@@ -1,190 +1,175 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import bg from "./assets/Mainpage.jpg";
 
 export default function FeedbackForm() {
+  const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false);
-  
-  const handleSubmit = (e) => {
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+    fetchRooms();
+  }, [navigate]);
+
+  const fetchRooms = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/v1/allroom");
+      if (res.ok) {
+        const data = await res.json();
+        setRooms(data.data || []);
+      } else {
+        toast.error("Không thể tải danh sách phòng");
+      }
+    } catch (error) {
+      console.error("Error fetching rooms:", error);
+      toast.error("Lỗi khi tải danh sách phòng");
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Xử lý gửi đánh giá
-    setShowSuccess(true);
-    
-    // Sau 3 giây, ẩn thông báo thành công
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
+
+    if (!selectedLocation) return toast.error("Vui lòng chọn vị trí");
+    if (rating === 0) return toast.error("Vui lòng đánh giá mức độ hài lòng");
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      toast.error("Bạn cần đăng nhập để gửi đánh giá");
+      navigate("/");
+      return;
+    }
+
+    try {
+      const userResponse = await fetch("http://localhost:8080/api/v1/users/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!userResponse.ok) {
+        toast.error("Không thể lấy thông tin người dùng");
+        return;
+      }
+
+      const userData = await userResponse.json();
+      const mssv = userData.data?.mssv;
+
+      if (!mssv) return toast.error("Không tìm thấy mã số sinh viên");
+
+      const payload = {
+        mssv,
+        roomId: selectedLocation,
+        rating: Number(rating),
+        comment: comment.trim(),
+      };
+
+      const res = await fetch("http://localhost:8080/api/v1/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Cảm ơn bạn đã gửi đánh giá!");
+        navigate("/FeedbackSuccess");
+      } else {
+        toast.error(data.message || "Không thể gửi đánh giá. Vui lòng thử lại sau.");
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      toast.error("Lỗi kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.");
+    }
   };
-  
-  const handleRatingClick = (value) => {
-    setRating(value);
-  };
-  
+
   return (
-    <div className="justify-center min-h-screen bg-gray-100">
-      {/* Background image with blur */}
-      <div
-        className="inset-0 bg-cover bg-center fixed"
-        style={{
-          backgroundImage: `url(${bg})`,
-          filter: "blur(3px)",
-          zIndex: 1,
-        }}
-      ></div>
-      
-      {/* Main content */}
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="flex items-center p-4 bg-transparent">
-          <div className="w-30% h-24 bg-white bg-opacity-15 p-4 shadow-lg rounded-lg border-2 border-gray-400 flex flex-col justify-center mr-8">
-            <p className="font-bold text-2xl">Smart Study Space Management &</p>
-            <p className="font-bold text-2xl">Reservation System at HCMUT</p>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
+      <div className="fixed inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bg})`, filter: "blur(3px)", zIndex: 0 }}></div>
+
+      <div className="relative z-10 w-full max-w-2xl p-8 bg-white/90 rounded-2xl shadow-xl">
+        <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">Gửi đánh giá trải nghiệm</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block font-semibold mb-2">Vị trí:</label>
+            <select
+              className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+            >
+              <option value="">-- Chọn vị trí --</option>
+              {rooms.map((room) => (
+                <option key={room.room_id} value={room.room_id}>
+                  {room.building} - Phòng {room.location}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="flex-grow flex">
-            <Link
-              to="/main"
-              className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
-            >
-              {" "}
-              Trang chủ
-            </Link>
-            <Link
-              to="/finding-room"
-              className="ml-4 flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
-            >
-              {" "}
-              Tìm phòng
-            </Link>
-            <Link
-              to="/booking-manager"
-              className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
-            >
-              {" "}
-              Quản lý đặt chỗ
-            </Link>
-            <Link
-              to="/reports"
-              className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200"
-            >
-              {" "}
-              Báo cáo
-            </Link>
-            <Link
-              to="/support"
-              className="flex-grow hover:text-gray-100 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
-            >
-              {" "}
-              Hỗ trợ
-            </Link>
-            <Link
-              to="/profile"
-              className="bg-black hover:bg-gray-100 hover:text-black text-white py-2 px-8 rounded-2xl transition duration-200 mr-10"
-            >
-              <i className="fas fa-user"></i>
-            </Link>
+
+          <div>
+            <label className="block font-semibold mb-2">Mức độ hài lòng:</label>
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  className={`text-4xl transition-colors ${
+                    star <= rating ? "text-yellow-400" : "text-gray-300 hover:text-yellow-400"
+                  }`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
           </div>
+
+          <div>
+            <label className="block font-semibold mb-2">Nhận xét:</label>
+            <textarea
+              className="w-full p-3 border rounded-lg bg-gray-50 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Thêm nhận xét của bạn..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200"
+          >
+            Gửi đánh giá
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => navigate("/main")}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-medium shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Quay lại trang chủ
+          </button>
         </div>
-        
-        {/* Feedback Form Container */}
-        <div className="mx-auto p-6 bg-gray-800 bg-opacity-70 rounded-lg shadow-lg max-w-4xl mt-4">
-          {/* Tabs */}
-          <div className="flex mb-6 border-b border-gray-600">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-t-lg font-medium">
-              Gửi đánh giá
-            </button>
-            <button className="px-4 py-2 text-white hover:bg-gray-700 rounded-t-lg font-medium ml-2">
-              Báo lỗi thiết bị
-            </button>
-            <button className="px-4 py-2 text-white hover:bg-gray-700 rounded-t-lg font-medium ml-2">
-              Lịch sử phản hồi
-            </button>
-          </div>
-          
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Location */}
-            <div>
-              <label className="block text-white mb-2">Vị trí:</label>
-              <select
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-md"
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-              >
-                <option value="">-- Chọn vị trí --</option>
-                <option value="h1-334-1">H1 - Phòng 334 - Vị trí 1</option>
-                <option value="h1-334-2">H1 - Phòng 334 - Vị trí 2</option>
-                <option value="h1-334-3">H1 - Phòng 334 - Vị trí 3</option>
-              </select>
-            </div>
-            
-            {/* Rating */}
-            <div>
-              <label className="block text-white mb-2">Mức độ hài lòng</label>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => handleRatingClick(star)}
-                    className="text-3xl focus:outline-none"
-                  >
-                    {star <= rating ? "★" : "☆"}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Comment */}
-            <div>
-              <label className="block text-white mb-2">Nhận xét</label>
-              <textarea
-                className="w-full p-3 bg-gray-700 text-white border border-gray-600 rounded-md h-32"
-                placeholder="Thêm nhận xét của bạn...."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              ></textarea>
-            </div>
-            
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md"
-              >
-                Gửi đánh giá
-              </button>
-            </div>
-          </form>
-        </div>
-        
-        {/* Success Popup */}
-        {showSuccess && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-blue-500 text-white p-8 rounded-lg shadow-lg text-center">
-              <h2 className="text-2xl font-bold">Thành công</h2>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      {/* Footer */}
-      <div className="bottom-0 left-0 right-0 text-center text-white z-10 bg-gray-600 mt-12">
-        <br />
-        <p className="text-xs text-left ml-6 text-gray-300">Tổ kỹ thuật P.DT / Technician</p>
-        <p className="text-xs text-left ml-6 text-gray-300">Email : ddthu@hcmut.edu.vn</p>
-        <p className="text-xs text-left ml-6 text-gray-300">ĐT (Tel.) : (84-8) 38647256 - 5258</p>
-        <p className="text-xs text-left ml-6 text-gray-300">
-          Quý Thầy/Cô chưa có tài khoản(hoặc quên mật khẩu) nhà trường vui lòng liên hệ Trung tâm Dữ liệu & Công nghệ
-          Thông tin, phòng 109A5 để được hỗ trợ.
-        </p>
-        <p className="text-xs text-left ml-6 text-gray-300">
-          (For HCMUT account, please contact to : Data and Information Technology Center)
-        </p>
-        <p className="text-xs text-left ml-6 text-gray-300">Email : dl-cntt@hcmut.edu.vn</p>
-        <p className="text-xs text-left ml-6 text-gray-300">ĐT (Tel.) : (84-8) 38647256 - 5200</p>
       </div>
     </div>
   );

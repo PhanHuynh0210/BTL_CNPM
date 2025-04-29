@@ -1,8 +1,86 @@
-import React from "react";
+import React, {useState,useEffect} from "react";
 import bg from "./assets/Mainpage.jpg";
+import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
+
+
+
+const calculateDuration = (start, end) => {
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const startMinutes = sh * 60 + sm;
+  const endMinutes = eh * 60 + em;
+  const durationMinutes = endMinutes - startMinutes;
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
+  return `${hours} giờ${minutes > 0 ? ` ${minutes} phút` : ""}`;
+};
+
+
 
 export default function RoomHistory() {
+  const [bookedData, setBookedData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+useEffect(() => {
+  const fetchBooked = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/users/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        toast.error("Không thể tải thông tin người dùng");
+        return;
+      }
+
+      const userData = await response.json();
+      const mssv = userData.studentId;
+
+      const bookingsResponse = await fetch(
+        `http://localhost:8080/api/v1/bookings/student/${mssv}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (bookingsResponse.ok) {
+        const respond = await bookingsResponse.json();
+        setBookedData(respond.DT);
+      } else {
+        toast.error("Không thể tải lịch sử đặt phòng");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error.message);
+      toast.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchBooked();
+}, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="text-white text-2xl">Đang tải...</div>
+      </div>
+    );
+  }
+
   return (
+
     <div
       className="h-screen w-screen relative"><div className="h-screen w-screen absolute bg-cover bg-center "
       style={{ backgroundImage: `url(${bg})`, filter: "blur(3px)", zIndex: -1 }}
@@ -12,7 +90,7 @@ export default function RoomHistory() {
       <div className="bg-gray-500 text-white py-4 px-8 flex justify-between items-center relative">
         <h1 className="text-3xl font-bold text-center flex-1">Lịch sử đặt phòng</h1>
         <button className="absolute right-8 text-gray-900 px-4 hover:text-white rounded-lg font-medium text-2xl">
-          <i className="fas fa-home"></i>
+          <i className="fas fa-home" onClick={()=>navigate("/main")}></i>
         </button>
       </div>
 
@@ -30,21 +108,25 @@ export default function RoomHistory() {
                 <th className="px-4 py-2 text-left">Thời gian</th>
               </tr>
             </thead>
-            <tbody className="">
-              {/* Example rows */}
-              <tr className=" rounded-lg my-2">
-                <td className="px-4 py-2 ">01/01/2023 10:00</td>
-                <td className="px-4 py-2">A</td>
-                <td className="px-4 py-2">3-305</td>
-                <td className="px-4 py-2">2 giờ</td>
-              </tr>
-              <tr className=" rounded-lg my-2">
-                <td className="px-4 py-2">02/01/2023 14:00</td>
-                <td className="px-4 py-2">B</td>
-                <td className="px-4 py-2">2-202</td>
-                <td className="px-4 py-2">3 giờ</td>
-              </tr>
-            </tbody>
+            <tbody>
+  {bookedData.map((booking, index) => {
+    const date = new Date(booking.Day);
+    const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth()+1).toString().padStart(2, "0")}/${date.getFullYear()} ${booking.start_time}`;
+
+    const [building, room] = booking.room_name.split("-");
+    const duration = calculateDuration(booking.start_time, booking.end_time);
+
+    return (
+      <tr key={index} className="rounded-lg my-2 hover:bg-blue-100">
+        <td className="px-4 py-2">{formattedDate}</td>
+        <td className="px-4 py-2">{room}</td>
+        <td className="px-4 py-2">{building}</td>
+        <td className="px-4 py-2">{duration}</td>
+      </tr>
+    );
+  })}
+</tbody>
+
           </table>
         </div>
         </div>

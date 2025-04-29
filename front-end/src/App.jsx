@@ -19,14 +19,17 @@ import FeedBackHistory from './FeedBackHistory';
 import Question from './Question';
 import SupportForm from './supportForm';
 // Placeholder - sẽ tạo sau
-
-const RoomSearch = () => <div className="p-5 text-center">🔍 Tìm phòng</div>;
-const Profile = () => <div className="p-5 text-center">👤 Hồ sơ cá nhân</div>;
-const Reports = () => <div className="p-5 text-center">📈 Báo cáo</div>;
-const Support = () => <div className="p-5 text-center">🛠️ Hỗ trợ</div>;
+import { Toaster } from 'react-hot-toast';
+// Placeholder - sẽ tạo sau
+const RoomSearch = () => <div className="p-5 text-center"> Tìm phòng</div>;
+const Profile = () => <div className="p-5 text-center"> Hồ sơ cá nhân</div>;
+const Reports = () => <div className="p-5 text-center"> Báo cáo</div>;
+const Support = () => <div className="p-5 text-center"> Hỗ trợ</div>;
 
 function App() {
   return (
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/logininfo" element={<LoginInfo />} />
@@ -35,7 +38,7 @@ function App() {
       <Route path="/main" element={<MainPage />} />
       <Route path="/current-room" element={<CurrentRoom />} />
       <Route path="/history" element={<RoomHistory />} />
-      <Route path="/room-details" element={<RoomDetails />} />
+      <Route path="/room-details/:bookingId" element={<RoomDetails />} />
       <Route path="/search" element={<RoomSearch />} />
       {/* <Route path="/profile" element={<Profile />} /> */}
       <Route path="/reports" element={<Reports />} />
@@ -51,6 +54,7 @@ function App() {
       <Route path="/QuestionForm" element={<Question />} />
       <Route path="/SupportForm" element={<SupportForm />} />
     </Routes>
+    </>
   );
 }
 

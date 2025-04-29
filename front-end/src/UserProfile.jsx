@@ -1,16 +1,54 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import bg from "./assets/Mainpage.jpg";
+import toast from 'react-hot-toast';
 
 export default function UserProfile() {
-  // Mock user data
-  const userData = {
-    name: "Phan Văn A",
-    dob: "NN/NN/NNNN",
-    studentId: "22xxxx",
-    email: "xxxx@hcmut.edu.vn"
-  };
-  
+  const navigate = useNavigate();
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        navigate("/");
+        return;
+      }
+    
+      try {
+        const response = await fetch("http://localhost:8080/api/v1/users/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+    
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          setUserData(result.data); // Chỉ lưu trữ phần data
+        } else {
+          toast.error(result.message || "Không thể tải thông tin người dùng");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        toast.error("Lỗi khi tải thông tin người dùng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="text-white text-2xl">Đang tải...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen relative">
       {/* Background image with blur */}
@@ -51,10 +89,10 @@ export default function UserProfile() {
           
           {/* User info */}
           <div className="text-center text-gray-800">
-            <p className="mb-2"><strong>Họ và Tên:</strong> {userData.name}</p>
-            <p className="mb-2"><strong>Ngày Sinh:</strong> {userData.dob}</p>
-            <p className="mb-2"><strong>MSSV:</strong> {userData.studentId}</p>
-            <p className="mb-2"><strong>Gmail:</strong> {userData.email}</p>
+          <p className="mb-2"><strong>Họ và Tên:</strong> {userData?.fullName || 'N/A'}</p>
+          <p className="mb-2"><strong>MSSV:</strong> {userData?.mssv || 'N/A'}</p>
+          <p className="mb-2"><strong>Giới tính:</strong> {userData?.sex || 'N/A'}</p>
+          <p className="mb-2"><strong>Gmail:</strong> {userData?.email || 'N/A'}</p>
           </div>
         </div>
       </div>
