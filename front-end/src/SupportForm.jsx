@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import bg from "./assets/Mainpage.jpg"; // Đảm bảo bạn đã có background ảnh này
+import bg from "./assets/Mainpage.jpg";
 
 export default function SupportForm() {
   const navigate = useNavigate();
@@ -115,11 +115,11 @@ export default function SupportForm() {
     },
     {
       question: "Làm thế nào có thể báo cáo vấn đề về thiết bị trong phòng học",
-      answer: "Bấm vào phần liên hệ hỗ trợ sau đó chọn thiết bị rồi mô tả vấn đề."
+      answer: "Bấm vào phần liên hệ hỗ trợ sau đó chọn thiết bị rồi mô tả vấn đề.",
     },
     {
       question: "Tôi có thể đặt chỗ cho nhóm học tập hay không?",
-      answer: "Có thể, số lượng người trong nhóm có thể đăng ký đã được set cho từng phòng."
+      answer: "Có thể, số lượng người trong nhóm có thể đăng ký đã được set cho từng phòng.",
     },
   ];
 
@@ -130,126 +130,128 @@ export default function SupportForm() {
         style={{ backgroundImage: `url(${bg})`, filter: "blur(3px)", zIndex: 0 }}
       ></div>
 
-      <div className="relative z-10 w-full max-w-2xl p-8 bg-white/90 rounded-2xl shadow-xl">
-        <div className="flex justify-center mb-6">
-          <h2 className="text-2xl font-bold text-blue-700">Gửi yêu cầu hỗ trợ</h2>
-        </div>
+      <div className="relative z-10 flex w-full max-w-6xl p-8 bg-white/90 rounded-2xl shadow-xl space-x-6">
+        {/* Cột form chính */}
+        <div className="flex-1">
+          <div className="flex justify-center mb-6">
+            <h2 className="text-2xl font-bold text-blue-700">Gửi yêu cầu hỗ trợ</h2>
+          </div>
 
-        {/* Tabs */}
-        <div className="flex space-x-4 mb-6">
-          <button
-            className={`w-1/2 py-3 text-center rounded-lg ${activeTab === "faq" ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"}`}
-            onClick={() => setActiveTab("faq")}
-          >
-            Câu hỏi thường gặp
-          </button>
-          <button
-            className={`w-1/2 py-3 text-center rounded-lg ${activeTab === "support" ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"}`}
-            onClick={() => setActiveTab("support")}
-          >
-            Liên hệ hỗ trợ
-          </button>
-        </div>
+          {/* Tabs */}
+          <div className="flex space-x-4 mb-6">
+            <button
+              className={`w-1/2 py-3 text-center rounded-lg ${activeTab === "faq" ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"}`}
+              onClick={() => setActiveTab("faq")}
+            >
+              Câu hỏi thường gặp
+            </button>
+            <button
+              className={`w-1/2 py-3 text-center rounded-lg ${activeTab === "support" ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"}`}
+              onClick={() => setActiveTab("support")}
+            >
+              Liên hệ hỗ trợ
+            </button>
+          </div>
 
-        {activeTab === "support" && (
-          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-            <div>
-              <label className="block font-semibold mb-2">Loại hỗ trợ:</label>
-              <select
-                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={supportType}
-                onChange={(e) => setSupportType(e.target.value)}
-              >
-                <option value="">-- Chọn loại hỗ trợ --</option>
-                <option value="Thiết bị">Thiết bị</option>
-                <option value="Hệ thống">Hệ thống</option>
-                <option value="Phòng học">Phòng học</option>
-                <option value="Khác">Khác</option>
-              </select>
+          {activeTab === "faq" && (
+            <div className="p-6">
+              <h3 className="font-semibold text-lg">Câu hỏi thường gặp</h3>
+              <div className="mt-4 space-y-4">
+                {faqList.map((faq, index) => (
+                  <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                    <button
+                      onClick={() =>
+                        setOpenFaqIndex(openFaqIndex === index ? null : index)
+                      }
+                      className="text-left w-full font-medium text-blue-600 hover:underline"
+                    >
+                      {faq.question}
+                    </button>
+                    {openFaqIndex === index && (
+                      <p className="mt-2 text-gray-700">{faq.answer}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            <div>
-              <label className="block font-semibold mb-2">Tiêu đề yêu cầu:</label>
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Nhập tiêu đề yêu cầu"
-              />
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-2">Mô tả yêu cầu:</label>
-              <textarea
-                className="w-full p-3 border rounded-lg bg-gray-50 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Mô tả chi tiết về yêu cầu hỗ trợ"
-              ></textarea>
-            </div>
-
-            <div>
-              <label className="block font-semibold mb-2">Phương thức liên hệ:</label>
-              <select
-                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={contactMethod}
-                onChange={(e) => setContactMethod(e.target.value)}
-              >
-                <option value="">-- Chọn phương thức liên hệ --</option>
-                <option value="email">Email</option>
-                <option value="phone">Số điện thoại</option>
-              </select>
-            </div>
-
-            {contactMethod && (
+          {activeTab === "support" && (
+            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
               <div>
-                <label className="block font-semibold mb-2">
-                  {contactMethod === "email" ? "Email" : "Số điện thoại"} của bạn:
-                </label>
+                <label className="block font-semibold mb-2">Loại hỗ trợ:</label>
+                <select
+                  className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={supportType}
+                  onChange={(e) => setSupportType(e.target.value)}
+                >
+                  <option value="">-- Chọn loại hỗ trợ --</option>
+                  <option value="Thiết bị">Thiết bị</option>
+                  <option value="Hệ thống">Hệ thống</option>
+                  <option value="Phòng học">Phòng học</option>
+                  <option value="Khác">Khác</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">Tiêu đề yêu cầu:</label>
                 <input
                   type="text"
                   className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={contactMethod === "email" ? userData?.email : userData?.phone}
-                  readOnly
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Nhập tiêu đề yêu cầu"
                 />
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200"
-            >
-              Gửi yêu cầu hỗ trợ
-            </button>
-          </form>
-        )}
+              <div>
+                <label className="block font-semibold mb-2">Mô tả yêu cầu:</label>
+                <textarea
+                  className="w-full p-3 border rounded-lg bg-gray-50 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Mô tả chi tiết về yêu cầu hỗ trợ"
+                ></textarea>
+              </div>
 
-        {activeTab === "faq" && (
-          <div className="p-6">
-            <h3 className="font-semibold text-lg">Câu hỏi thường gặp</h3>
-            <div className="mt-4 space-y-4">
-              {faqList.map((faq, index) => (
-                <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                  <button
-                    onClick={() =>
-                      setOpenFaqIndex(openFaqIndex === index ? null : index)
-                    }
-                    className="text-left w-full font-medium text-blue-600 hover:underline"
-                  >
-                    {faq.question}
-                  </button>
-                  {openFaqIndex === index && (
-                    <p className="mt-2 text-gray-700">{faq.answer}</p>
-                  )}
+              <div>
+                <label className="block font-semibold mb-2">Phương thức liên hệ:</label>
+                <select
+                  className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={contactMethod}
+                  onChange={(e) => setContactMethod(e.target.value)}
+                >
+                  <option value="">-- Chọn phương thức liên hệ --</option>
+                  <option value="email">Email</option>
+                  <option value="phone">Số điện thoại</option>
+                </select>
+              </div>
+
+              {contactMethod && (
+                <div>
+                  <label className="block font-semibold mb-2">
+                    {contactMethod === "email" ? "Email" : "Số điện thoại"} của bạn:
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={contactMethod === "email" ? userData?.email : userData?.phone}
+                    readOnly
+                  />
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              )}
 
-          {/* Nút về trang chủ */}
-          <div className="mt-8 text-center">
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200"
+              >
+                Gửi yêu cầu hỗ trợ
+              </button>
+            </form>
+          )}
+
+        {/* Nút về trang chủ */}
+        <div className="mt-8 text-center">
           <button
             onClick={() => navigate("/main")}
             className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-medium shadow-sm"
@@ -267,6 +269,19 @@ export default function SupportForm() {
             Quay lại trang chủ
           </button>
         </div>
+        </div>
+          
+        {/* Cột thông tin hỗ trợ */}
+        <div className="w-64 bg-blue-50 rounded-xl p-4 border border-blue-200 shadow-sm">
+          <h3 className="text-lg font-semibold text-blue-700 mb-4">Thông tin hỗ trợ</h3>
+          <ul className="text-sm text-gray-700 space-y-2">
+            <li><strong>Email:</strong> support@hust.edu.vn</li>
+            <li><strong>Hotline:</strong> 1900 123 456</li>
+            <li><strong>Thời gian:</strong> 08:00 - 17:00 (T2 - T6)</li>
+            <li><strong>Địa chỉ:</strong> Phòng 101, Tòa A1, Đại học Bách Khoa Hà Nội</li>
+          </ul>
+        </div>
+        
       </div>
     </div>
   );
