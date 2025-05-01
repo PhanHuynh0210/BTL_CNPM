@@ -1,148 +1,273 @@
-import React, { useState } from "react";
-import bg from "./assets/bg.png";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import bg from "./assets/Mainpage.jpg"; // Đảm bảo bạn đã có background ảnh này
 
+export default function SupportForm() {
+  const navigate = useNavigate();
+  const [supportType, setSupportType] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [contactMethod, setContactMethod] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [activeTab, setActiveTab] = useState("faq");
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
-const SupportForm = () => {
-  const [Support, setFormData] = useState({
-    support_type: "",
-    title: "",
-    description: "",
-    mssv: "",
-    contact_info: "",
-  });
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
 
-  const [showSuccess, setShowSuccess] = useState(false);
-  
-  const handleChange = (e) => {
-    setFormData({ ...Support, [e.target.name]: e.target.value });
-  };
+    const fetchUserData = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/v1/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUserData(data.data);
+        } else {
+          toast.error("Không thể lấy thông tin người dùng");
+        }
+      } catch (error) {
+        toast.error("Lỗi kết nối. Vui lòng kiểm tra kết nối mạng.");
+        console.error("Error fetching user data:", error);
+      }
+    };
 
-  const handleSubmit = (e) => {
+    fetchUserData();
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Xử lý gửi đánh giá
-    setShowSuccess(true);
 
-    // Gửi dữ liệu đến backend ở đây
-    console.log("Form submitted:", Support);
-    
-    // Sau 3 giây, ẩn thông báo thành công
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000);
+    if (!supportType || !title || !description) {
+      return toast.error("Vui lòng điền đầy đủ thông tin.");
+    }
+
+    if (!contactMethod) {
+      return toast.error("Vui lòng chọn phương thức liên hệ.");
+    }
+
+    if (!userData) {
+      return toast.error("Không thể lấy thông tin người dùng.");
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      toast.error("Bạn cần đăng nhập để gửi yêu cầu hỗ trợ");
+      navigate("/");
+      return;
+    }
+
+    try {
+      const mssv = userData?.mssv;
+      if (!mssv) return toast.error("Không tìm thấy mã số sinh viên");
+
+      const contactInfo =
+        contactMethod === "email" ? userData?.email : userData?.phone;
+
+      const payload = {
+        mssv,
+        support_type: supportType,
+        title: title.trim(),
+        description: description.trim(),
+        contact_info: contactInfo,
+      };
+
+      const res = await fetch("http://localhost:8080/api/v1/support", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Yêu cầu hỗ trợ đã được gửi thành công!");
+        navigate("/SupportSuccess");
+      } else {
+        toast.error(data.message || "Không thể gửi yêu cầu hỗ trợ. Vui lòng thử lại sau.");
+      }
+    } catch (error) {
+      console.error("Error submitting support request:", error);
+      toast.error("Lỗi kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.");
+    }
   };
 
-  
+  const faqList = [
+    {
+      question: "Làm sao để đặt chỗ học tập?",
+      answer: "Bạn có thể đặt phòng ngay lập tức tại trang chủ hoặc vào tìm phòng để có thể đặt phòng từ trước.",
+    },
+    {
+      question: "Tôi có thể hủy đặt chỗ không?",
+      answer: "Có thể hủy đặt chỗ, vào trang quản lý đặt chỗ bấm hủy.",
+    },
+    {
+      question: "Tôi có thể đặt chỗ trong bao lâu?",
+      answer: "Từ 1 đến 3 tiếng.",
+    },
+    {
+      question: "Làm thế nào có thể báo cáo vấn đề về thiết bị trong phòng học",
+      answer: "Bấm vào phần liên hệ hỗ trợ sau đó chọn thiết bị rồi mô tả vấn đề."
+    },
+    {
+      question: "Tôi có thể đặt chỗ cho nhóm học tập hay không?",
+      answer: "Có thể, số lượng người trong nhóm có thể đăng ký đã được set cho từng phòng."
+    },
+  ];
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background */}
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
       <div
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{
-          backgroundImage: `url(${bg})`,
-          filter: "brightness(60%)",
-        }}
+        className="fixed inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${bg})`, filter: "blur(3px)", zIndex: 0 }}
       ></div>
 
-      {/* Form container */}
-      <div className="relative z-10 px-6 py-10">
-        <div className="max-w-4xl mx-auto bg-white bg-opacity-20 backdrop-blur-md rounded-xl shadow-lg p-6 text-white">
-          <h2 className="text-xl font-semibold mb-4">Liên hệ hỗ trợ</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Support Type */}
+      <div className="relative z-10 w-full max-w-2xl p-8 bg-white/90 rounded-2xl shadow-xl">
+        <div className="flex justify-center mb-6">
+          <h2 className="text-2xl font-bold text-blue-700">Gửi yêu cầu hỗ trợ</h2>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex space-x-4 mb-6">
+          <button
+            className={`w-1/2 py-3 text-center rounded-lg ${activeTab === "faq" ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"}`}
+            onClick={() => setActiveTab("faq")}
+          >
+            Câu hỏi thường gặp
+          </button>
+          <button
+            className={`w-1/2 py-3 text-center rounded-lg ${activeTab === "support" ? "bg-blue-500 text-white" : "bg-gray-200 text-blue-500"}`}
+            onClick={() => setActiveTab("support")}
+          >
+            Liên hệ hỗ trợ
+          </button>
+        </div>
+
+        {activeTab === "support" && (
+          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
             <div>
-              <label className="block mb-1">Loại hỗ trợ</label>
+              <label className="block font-semibold mb-2">Loại hỗ trợ:</label>
               <select
-                name="supportType"
-                value={Support.support_type}
-                onChange={handleChange}
-                className="w-full bg-transparent border border-white rounded p-2 text-white"
+                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={supportType}
+                onChange={(e) => setSupportType(e.target.value)}
               >
                 <option value="">-- Chọn loại hỗ trợ --</option>
-                <option value="booking">Đặt chỗ</option>
-                <option value="equipment">Thiết bị</option>
-                <option value="account">Tài khoản</option>
-                <option value="other">Khác</option>
+                <option value="Thiết bị">Thiết bị</option>
+                <option value="Hệ thống">Hệ thống</option>
+                <option value="Phòng học">Phòng học</option>
+                <option value="Khác">Khác</option>
               </select>
             </div>
 
-            {/* Title */}
             <div>
-              <label className="block mb-1">Tiêu đề</label>
+              <label className="block font-semibold mb-2">Tiêu đề yêu cầu:</label>
               <input
                 type="text"
-                name="title"
-                value={Support.title}
-                onChange={handleChange}
-                className="w-full bg-transparent border border-white rounded p-2 text-white"
-                placeholder="Nhập tiêu đề"
+                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Nhập tiêu đề yêu cầu"
               />
             </div>
 
-            {/* Description */}
             <div>
-              <label className="block mb-1">Mô tả chi tiết</label>
+              <label className="block font-semibold mb-2">Mô tả yêu cầu:</label>
               <textarea
-                name="description"
-                value={Support.description}
-                onChange={handleChange}
-                rows={3}
-                className="w-full bg-transparent border border-white rounded p-2 text-white"
-                placeholder="Nhập nội dung mô tả"
-              />
+                className="w-full p-3 border rounded-lg bg-gray-50 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Mô tả chi tiết về yêu cầu hỗ trợ"
+              ></textarea>
             </div>
 
-            {/* Contact Method */}
             <div>
-              <label className="block mb-1">Phương thức liên hệ</label>
-              <input
-                type="text"
-                name="contactMethod"
-                value={Support.contact_info}
-                onChange={handleChange}
-                className="w-full bg-transparent border border-white rounded p-2 text-white"
-                placeholder="Email hoặc số điện thoại"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow"
+              <label className="block font-semibold mb-2">Phương thức liên hệ:</label>
+              <select
+                className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={contactMethod}
+                onChange={(e) => setContactMethod(e.target.value)}
               >
-                Gửi yêu cầu hỗ trợ
-              </button>
+                <option value="">-- Chọn phương thức liên hệ --</option>
+                <option value="email">Email</option>
+                <option value="phone">Số điện thoại</option>
+              </select>
             </div>
 
-            {/* Success Popup */}
-        {showSuccess && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-blue-500 text-white p-8 rounded-lg shadow-lg text-center">
-              <h2 className="text-2xl font-bold">Thành công</h2>
+            {contactMethod && (
+              <div>
+                <label className="block font-semibold mb-2">
+                  {contactMethod === "email" ? "Email" : "Số điện thoại"} của bạn:
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={contactMethod === "email" ? userData?.email : userData?.phone}
+                  readOnly
+                />
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition duration-200"
+            >
+              Gửi yêu cầu hỗ trợ
+            </button>
+          </form>
+        )}
+
+        {activeTab === "faq" && (
+          <div className="p-6">
+            <h3 className="font-semibold text-lg">Câu hỏi thường gặp</h3>
+            <div className="mt-4 space-y-4">
+              {faqList.map((faq, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <button
+                    onClick={() =>
+                      setOpenFaqIndex(openFaqIndex === index ? null : index)
+                    }
+                    className="text-left w-full font-medium text-blue-600 hover:underline"
+                  >
+                    {faq.question}
+                  </button>
+                  {openFaqIndex === index && (
+                    <p className="mt-2 text-gray-700">{faq.answer}</p>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
-          </form>
-        </div>
-      </div>
 
-      {/* Footer giống các trang khác */}
-      <div className="absolute bottom-0 w-full bg-gray-800 bg-opacity-80 text-gray-300 text-xs p-4">
-        <div className="max-w-4xl mx-auto">
-          <p>Tổ kỹ thuật P.ĐT / Technician</p>
-          <p>Email: ddthu@hcmut.edu.vn</p>
-          <p>ĐT (Tel.): (84-8) 38647256 - 5258</p>
-          <p>
-            Quý Thầy/Cô chưa có tài khoản (hoặc quên mật khẩu) vui lòng liên hệ
-            Trung tâm Dữ liệu & Công nghệ Thông tin, phòng 109A5 để được hỗ trợ.
-          </p>
-          <p>Email: dl-cntt@hcmut.edu.vn</p>
-          <p>ĐT (Tel.): (84-8) 38647256 - 5200</p>
+          {/* Nút về trang chủ */}
+          <div className="mt-8 text-center">
+          <button
+            onClick={() => navigate("/main")}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition font-medium shadow-sm"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-5 h-5"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Quay lại trang chủ
+          </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default SupportForm;
+}

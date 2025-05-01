@@ -66,7 +66,7 @@ export default function FeedbackSuccess() {
               className="flex-grow bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200"
             >
               {" "}
-              Báo cáo
+              Đánh giá
             </Link>
             <Link
               to="/support"

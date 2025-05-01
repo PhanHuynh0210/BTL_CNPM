@@ -199,8 +199,8 @@ export default function FindingRoom() {
             <Link to="/main" className="text-white hover:text-blue-300 transition">Trang chủ</Link>
             <Link to="/finding-room" className="bg-blue-500/80 text-white px-4 py-2 rounded-lg hover:bg-blue-600/80 transition">Tìm chỗ</Link>
             <Link to="/booking-manager" className="text-white hover:text-blue-300 transition">Quản lý đặt chỗ</Link>
-            <Link to="/FeedbackForm" className="text-white hover:text-blue-300 transition">Báo cáo</Link>
-            <Link to="/support" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
+            <Link to="/FeedbackForm" className="text-white hover:text-blue-300 transition">Đánh giá</Link>
+            <Link to="/SupportForm" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
             <Link to="/profile" className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition">
               <i className="fas fa-user"></i>
             </Link>

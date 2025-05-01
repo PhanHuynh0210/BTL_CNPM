@@ -14,16 +14,13 @@ import UserDashboard from './UserDashboard';
 import UserProfile from './UserProfile';
 import FeedbackForm from './FeedbackForm';
 import FeedbackSuccess from './FeedbackSuccess';
-import FeedbackErrol from './FeedbackErrol';
-import FeedBackHistory from './FeedBackHistory';
-import Question from './Question';
-import SupportForm from './supportForm';
-// Placeholder - sẽ tạo sau
 import { Toaster } from 'react-hot-toast';
+import SupportForm from './SupportForm';
+import SupportSuccess from './SupportSuccess';
 // Placeholder - sẽ tạo sau
 const RoomSearch = () => <div className="p-5 text-center"> Tìm phòng</div>;
 const Profile = () => <div className="p-5 text-center"> Hồ sơ cá nhân</div>;
-const Reports = () => <div className="p-5 text-center"> Báo cáo</div>;
+const Reports = () => <div className="p-5 text-center"> Đánh giá</div>;
 const Support = () => <div className="p-5 text-center"> Hỗ trợ</div>;
 
 function App() {
@@ -49,10 +46,8 @@ function App() {
       <Route path="/UserProfile" element={<UserProfile />} />
       <Route path="/FeedbackForm" element={<FeedbackForm />} />
       <Route path="/FeedbackSuccess" element={<FeedbackSuccess />} />
-      <Route path="/FeedbackErrol" element={<FeedbackErrol />} />
-      <Route path="/FeedbackHistory" element={<FeedBackHistory />} />
-      <Route path="/QuestionForm" element={<Question />} />
       <Route path="/SupportForm" element={<SupportForm />} />
+      <Route path="/SupportSuccess" element={<SupportSuccess />} />
     </Routes>
     </>
   );

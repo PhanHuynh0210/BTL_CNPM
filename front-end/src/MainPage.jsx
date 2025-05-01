@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import bg from "./assets/Mainpage.jpg";
 import { useNavigate, Link } from "react-router-dom";
-import toast from 'react-hot-toast';
+import toast from "react-hot-toast";
 
 function RoomBox({ data, onBookingSuccess }) {
   const handleBookNow = async () => {
@@ -186,11 +186,11 @@ export default function MainPage() {
               <p className="text-sm">HCMUT Reservation System</p>
             </div>
             <div className="flex items-center space-x-6">
-              <Link to="/main" className="text-white hover:text-blue-300 transition">Trang chủ</Link>
+              <Link to="/main" className="bg-blue-500/80 text-white px-4 py-2 rounded-lg hover:bg-blue-600/80 transition">Trang chủ</Link>
               <Link to="/finding-room" className="text-white hover:text-blue-300 transition">Tìm chỗ</Link>
               <Link to="/booking-manager" className="text-white hover:text-blue-300 transition">Quản lý đặt chỗ</Link>
-              <Link to="/FeedbackForm" className="text-white hover:text-blue-300 transition">Báo cáo</Link>
-              <Link to="/support" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
+              <Link to="/FeedbackForm" className="text-white hover:text-blue-300 transition">Đánh giá</Link>
+              <Link to="/SupportForm" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
               
               {/* User Menu with fixed positioning */}
               <div className="user-menu-container relative">
@@ -265,7 +265,7 @@ export default function MainPage() {
                 Lịch sử đặt chỗ
               </Link> */}
               <Link
-                to="/support"
+                to="/SupportForm"
                 className="block bg-purple-500/80 hover:bg-purple-600/80 text-white p-3 rounded-lg text-center transition"
               >
                 Liên hệ hỗ trợ

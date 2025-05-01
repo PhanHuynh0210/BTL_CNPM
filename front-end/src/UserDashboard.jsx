@@ -96,8 +96,8 @@ export default function UserDashboard() {
               <Link to="/main" className="text-white hover:text-blue-300 transition">Trang chủ</Link>
               <Link to="/finding-room" className="text-white hover:text-blue-300 transition">Tìm chỗ</Link>
               <Link to="/booking-manager" className="text-white hover:text-blue-300 transition">Quản lý đặt chỗ</Link>
-              <Link to="/reports" className="text-white hover:text-blue-300 transition">Báo cáo</Link>
-              <Link to="/support" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
+              <Link to="/reports" className="text-white hover:text-blue-300 transition">Đánh giá</Link>
+              <Link to="/SupportForm" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
               <div className="relative">
                 <button
                   onClick={toggleUserMenu}
@@ -162,7 +162,7 @@ export default function UserDashboard() {
             <div className="backdrop-blur-md bg-white/20 border border-white/30 rounded-lg shadow-lg p-6">
               <h3 className="text-xl font-semibold mb-4 text-white">Hỗ trợ</h3>
               <Link
-                to="/support"
+                to="/SupportForm"
                 className="block bg-purple-500/80 hover:bg-purple-600/80 text-white p-3 rounded-lg text-center transition"
               >
                 Liên hệ hỗ trợ
