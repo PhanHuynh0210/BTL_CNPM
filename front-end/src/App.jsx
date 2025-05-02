@@ -31,7 +31,7 @@ function App() {
       <Route path="/booking-manager" element={<BookingManager />} />
       
       <Route path="/main" element={<MainPage />} />
-      <Route path="/current-room" element={<CurrentRoom />} />
+      <Route path="/current-room/:bookingId" element={<CurrentRoom />} />
       <Route path="/history" element={<RoomHistory />} />
       <Route path="/room-details/:bookingId" element={<RoomDetails />} />
       <Route path="/search" element={<RoomSearch />} />

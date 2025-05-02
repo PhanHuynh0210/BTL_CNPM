@@ -16,7 +16,7 @@ function ConfirmModal({ show, onClose, onConfirm }) {
     <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
       <div className="bg-white p-6 rounded-xl shadow-lg w-[90%] max-w-sm">
         <h2 className="text-xl font-bold mb-4">Xác nhận hủy</h2>
-        <p className="mb-6">Bạn có chắc chắn muốn hủy chỉnh sửa không?</p>
+        <p className="mb-6">Bạn có chắc chắn muốn hủy đặt phòng không?</p>
         <div className="flex justify-end gap-4">
           <button
             onClick={onClose}
@@ -28,7 +28,7 @@ function ConfirmModal({ show, onClose, onConfirm }) {
             onClick={onConfirm}
             className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
           >
-            Xác nhận hủy
+            Xác nhận hủy phòng
           </button>
         </div>
       </div>
@@ -49,6 +49,8 @@ export default function RoomDetails() {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [numberOfAttendees, setNumberOfAttendees] = useState(1);
+
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
@@ -77,6 +79,7 @@ export default function RoomDetails() {
         );
         if (response.ok) {
           setBookingDetails(room);
+          setNumberOfAttendees(room.booked_seats || 1); 
           // Set initial values for editing
           if (room) {
             setSelectedDate(new Date(room.Day));
@@ -136,6 +139,7 @@ export default function RoomDetails() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showUserMenu]);
+  
 
   const toggleEditMode = () => {
     setIsEditing((prev) => !prev);
@@ -196,25 +200,8 @@ export default function RoomDetails() {
       const token = localStorage.getItem("access_token");
 
       // 1. Hủy đặt chỗ cũ
-      const cancelResponse = await fetch(
-        `http://localhost:8080/api/v1/booking/${bookingId}/cancel`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!cancelResponse.ok) {
-        const errorData = await cancelResponse.json();
-        throw new Error("Hủy đặt chỗ thất bại: " + errorData.message);
-      }
-
-      // 2. Đặt lại với thông tin mới
-      const createResponse = await fetch("http://localhost:8080/api/v1/booking", {
-        method: "POST",
+      const createResponse = await fetch(`http://localhost:8080/api/v1/bookings/update/${bookingId}`,{
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -224,9 +211,9 @@ export default function RoomDetails() {
           date: selectedDate.toISOString().split("T")[0],
           start_time: startTime.toTimeString().split(" ")[0].substring(0, 5),
           end_time: endTime.toTimeString().split(" ")[0].substring(0, 5),
-          number_of_attendees: bookingDetails.booked_seats,
+          number_of_attendees: numberOfAttendees,
         }),
-      });
+      })
 
       const createData = await createResponse.json();
 
@@ -382,6 +369,10 @@ export default function RoomDetails() {
                 người
               </li>
               <li>
+                <span className="font-medium">Số chỗ đặt:</span> {bookingDetails.booked_seats}{" "}
+                chỗ
+              </li>
+              <li>
                 <span className="font-medium">Thiết bị:</span>{" "}
                 {rooms.devices || "Không có"}
               </li>
@@ -470,6 +461,18 @@ export default function RoomDetails() {
                 placeholderText="Chọn giờ kết thúc"
                 className="w-full p-3 rounded-lg border border-blue-300 focus:outline-none focus:ring focus:ring-blue-400 font-medium"
               />
+            </div>
+            <div className="w-full backdrop-blur-md bg-white/30 border border-white/30 rounded-lg shadow-lg p-4 flex flex-col gap-3 relative z-40">
+              <label className="text-white font-semibold text-base">
+                Số chỗ đặt: 
+              <input type="number" value={numberOfAttendees}
+              className="text-black p-3 rounded-lg border border-blue-300 focus:outline-none focus:ring focus:ring-blue-400 font-medium w-full"
+              min={1}
+              max={rooms.available_seats+numberOfAttendees}
+              onChange={(e) => setNumberOfAttendees(Math.min(Math.max(1, +e.target.value), rooms.available_seats + numberOfAttendees))}
+              />
+              </label>
+              
             </div>
           </div>
         )}

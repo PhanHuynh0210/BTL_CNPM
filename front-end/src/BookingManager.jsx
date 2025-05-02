@@ -195,13 +195,19 @@ export default function BookingManager() {
                                 className="bg-blue-500/80 hover:bg-blue-600/80 text-white py-2 px-4 rounded-lg mr-2 transition"
                                 onClick={() => navigate(`/room-details/${booking.booking_id}`)}
                               >
-                                Chi tiết
+                                Chỉnh sửa
                               </button>
                               <button
-                                className="bg-red-500/80 hover:bg-red-600/80 text-white py-2 px-4 rounded-lg transition"
+                                className="bg-red-500/80 hover:bg-red-600/80 text-white py-2 px-4 mr-2 rounded-lg transition"
                                 onClick={() => handleCancel(booking.booking_id)}
                               >
                                 Hủy
+                              </button>
+                              <button
+                                className="bg-green-500/80 hover:bg-green-600/80 text-white py-2 px-4 rounded-lg transition"
+                                onClick={() => navigate(`/current-room/${booking.booking_id}`)}
+                              >
+                                Quản lý
                               </button>
                             </td>
                           </tr>
