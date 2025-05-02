@@ -168,7 +168,7 @@ export default function MainPage() {
 
   return (
     <div 
-      className="min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{
         backgroundImage: `url(${bg})`,
         backgroundSize: 'cover',
@@ -177,7 +177,7 @@ export default function MainPage() {
       }}
     >
       {/* Main content */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex-grow">
         {/* Header */}
         <div className="backdrop-blur-sm bg-white/10 border border-white/20 shadow-lg p-4 relative z-20">
           <div className="container mx-auto flex items-center justify-between">
@@ -250,7 +250,7 @@ export default function MainPage() {
                   to="/booking-manager"
                   className="bg-green-500/80 hover:bg-green-600/80 text-white p-3 rounded-lg text-center transition"
                 >
-                  Đặt chỗ của tôi ({bookedData.length})
+                  Đặt chỗ của tôi ({bookedData.filter(item => item.status === "Confirmed").length})
                 </Link>
               </div>
             </div>

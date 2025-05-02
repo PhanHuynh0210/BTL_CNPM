@@ -6,7 +6,7 @@ import roomImage from "./assets/Room.jpg";
 import { registerLocale } from "react-datepicker";
 import vi from "date-fns/locale/vi";
 import toast from "react-hot-toast";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 registerLocale("vi", vi);
 
 function ConfirmModal({ show, onClose, onConfirm }) {
@@ -20,13 +20,13 @@ function ConfirmModal({ show, onClose, onConfirm }) {
         <div className="flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-green-300 rounded hover:bg-gray-400"
+            className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition"
           >
             Tiếp tục chỉnh sửa
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
           >
             Xác nhận hủy
           </button>
@@ -38,6 +38,7 @@ function ConfirmModal({ show, onClose, onConfirm }) {
 
 export default function RoomDetails() {
   const { bookingId } = useParams();
+
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [startTime, setStartTime] = useState(null);
@@ -46,38 +47,44 @@ export default function RoomDetails() {
   const [bookingDetails, setBookingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [rooms, setRooms] = useState([]);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
         const token = localStorage.getItem("access_token");
+
         if (!token) {
           toast.error("Vui lòng đăng nhập để xem chi tiết đặt phòng");
           navigate("/");
           return;
         }
+        const userInfo = JSON.parse(localStorage.getItem("user_info"));
+        if (!userInfo?.mssv) {
+          toast.error("Không tìm thấy thông tin người dùng");
+          return;
+        }
 
         const response = await fetch(
-          `http://localhost:8080/api/v1/bookings/ID/${bookingId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `http://localhost:8080/api/v1/bookings/student/${userInfo.mssv}`
         );
 
-        const data = await response.json();
+        const res = await response.json();
 
+        const room = res.DT.find(
+          (item) => item.booking_id === Number(bookingId)
+        );
         if (response.ok) {
-          setBookingDetails(data.DT);
+          setBookingDetails(room);
           // Set initial values for editing
-          if (data.DT) {
-            setSelectedDate(new Date(data.DT.booking_day));
-            setStartTime(new Date(`1970-01-01T${data.DT.start_time}`));
-            setEndTime(new Date(`1970-01-01T${data.DT.end_time}`));
+          if (room) {
+            setSelectedDate(new Date(room.Day));
+            setStartTime(new Date(`1970-01-01T${room.start_time}`));
+            setEndTime(new Date(`1970-01-01T${room.end_time}`));
           }
         } else {
-          toast.error(data.EM || "Không thể tải thông tin đặt phòng");
+          toast.error(room.EM || "Không thể tải thông tin đặt phòng");
         }
       } catch (error) {
         console.error("Error fetching booking details:", error);
@@ -92,6 +99,44 @@ export default function RoomDetails() {
     }
   }, [bookingId, navigate]);
 
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (!bookingDetails?.room_name) return;
+
+      try {
+        const res = await fetch("http://localhost:8080/api/v1/allroom");
+        if (res.ok) {
+          const ans = await res.json();
+          const roomData = ans.data.find(
+            (item) => item.location === bookingDetails.room_name
+          );
+          setRooms(roomData || []);
+        } else {
+          toast.error("Không thể tải danh sách phòng");
+        }
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+        toast.error("Lỗi khi tải danh sách phòng");
+      }
+    };
+
+    fetchRooms();
+  }, [bookingDetails?.room_name]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (showUserMenu && !event.target.closest(".user-menu-container")) {
+        setShowUserMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
+
   const toggleEditMode = () => {
     setIsEditing((prev) => !prev);
   };
@@ -100,7 +145,7 @@ export default function RoomDetails() {
     if (isEditing) {
       setIsEditing(false);
       if (bookingDetails) {
-        setSelectedDate(new Date(bookingDetails.booking_day));
+        setSelectedDate(new Date(bookingDetails.Day));
         setStartTime(new Date(`1970-01-01T${bookingDetails.start_time}`));
         setEndTime(new Date(`1970-01-01T${bookingDetails.end_time}`));
       }
@@ -149,71 +194,65 @@ export default function RoomDetails() {
 
     try {
       const token = localStorage.getItem("access_token");
-      const response = await fetch(
-        `http://localhost:8080/api/v1/bookings/update/${bookingId}`,
+
+      // 1. Hủy đặt chỗ cũ
+      const cancelResponse = await fetch(
+        `http://localhost:8080/api/v1/booking/${bookingId}/cancel`,
         {
-          method: "PATCH",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            date: selectedDate.toISOString().split("T")[0],
-            start_time: startTime.toTimeString().split(" ")[0].substring(0, 5),
-            end_time: endTime.toTimeString().split(" ")[0].substring(0, 5),
-            number_of_attendees: bookingDetails.booked_seats // Giữ nguyên số người tham gia
-          }),
         }
       );
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        toast.success(data.message || "Cập nhật đặt phòng thành công");
+      if (!cancelResponse.ok) {
+        const errorData = await cancelResponse.json();
+        throw new Error("Hủy đặt chỗ thất bại: " + errorData.message);
+      }
+
+      // 2. Đặt lại với thông tin mới
+      const createResponse = await fetch("http://localhost:8080/api/v1/booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          room_id: rooms.room_id,
+          date: selectedDate.toISOString().split("T")[0],
+          start_time: startTime.toTimeString().split(" ")[0].substring(0, 5),
+          end_time: endTime.toTimeString().split(" ")[0].substring(0, 5),
+          number_of_attendees: bookingDetails.booked_seats,
+        }),
+      });
+
+      const createData = await createResponse.json();
+
+      if (createResponse.ok) {
+        toast.success(createData.message || "Đặt lại thành công");
         setIsEditing(false);
-        
-        // Refresh booking details
-        const updatedResponse = await fetch(
-          `http://localhost:8080/api/v1/bookings/ID/${bookingId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const updatedData = await updatedResponse.json();
-        if (updatedResponse.ok) {
-          setBookingDetails(updatedData.DT);
-        }
+        setBookingDetails(createData.DT); // Cập nhật thông tin mới
+        navigate("/booking-manager");
       } else {
-        // Handle specific error cases
-        let errorMessage = data.message;
-        switch (response.status) {
-          case 400:
-            errorMessage = "Thông tin cập nhật không hợp lệ: " + errorMessage;
-            break;
-          case 401:
-            errorMessage = "Vui lòng đăng nhập lại để tiếp tục";
-            navigate("/");
-            break;
-          case 403:
-            errorMessage = "Bạn không có quyền sửa đổi đặt phòng này";
-            break;
-          case 404:
-            errorMessage = "Không tìm thấy thông tin đặt phòng";
-            break;
-          case 409:
-            errorMessage = "Không thể cập nhật: " + errorMessage;
-            break;
-          default:
-            errorMessage = "Lỗi khi cập nhật đặt phòng: " + errorMessage;
-        }
-        toast.error(errorMessage);
+        throw new Error("Đặt lại thất bại: " + createData.message);
       }
     } catch (error) {
-      console.error("Error updating booking:", error);
-      toast.error("Lỗi khi cập nhật đặt phòng");
+      console.error("Error while rebooking:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi cập nhật đặt chỗ");
     }
+  };
+
+  const toggleUserMenu = (e) => {
+    e.stopPropagation();
+    setShowUserMenu(!showUserMenu);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_info");
+    navigate("/");
   };
 
   if (loading) {
@@ -227,35 +266,91 @@ export default function RoomDetails() {
   if (!bookingDetails) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <div className="text-2xl font-semibold">Không tìm thấy thông tin đặt phòng</div>
+        <div className="text-2xl font-semibold">
+          Không tìm thấy thông tin đặt phòng
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-screen relative flex flex-col overflow-hidden">
-      {/* Background */}
-      <div
-        className="fixed top-0 left-0 w-full h-full bg-cover bg-center blur-sm z-[-1]"
-        style={{ backgroundImage: `url(${bg})` }}
-      ></div>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{
+        backgroundImage: `url(${bg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      {/* Header */}
+      <div className="backdrop-blur-sm bg-white/10 border border-white/20 shadow-lg p-4 relative z-20">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="text-white">
+            <h1 className="text-2xl font-bold">Smart Study Space Management</h1>
+            <p className="text-sm">HCMUT Reservation System</p>
+          </div>
+          <div className="flex items-center space-x-6">
+            <Link to="/main" className="text-white hover:text-blue-300 transition">
+              Trang chủ
+            </Link>
+            <Link to="/finding-room" className="text-white hover:text-blue-300 transition">
+              Tìm chỗ
+            </Link>
+            <Link
+              to="/booking-manager"
+              className="text-white hover:text-blue-300 transition"
+            >
+              Quản lý đặt chỗ
+            </Link>
+            <Link
+              to="/FeedbackForm"
+              className="text-white hover:text-blue-300 transition"
+            >
+              Báo cáo
+            </Link>
+            <Link to="/support" className="text-white hover:text-blue-300 transition">
+              Hỗ trợ
+            </Link>
 
-      {/* Top Bar */}
-      <div className="bg-gray-600 text-white py-4 px-8 flex justify-between items-center relative z-10">
-        <h1 className="text-3xl font-bold flex-1 text-center">Chi tiết đặt phòng</h1>
-        <button
-          className="absolute right-8 text-gray-900 px-4 hover:text-white rounded-lg font-medium text-2xl"
-          onClick={() => navigate("/main")}
-        >
-          <i className="fas fa-home"></i>
-        </button>
+            {/* User Menu with fixed positioning */}
+            <div className="user-menu-container relative">
+              <button
+                onClick={toggleUserMenu}
+                className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition"
+              >
+                <i className="fas fa-user"></i>
+              </button>
+
+              {showUserMenu && (
+                <div
+                  className="fixed right-4 mt-2 w-48 backdrop-blur-md bg-white/90 border border-white/30 rounded-lg shadow-2xl py-2"
+                  style={{ zIndex: 9999 }}
+                >
+                  <Link
+                    to="/UserProfile"
+                    className="block px-4 py-2 text-gray-800 hover:bg-white/40 transition"
+                  >
+                    Hồ sơ
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-white/40 transition"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Middle */}
-      <div className="flex flex-1 px-[10%] py-8 gap-6 items-start transition-all duration-500">
+      <div className="flex flex-1 px-[10%] py-8 gap-6 items-start transition-all duration-500 relative z-10">
         {/* Room Info Box */}
         <div
-          className={`bg-blue-200 bg-opacity-60 shadow-lg rounded-lg border-2 border-gray-300 flex transition-all duration-500 ${
+          className={`backdrop-blur-md bg-white/30 border border-white/30 rounded-lg shadow-lg p-6 flex transition-all duration-500 ${
             isEditing ? "w-1/2" : "w-3/4 mx-auto"
           }`}
         >
@@ -275,45 +370,46 @@ export default function RoomDetails() {
           </div>
 
           {/* Room Details */}
-          <div className="w-1/2 h-full p-6 flex flex-col justify-center">
-            <h2 className="text-xl font-bold mb-4">Thông tin đặt phòng</h2>
+          <div className="w-1/2 h-full p-6 flex flex-col justify-center text-white">
+            <h2 className="text-xl font-semibold mb-4">Thông tin đặt phòng</h2>
             <ul className="text-lg space-y-2">
               <li>
-                <strong>Phòng:</strong> {bookingDetails.room_location}
+                <span className="font-medium">Phòng:</span>{" "}
+                {bookingDetails.room_name}
               </li>
               <li>
-                <strong>Sức chứa:</strong> {bookingDetails.room_capacity} người
+                <span className="font-medium">Sức chứa:</span> {rooms.capacity}{" "}
+                người
               </li>
               <li>
-                <strong>Thiết bị:</strong>{" "}
-                {bookingDetails.room_devices?.map(device => device.name).join(", ") || "Không có"}
+                <span className="font-medium">Thiết bị:</span>{" "}
+                {rooms.devices || "Không có"}
+              </li>
+
+              <li>
+                <span className="font-medium">MSSV:</span>{" "}
+                {bookingDetails.mssv}
               </li>
               <li>
-                <strong>Người đặt:</strong> {bookingDetails.user_fullName}
+                <span className="font-medium">Ngày:</span>{" "}
+                {new Date(bookingDetails.Day).toLocaleDateString("vi-VN")}
               </li>
               <li>
-                <strong>MSSV:</strong> {bookingDetails.mssv}
-              </li>
-              <li>
-                <strong>Ngày:</strong>{" "}
-                {new Date(bookingDetails.booking_day).toLocaleDateString("vi-VN")}
-              </li>
-              <li>
-                <strong>Thời gian:</strong>{" "}
+                <span className="font-medium">Thời gian:</span>{" "}
                 {`${bookingDetails.start_time} - ${bookingDetails.end_time}`}
               </li>
               <li>
-                <strong>Trạng thái:</strong>{" "}
+                <span className="font-medium">Trạng thái:</span>{" "}
                 <span
                   className={`${
-                    bookingDetails.booking_status === "Confirmed"
-                      ? "text-green-600"
-                      : bookingDetails.booking_status === "Cancelled"
-                      ? "text-red-600"
-                      : "text-yellow-600"
+                    bookingDetails.status === "Confirmed"
+                      ? "text-green-400"
+                      : bookingDetails.status === "Cancelled"
+                      ? "text-red-400"
+                      : "text-yellow-400"
                   }`}
                 >
-                  {bookingDetails.booking_status}
+                  {bookingDetails.status}
                 </span>
               </li>
             </ul>
@@ -322,10 +418,10 @@ export default function RoomDetails() {
 
         {/* Calendar + Time */}
         {isEditing && (
-          <div className="flex flex-col w-1/2 gap-6 transition-all duration-500">
+          <div className="flex flex-col w-1/2 gap-6 transition-all duration-500 relative z-10">
             {/* Date Picker */}
-            <div className="w-full bg-white p-4 rounded-2xl shadow-lg flex flex-col gap-3 border border-gray-300">
-              <label className="text-gray-700 font-semibold text-base">
+            <div className="w-full backdrop-blur-md bg-white/30 border border-white/30 rounded-lg shadow-lg p-4 flex flex-col gap-3 relative z-40">
+              <label className="text-white font-semibold text-base">
                 Chọn ngày:
               </label>
               <DatePicker
@@ -341,8 +437,8 @@ export default function RoomDetails() {
             </div>
 
             {/* Time Picker - Start */}
-            <div className="w-full bg-white p-4 rounded-2xl shadow-lg flex flex-col gap-3 border border-gray-300">
-              <label className="text-gray-700 font-semibold text-base">
+            <div className="w-full backdrop-blur-md bg-white/30 border border-white/30 rounded-lg shadow-lg p-4 flex flex-col gap-3 relative z-30">
+              <label className="text-white font-semibold text-base">
                 Giờ bắt đầu:
               </label>
               <DatePicker
@@ -359,8 +455,8 @@ export default function RoomDetails() {
             </div>
 
             {/* Time Picker - End */}
-            <div className="w-full bg-white p-4 rounded-2xl shadow-lg flex flex-col gap-3 border border-gray-300">
-              <label className="text-gray-700 font-semibold text-base">
+            <div className="w-full backdrop-blur-md bg-white/30 border border-white/30 rounded-lg shadow-lg p-4 flex flex-col gap-3 relative z-20">
+              <label className="text-white font-semibold text-base">
                 Giờ kết thúc:
               </label>
               <DatePicker
@@ -380,18 +476,18 @@ export default function RoomDetails() {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-center gap-4 mb-6 transition-all duration-300">
+      <div className="flex justify-center gap-4 mb-6 transition-all duration-300 relative z-10">
         {isEditing ? (
           <>
             <button
               onClick={handleCancel}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-red-600"
+              className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-2 rounded-lg shadow-md transition"
             >
               Hủy
             </button>
             <button
               onClick={handleSave}
-              className="bg-blue-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-600"
+              className="bg-blue-500/80 hover:bg-blue-600/80 text-white px-6 py-2 rounded-lg shadow-md transition"
             >
               Lưu
             </button>
@@ -400,13 +496,13 @@ export default function RoomDetails() {
           <>
             <button
               onClick={handleCancel}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-red-600"
+              className="bg-red-500/80 hover:bg-red-600/80 text-white px-6 py-2 rounded-lg shadow-md transition"
             >
               Hủy đặt phòng
             </button>
             <button
               onClick={toggleEditMode}
-              className="bg-yellow-500 text-white px-6 py-2 rounded-lg shadow-md hover:bg-yellow-600"
+              className="bg-yellow-500/80 hover:bg-yellow-600/80 text-white px-6 py-2 rounded-lg shadow-md transition"
             >
               Chỉnh sửa
             </button>
@@ -422,27 +518,38 @@ export default function RoomDetails() {
       />
 
       {/* Footer */}
-      <div className="bg-gray-600 text-white text-xs py-4 px-6 mt-auto space-y-1">
-        <p className="text-left text-gray-300">
-          Tổ kỹ thuật P.DT / Technician
-        </p>
-        <p className="text-left text-gray-300">
-          ĐT (Tel.): (84-8) 38647256 - 5258
-        </p>
-        <p className="text-left text-gray-300">
-          Quý Thầy/Cô chưa có tài khoản (hoặc quên mật khẩu) vui lòng liên hệ
-          Trung tâm Dữ liệu & Công nghệ Thông tin, phòng 109A5 để được hỗ trợ.
-        </p>
-        <p className="text-left text-gray-300">Email: ddthu@hcmut.edu.vn</p>
-        <p className="text-left text-gray-300">
-          (For HCMUT account, please contact: Data and Information Technology
-          Center)
-        </p>
-        <p className="text-left text-gray-300">Email: dl-cntt@hcmut.edu.vn</p>
-        <p className="text-left text-gray-300">
-          ĐT (Tel.): (84-8) 38647256 - 5200
-        </p>
-      </div>
+      <footer className="backdrop-blur-md bg-gray-800/70 border-t border-white/10 text-white py-6 mt-auto relative z-10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Liên hệ</h4>
+              <p className="text-sm text-gray-300">Email: ddthu@hcmut.edu.vn</p>
+              <p className="text-sm text-gray-300">
+                ĐT (Tel.): (84-8) 38647256 - 5258
+              </p>
+              <p className="text-sm text-gray-300">
+                Quý Thầy/Cô chưa có tài khoản(hoặc quên mật khẩu) nhà trường vui
+                lòng liên hệ Trung tâm Dữ liệu & Công nghệ Thông tin, phòng 109A5
+                để được hỗ trợ.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Hỗ trợ kỹ thuật</h4>
+              <p className="text-sm text-gray-300">
+                Trung tâm Dữ liệu & Công nghệ Thông tin
+              </p>
+              <p className="text-sm text-gray-300">Email: dl-cntt@hcmut.edu.vn</p>
+              <p className="text-sm text-gray-300">
+                ĐT (Tel.): (84-8) 38647256 - 5200
+              </p>
+              <p className="text-sm text-gray-300">
+                (For HCMUT account, please contact to : Data and Information
+                Technology Center)
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
