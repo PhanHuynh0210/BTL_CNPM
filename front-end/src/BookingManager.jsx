@@ -121,7 +121,7 @@ export default function BookingManager() {
             <Link to="/finding-room" className="text-white hover:text-blue-300 transition">Tìm chỗ</Link>
             <Link to="/booking-manager" className="bg-blue-500/80 text-white px-4 py-2 rounded-lg hover:bg-blue-600/80 transition">Quản lý đặt chỗ</Link>
             <Link to="/FeedbackForm" className="text-white hover:text-blue-300 transition">Báo cáo</Link>
-            <Link to="/support" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
+            <Link to="/SupportForm" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
 
             {/* User Menu with fixed positioning */}
             <div className="user-menu-container relative">
