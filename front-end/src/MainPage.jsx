@@ -250,7 +250,7 @@ export default function MainPage() {
                   to="/booking-manager"
                   className="bg-green-500/80 hover:bg-green-600/80 text-white p-3 rounded-lg text-center transition"
                 >
-                  Đặt chỗ của tôi ({bookedData.filter(item => item.status === "Confirmed").length})
+                  Đặt chỗ của tôi ({bookedData.filter(item => item.status === "Confirmed"||item.status === "CheckedIn").length})
                 </Link>
               </div>
             </div>

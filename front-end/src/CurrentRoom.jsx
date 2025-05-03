@@ -90,46 +90,14 @@ export default function CurrentRoom() {
     const deviceName = getApiDeviceName(internalName);
     if (!deviceName) return;
 
-    const currentStatus = deviceStates[internalName];
-    const newStatus = currentStatus ? 'Inactive' : 'Active';
-
-    try {
-      const token = localStorage.getItem('access_token');
-      if (!token) {
-        toast.error("Bạn chưa đăng nhập.");
-        return;
-      }
-
-      const res = await fetch(`http://localhost:8080/api/v1/bookings/update/${bookingId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          devices: [
-            {
-              device_name: deviceName,
-              status: newStatus
-            }
-          ]
-        }),
-      });
-
-      if (res.ok) {
-        setDeviceStates(prevStates => ({
-          ...prevStates,
-          [internalName]: !prevStates[internalName],
-        }));
-        toast.success(`${deviceName} đã được chuyển sang trạng thái ${newStatus === 'Active' ? 'bật' : 'tắt'}.`);
-      } else {
-        const errorData = await res.json();
-        toast.error(`Không thể cập nhật trạng thái ${deviceName}: ${errorData.message || 'Lỗi không xác định'}`);
-      }
-    } catch (error) {
-      console.error("Error updating device status:", error);
-      toast.error(`Lỗi khi cập nhật trạng thái ${deviceName}.`);
-    }
+    setDeviceStates(prevStates => {
+      const newStatus = !prevStates[internalName];
+      toast.success(`${deviceName} đã được ${newStatus ? 'bật' : 'tắt'}.`);
+      return {
+        ...prevStates,
+        [internalName]: newStatus,
+      };
+    });
   };
 
   // Hàm để ánh xạ tên nội bộ sang tên thiết bị API
@@ -282,7 +250,7 @@ export default function CurrentRoom() {
                   <button
                     key={device.name}
                     className={`flex items-center justify-center space-x-2 px-6 py-3 rounded-lg font-medium transition duration-200
-                      ${isOn ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 hover:bg-gray-500'}
+                      ${isOn ? 'bg-blue-600 hover:bg-blue-700' : 'bg-red-400 hover:bg-red-500'}
                       ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''}
                       text-white`}
                     onClick={() => handleDeviceToggle(device.name)}

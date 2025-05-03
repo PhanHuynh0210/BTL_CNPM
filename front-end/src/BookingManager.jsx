@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import bg from "./assets/Mainpage.jpg";
 import { useNavigate, Link } from "react-router-dom";
-import toast from "react-hot-toast";
+import toast from 'react-hot-toast';
 
 export default function BookingManager() {
   const [bookedData, setBookedData] = useState([]);
@@ -121,7 +121,7 @@ export default function BookingManager() {
             <Link to="/finding-room" className="text-white hover:text-blue-300 transition">Tìm chỗ</Link>
             <Link to="/booking-manager" className="bg-blue-500/80 text-white px-4 py-2 rounded-lg hover:bg-blue-600/80 transition">Quản lý đặt chỗ</Link>
             <Link to="/FeedbackForm" className="text-white hover:text-blue-300 transition">Báo cáo</Link>
-            <Link to="/SupportForm" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
+            <Link to="/support" className="text-white hover:text-blue-300 transition">Hỗ trợ</Link>
 
             {/* User Menu with fixed positioning */}
             <div className="user-menu-container relative">
@@ -170,14 +170,14 @@ export default function BookingManager() {
                     <th className="px-6 py-3 text-left font-semibold">Thời điểm</th>
                     <th className="px-6 py-3 text-left font-semibold">Tên phòng</th>
                     <th className="px-6 py-3 text-left font-semibold">Giờ bắt đầu</th>
-                    <th className="px-6 py-3 text-left font-semibold">Check In</th>
+                    <th className="px-6 py-3 text-left font-semibold">Trạng thái</th>
                     <th className="px-6 py-3 text-left font-semibold">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {bookedData.filter((booking) => booking.status === "Confirmed").length > 0 ? (
+                  {bookedData.filter((booking) => booking.status === "Confirmed"||booking.status === "CheckedIn").length > 0 ? (
                     bookedData
-                      .filter((booking) => booking.status === "Confirmed")
+                      .filter((booking) => booking.status === "Confirmed"||booking.status === "CheckedIn")
                       .map((booking, index) => {
                         const date = new Date(booking.Day);
                         const formattedDate = date.toLocaleDateString("vi-VN");
