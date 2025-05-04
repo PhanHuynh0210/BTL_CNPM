@@ -6,26 +6,26 @@
     </button>
   </div>
   <div class="card-body p-0">
-    <!-- Flash Messages -->
-<!-- Flash Messages -->
-<div class="container-fluid pt-3">
-  <% if (typeof messages !== 'undefined' && messages.error && messages.error.length > 0) { %>
-    <div class="alert alert-danger alert-dismissible fade show mb-3 rounded-1" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <%= messages.error[0] %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Flash Messages (Keep as is) -->
+    <div class="container-fluid pt-3">
+      <% if (typeof messages !== 'undefined' && messages.error && messages.error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show mb-3 rounded-1" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <%= messages.error[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+      <% if (typeof messages !== 'undefined' && messages.success && messages.success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show mb-3 rounded-1" role="alert">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <%= messages.success[0] %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
     </div>
-  <% } %>
-  <% if (typeof messages !== 'undefined' && messages.success && messages.success.length > 0) { %>
-    <div class="alert alert-success alert-dismissible fade show mb-3 rounded-1" role="alert">
-      <i class="bi bi-check-circle-fill me-2"></i>
-      <%= messages.success[0] %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-  <% } %>
-</div>
 
     <div class="container-fluid px-0">
+      <!-- Tabs (Keep as is) -->
       <ul class="nav nav-tabs nav-justified" id="roomTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active d-flex align-items-center justify-content-center" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-rooms-tab" type="button" role="tab">
@@ -52,15 +52,15 @@
       <div class="tab-content p-3" id="roomTabsContent">
         <div class="tab-pane fade show active" id="all-rooms-tab" role="tabpanel" aria-labelledby="all-tab">
           <div class="table-responsive rounded-3 border">
-            <table class="table table-hover align-middle mb-0"> 
+            <table class="table table-hover align-middle mb-0">
               <thead class="table-light">
                 <tr>
                   <th class="ps-4">ID</th>
                   <th>Trạng thái</th>
-                  <th>Loại phòng</th> 
+                  <th>Loại phòng</th>
                   <th>Sức chứa</th>
-                  <th>Chỗ trống</th> 
-                  <th>Thiết bị</th>
+                  <th>Chỗ trống</th>
+                  <th>Thiết bị</th> <!-- Column Header remains -->
                   <th>Vị trí</th>
                   <th>QR Code</th>
                   <th class="pe-4">Hành động</th>
@@ -73,9 +73,9 @@
                       <td class="ps-4 fw-semibold">Phòng <%= room.room_id %></td>
                       <td>
                         <% if (room.room_status === 'Occupied') { %>
-                          <span class="badge bg-danger rounded-pill px-3 py-1">Đầy</span> 
+                          <span class="badge bg-danger rounded-pill px-3 py-1">Đầy</span>
                         <% } else if (room.room_status === 'Available') { %>
-                          <span class="badge bg-success rounded-pill px-3 py-1">Trống</span> 
+                          <span class="badge bg-success rounded-pill px-3 py-1">Trống</span>
                         <% } else { %>
                           <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Bảo trì</span>
                         <% } %>
@@ -98,14 +98,17 @@
                           <% } %>
                       </td>
                       <td>
-                        <div class="d-flex align-items-center">
-                          <% if (room.devices) { %>
-                            <i class="bi bi-pc-display me-2 text-primary"></i>
-                            <span><%= room.devices.split(',').slice(0, 2).join(',') %><%= room.devices.split(',').length > 2 ? '...' : '' %></span>
-                          <% } else { %>
-                            <span class="text-muted">Không có</span>
-                          <% } %>
-                        </div>
+                        <!-- *** MODIFICATION START *** -->
+                        <% if (room.devices && room.devices.trim() !== '') { %>
+                          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#deviceModal"
+                            data-room-location="<%= room.location %>"
+                            data-devices="<%= room.devices %>">
+                            <i class="bi bi-tv me-1"></i> Xem
+                          </button>
+                        <% } else { %>
+                          <span class="text-muted fst-italic">Không có</span>
+                        <% } %>
+                        <!-- *** MODIFICATION END *** -->
                       </td>
                       <td class="fw-semibold"><%= room.location %></td>
                       <td>
@@ -132,8 +135,8 @@
                             data-capacity="<%= room.capacity %>"
                             data-devices="<%= room.devices || '' %>"
                             data-location="<%= room.location %>"
-                            data-roomtype="<%= room.room_type %>"              
-                            data-availableseats="<%= (room.available_seats !== null && room.available_seats !== undefined) ? room.available_seats : '' %>" 
+                            data-roomtype="<%= room.room_type %>"
+                            data-availableseats="<%= (room.available_seats !== null && room.available_seats !== undefined) ? room.available_seats : '' %>"
                             style="width: 32px; height: 32px;">
                             <i class="bi bi-pencil-fill"></i>
                           </button>
@@ -154,7 +157,7 @@
           </div>
         </div>
 
-        <!-- Other tabs content remains similar but with improved styling -->
+        <!-- Other Tabs Content (Keep as is, structure identical to original) -->
         <div class="tab-pane fade" id="inuse-rooms-tab" role="tabpanel" aria-labelledby="inuse-tab">
           <% if (typeof rooms !== 'undefined') { %>
              <% const inUseRooms = rooms.filter(r => r.room_status === 'Occupied'); %>
@@ -257,12 +260,33 @@
              <% } %>
             <% } %>
         </div>
+      </div> <!-- End Tab Content -->
+    </div> <!-- End Container Fluid -->
+  </div> <!-- End Card Body -->
+</div> <!-- End Card -->
+
+<!-- *** NEW: Device Modal *** -->
+<div class="modal fade" id="deviceModal" tabindex="-1" aria-labelledby="deviceModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="deviceModalLabel"><i class="bi bi-pc-display-horizontal me-2"></i>Thiết bị phòng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body" id="deviceModalBody">
+        <!-- Device list will be loaded here by JavaScript -->
+        <p class="text-center text-muted">Đang tải...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
       </div>
     </div>
   </div>
 </div>
+<!-- *** END: Device Modal *** -->
 
-<!-- Edit Room Modal -->
+
+<!-- Edit Room Modal (Keep as is) -->
 <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <form action="/update-room" method="POST">
@@ -337,7 +361,7 @@
   </div>
 </div>
 
-<!-- Add Room Modal -->
+<!-- Add Room Modal (Keep as is) -->
 <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <form action="/add-room" method="POST">
@@ -410,9 +434,10 @@
   </div>
 </div>
 
+<!-- *** MODIFIED/ADDED JAVASCRIPT *** -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Edit Room Modal
+  // Edit Room Modal Logic (Keep as is)
   const editRoomModalElement = document.getElementById('editRoomModal');
   if (editRoomModalElement) {
     editRoomModalElement.addEventListener('show.bs.modal', function (event) {
@@ -422,16 +447,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const capacity = button.getAttribute('data-capacity');
       const devices = button.getAttribute('data-devices');
       const location = button.getAttribute('data-location');
-      const roomType = button.getAttribute('data-roomtype');           
-      const availableSeats = button.getAttribute('data-availableseats'); 
+      const roomType = button.getAttribute('data-roomtype');
+      const availableSeats = button.getAttribute('data-availableseats');
 
-      const modal = this; 
+      const modal = this;
       modal.querySelector('#edit-room-id').value = roomId;
       modal.querySelector('#edit-room-status').value = status;
       modal.querySelector('#edit-capacity').value = capacity;
       modal.querySelector('#edit-devices').value = devices;
       modal.querySelector('#edit-location').value = location;
-      modal.querySelector('#edit-room-type').value = roomType;         
+      modal.querySelector('#edit-room-type').value = roomType;
       modal.querySelector('#edit-available-seats').value = availableSeats;
       modal.querySelector('#capacity-display').textContent = capacity;
 
@@ -439,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Add Room Modal
+  // Add Room Modal Logic (Keep as is)
   const addRoomModalElement = document.getElementById('addRoomModal');
   if (addRoomModalElement) {
     addRoomModalElement.addEventListener('hidden.bs.modal', function(event) {
@@ -447,23 +472,59 @@ document.addEventListener('DOMContentLoaded', () => {
       if(form) {
         form.reset();
       }
+      // Reset capacity display as well
+      document.getElementById('add-capacity-display').textContent = '0';
     });
   }
 
-  // Update capacity display in add modal
+  // Update capacity display in add modal (Keep as is)
   const addCapacityInput = document.getElementById('add-capacity');
   if (addCapacityInput) {
     addCapacityInput.addEventListener('input', function() {
-      document.getElementById('add-capacity-display').textContent = this.value;
+      document.getElementById('add-capacity-display').textContent = this.value || '0';
     });
   }
 
-  // Update capacity display in edit modal
+  // Update capacity display in edit modal (Keep as is)
   const editCapacityInput = document.getElementById('edit-capacity');
   if (editCapacityInput) {
     editCapacityInput.addEventListener('input', function() {
-      document.getElementById('capacity-display').textContent = this.value;
+      document.getElementById('capacity-display').textContent = this.value || '0';
     });
   }
+
+  // *** NEW: Device Modal Logic ***
+  const deviceModalElement = document.getElementById('deviceModal');
+  if (deviceModalElement) {
+    deviceModalElement.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget; // Button that triggered the modal
+      const roomLocation = button.getAttribute('data-room-location');
+      const devicesString = button.getAttribute('data-devices');
+
+      const modalTitle = deviceModalElement.querySelector('.modal-title');
+      const modalBody = deviceModalElement.querySelector('.modal-body');
+
+      // Update modal title
+      modalTitle.innerHTML = `<i class="bi bi-pc-display-horizontal me-2"></i>Thiết bị phòng <strong>${roomLocation}</strong>`;
+
+      // Update modal body
+      if (devicesString && devicesString.trim() !== '') {
+        const devicesArray = devicesString.split(',').map(device => device.trim()).filter(device => device); // Split, trim, remove empty
+        if (devicesArray.length > 0) {
+          let deviceListHtml = '<ul class="list-group list-group-flush">';
+          devicesArray.forEach(device => {
+            deviceListHtml += `<li class="list-group-item">${device}</li>`;
+          });
+          deviceListHtml += '</ul>';
+          modalBody.innerHTML = deviceListHtml;
+        } else {
+          modalBody.innerHTML = '<p class="text-center text-muted">Không có thông tin thiết bị.</p>';
+        }
+      } else {
+        modalBody.innerHTML = '<p class="text-center text-muted">Không có thông tin thiết bị.</p>';
+      }
+    });
+  }
+
 });
 </script>
