@@ -194,7 +194,7 @@ export default function SupportForm() {
               </div>
 
               <div>
-                <label className="block font-semibold mb-2">Tiêu đề yêu cầu:</label>
+                <label className="block font-semibold mb-2">Tiêu đề yêu cầu (cần nêu rõ phòng):</label>
                 <input
                   type="text"
                   className="w-full p-3 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -278,7 +278,7 @@ export default function SupportForm() {
             <li><strong>Email:</strong> support@hust.edu.vn</li>
             <li><strong>Hotline:</strong> 1900 123 456</li>
             <li><strong>Thời gian:</strong> 08:00 - 17:00 (T2 - T6)</li>
-            <li><strong>Địa chỉ:</strong> Phòng 101, Tòa A1, Đại học Bách Khoa Hà Nội</li>
+            <li><strong>Địa chỉ:</strong> Phòng 101, Tòa A1, Đại học Bách Khoa TPHCM</li>
           </ul>
         </div>
         
