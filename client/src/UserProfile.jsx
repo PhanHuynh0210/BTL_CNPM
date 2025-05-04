@@ -91,7 +91,11 @@ export default function UserProfile() {
           <div className="text-center text-gray-800">
           <p className="mb-2"><strong>Họ và Tên:</strong> {userData?.fullName || 'N/A'}</p>
           <p className="mb-2"><strong>MSSV:</strong> {userData?.mssv || 'N/A'}</p>
-          <p className="mb-2"><strong>Giới tính:</strong> {userData?.sex || 'N/A'}</p>
+          <p className="mb-2">
+            <strong>Giới tính:</strong> {
+              userData?.sex === 'M' ? 'Nam' :
+              userData?.sex === 'F' ? 'Nữ' : 'N/A'
+            }</p>
           <p className="mb-2"><strong>Gmail:</strong> {userData?.email || 'N/A'}</p>
           </div>
         </div>

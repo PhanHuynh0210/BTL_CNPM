@@ -7,12 +7,11 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const Logintype = () => {
-    // Chuyển sang nhập tài khoản mật khẩu
     navigate("/logininfo");
   };
 
   const handleAdminLogin = () => {
-    window.location.href = "http://localhost:8080/"; // chuyển hướng sang trang khác
+    window.open("http://localhost:8080/", "_blank");
   };
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100">
