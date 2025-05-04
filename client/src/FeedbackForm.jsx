@@ -115,7 +115,7 @@ export default function FeedbackForm() {
     }
   };
 
-  const titles = ["Gửi đánh giá trải nghiệm", "Lịch sử báo cáo"];
+  const titles = ["Gửi đánh giá trải nghiệm", "Lịch sử đánh giá"];
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center relative">
@@ -207,6 +207,7 @@ export default function FeedbackForm() {
                 {feedbackHistory.map((fb, index) => (
                   <li key={index} className="py-4">
                     <p className="font-medium">MSSV: {fb.mssv}</p>
+                    <p>Room: {fb.location}</p>
                     <p>Rating: {fb.rating} ⭐</p>
                     <p>Nhận xét: {fb.comment || "Không có"}</p>
                     <p className="text-sm text-gray-500">Thời gian: {new Date(fb.Time).toLocaleString()}</p>
