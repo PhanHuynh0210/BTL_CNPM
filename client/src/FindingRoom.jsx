@@ -27,10 +27,10 @@ export default function FindingRoom() {
       navigate("/");
       return;
     }
-    
+
     const now = new Date();
     const defaultDate = now.toISOString().split('T')[0];
-    const defaultTime = now.toTimeString().slice(0,5);
+    const defaultTime = now.toTimeString().slice(0, 5);
     setFilters(prev => ({ ...prev, date: defaultDate, time: defaultTime }));
 
     fetchRooms();
@@ -82,7 +82,7 @@ export default function FindingRoom() {
     const selectedDate = new Date(filters.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       setValidationError("Không thể đặt phòng cho ngày trong quá khứ");
       return false;
@@ -105,15 +105,15 @@ export default function FindingRoom() {
   };
   const calculateEndTime = (startTime) => {
     if (!startTime) return "";
-    
+
     const [hours, minutes] = startTime.split(':').map(Number);
-    let endHours = hours + 1;  // Assuming 1-hour bookings
-    
+    let endHours = hours + 1; // Assuming 1-hour bookings
+
     // Handle hour overflow
     if (endHours >= 24) {
       endHours = endHours - 24;
     }
-    
+
     return `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
@@ -157,29 +157,49 @@ export default function FindingRoom() {
     }
   };
 
+  //  trích xuất tòa nhà từ location
+  const getBuildingFromLocation = (location) => {
+    if (!location) return null;
+    const parts = location.split('-');
+    return parts.length > 1 ? parts[1] : null;
+  };
+
+  //  trích xuất tầng từ location
+  const getFloorFromLocation = (location) => {
+    if (!location) return null;
+    const parts = location.split('-');
+    if (parts.length > 0 && parts[0].length > 0) {
+      return parseInt(parts[0][0]);
+    }
+    return null;
+  };
+
   const filteredRooms = rooms.filter((room) => {
-    const matchesBuilding = filters.building === "Tất cả" || room.building === filters.building;
-    const matchesFloor = filters.floor === "Tất cả" || room.floor === parseInt(filters.floor);
-    const matchesType = filters.type === "Tất cả" || 
-                       (filters.type === "Nhóm" ? room.room_type === "group" : 
-                        filters.type === "Đơn" ? room.room_type === "single" : false);
-    
+    const roomBuilding = getBuildingFromLocation(room.location);
+    const roomFloor = getFloorFromLocation(room.location);
+
+    const matchesBuilding = filters.building === "Tất cả" || roomBuilding === filters.building;
+    const matchesFloor = filters.floor === "Tất cả" || (filters.floor !== "Tất cả" && roomFloor === parseInt(filters.floor));
+    const matchesType = filters.type === "Tất cả" ||
+                          (filters.type === "Nhóm" ? room.room_type === "group" :
+                           filters.type === "Đơn" ? room.room_type === "single" : false);
+
     // Handle devices array or string
-    const roomDevices = typeof room.devices === 'string' 
+    const roomDevices = typeof room.devices === 'string'
       ? room.devices.split(',').map(d => d.trim())
-      : Array.isArray(room.devices) 
-        ? room.devices 
+      : Array.isArray(room.devices)
+        ? room.devices
         : [];
-    
-    const matchesEquipment = filters.equipment === "Tất cả" || 
-                            roomDevices.some(device => 
-                              device.toLowerCase().includes(filters.equipment.toLowerCase()));
+
+    const matchesEquipment = filters.equipment === "Tất cả" ||
+                              roomDevices.some(device =>
+                                device.toLowerCase().includes(filters.equipment.toLowerCase()));
 
     return matchesBuilding && matchesFloor && matchesType && matchesEquipment;
   });
 
   return (
-    <div 
+    <div
       className="min-h-screen"
       style={{
         backgroundImage: `url(${bg})`,
@@ -250,9 +270,8 @@ export default function FindingRoom() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredRooms.map((room) => (
                 <div key={room.room_id} className="backdrop-blur-md bg-white/20 rounded-lg p-4 border border-white/20 shadow-lg">
-                  <h3 className="text-lg font-bold text-white mb-2">Phòng {room.location} - {room.building}</h3>
+                  <h3 className="text-lg font-bold text-white mb-2">Phòng {room.location} - Tầng {getFloorFromLocation(room.location)} - Tòa {getBuildingFromLocation(room.location)}</h3>
                   <ul className="text-white text-sm space-y-1">
-                    <li>Tầng: {room.floor}</li>
                     <li>Loại: {room.room_type === "group" ? "Nhóm" : "Đơn"}</li>
                     <li>Chỗ trống: {room.available_seats}</li>
                     <li>Thiết bị: {room.devices || "Không có"}</li>

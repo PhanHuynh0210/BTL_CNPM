@@ -11,6 +11,9 @@ const LoginPage = () => {
     navigate("/logininfo");
   };
 
+  const handleAdminLogin = () => {
+    window.location.href = "http://localhost:8080/"; // chuyển hướng sang trang khác
+  };
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div
@@ -42,7 +45,7 @@ p-12 shadow-2xl w-full max-w-lg z-10 mb-4 rounded-3xl border-2 border-gray-600">
         />
             Tài khoản HCMUT</button>
         <button
-          onClick={Logintype}
+          onClick={handleAdminLogin}
           className="w-full bg-gray-300 hover:bg-blue-700 text-black py-2 px-4 rounded-lg font-medium transition duration-200"
         >Quản trị viên</button>
         </div>
