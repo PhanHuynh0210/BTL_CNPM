@@ -45,6 +45,8 @@ const initApiRouter = (app) => {
     router.get("/users/me", authenticateToken, apiController.getCurrentUserProfile); 
     // bkID
     router.get('/bookings/ID/:bookingId', authenticateToken, bookingController.getBookingDetails);
+    router.get('/feedbacks', feedbackController.getFeedbacks);
+
     return app.use("/api/v1/",router);
 }
 

@@ -144,7 +144,6 @@ const updateRoom = async (roomId, updatedRoomData) => {
      }
      if (!updatedRoomData || Object.keys(updatedRoomData).length === 0) {
           console.warn(`Không có dữ liệu cập nhật cho phòng ${roomId}. Trả về dữ liệu hiện tại.`);
-         // Return current data if nothing to update
          return getRoomById(roomId);
      }
 
@@ -225,33 +224,57 @@ const updateRoom = async (roomId, updatedRoomData) => {
 
         values.push(roomId);
         const query = `UPDATE Rooms SET ${fieldsToUpdate.join(', ')} WHERE ID = ?`;
-
-        return new Promise((resolve, reject) => {
-            connection.query(query, values, (err, result) => {
-                if (err) {
-                     console.error(`SQL Error updating room ${roomId}:`, err);
-                     return reject(new Error("Lỗi cập nhật phòng: " + err.message));
-                }
-
-                if (result.affectedRows === 0 && result.changedRows === 0) {
-                     console.warn(`Phòng ${roomId} không được tìm thấy hoặc không có thay đổi nào được áp dụng.`);
-                     return getRoomById(roomId).then(resolve).catch(reject);
-                }
-
-                getRoomById(roomId)
-                    .then(updatedRoom => {
-                        if (!updatedRoom) {
-                             console.error(`Không thể lấy lại thông tin phòng ${roomId} sau khi cập nhật.`);
-                             reject(new Error(`Không thể lấy lại thông tin phòng ${roomId} sau khi cập nhật.`));
-                        } else {
-                            resolve(updatedRoom);
-                        }
-                    })
-                    .catch(getErr => {
-                         console.error(`Lỗi khi lấy lại thông tin phòng ${roomId} sau cập nhật:`, getErr);
-                         reject(getErr);
+        
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Cập nhật thông tin cơ bản của phòng
+                await new Promise((innerResolve, innerReject) => {
+                    connection.query(query, values, (err, result) => {
+                        if (err) innerReject(err);
+                        else innerResolve(result);
                     });
-            });
+                });
+
+                // Xử lý cập nhật thiết bị nếu có
+                if (updatedRoomData.devices !== undefined) {
+                    // Xóa tất cả thiết bị cũ
+                    await new Promise((innerResolve, innerReject) => {
+                        const deleteQuery = 'DELETE FROM Devices WHERE room_id = ?';
+                        connection.query(deleteQuery, [roomId], (err) => {
+                            if (err) innerReject(err);
+                            else innerResolve();
+                        });
+                    });
+
+                    // Thêm thiết bị mới nếu có
+                    if (Array.isArray(updatedRoomData.devices) && updatedRoomData.devices.length > 0) {
+                        const deviceValues = updatedRoomData.devices
+                            .filter(device => device && device.trim())
+                            .map(device => [device.trim(), roomId]);
+
+                        if (deviceValues.length > 0) {
+                            await new Promise((innerResolve, innerReject) => {
+                                const insertDevicesQuery = 'INSERT INTO Devices (device_name, room_id) VALUES ?';
+                                connection.query(insertDevicesQuery, [deviceValues], (err) => {
+                                    if (err) innerReject(err);
+                                    else innerResolve();
+                                });
+                            });
+                        }
+                    }
+                }
+
+                // Lấy thông tin phòng đã cập nhật
+                const updatedRoom = await getRoomById(roomId);
+                if (!updatedRoom) {
+                    throw new Error(`Không thể lấy lại thông tin phòng ${roomId} sau khi cập nhật.`);
+                }
+                resolve(updatedRoom);
+
+            } catch (error) {
+                console.error(`Lỗi trong quá trình cập nhật phòng ${roomId}:`, error);
+                reject(error);
+            }
         });
 
     } catch (error) {
@@ -260,13 +283,6 @@ const updateRoom = async (roomId, updatedRoomData) => {
     }
 };
 
-
-/**
- * Khóa phòng (chuyển trạng thái sang 'Maintenance').
- * Sẽ đặt available_seats thành 0 khi khóa phòng.
- * @param {number} roomId - ID của phòng cần khóa.
- * @returns {Promise<boolean>} - Promise trả về true nếu thành công, false nếu không tìm thấy hoặc đã khóa.
- */
 const lockRoom = (roomId) => {
      if (!roomId || isNaN(parseInt(roomId, 10))) {
          return Promise.reject(new Error("ID phòng không hợp lệ để khóa."));
@@ -283,10 +299,7 @@ const lockRoom = (roomId) => {
     });
 };
 
-/**
- * Lấy danh sách tất cả các phòng cùng thông tin cơ bản và thiết bị.
- * @returns {Promise<Array<object>>} - Promise chứa mảng các đối tượng phòng.
- */
+
 const getRoomList = () => {
     return new Promise((resolve, reject) => {
         const query = `

@@ -87,17 +87,6 @@
                 <section id="account">
                     <%- include('dashboard/account', { accounts: accounts }) %>
                 </section>
-    
-                <!-- Support -->
-                <section id="support">
-                    <%- include('dashboard/support', { supports: supports }) %>
-                </section>
-    
-                <!-- Device management -->
-                <section id="device">
-                    <%- include('dashboard/device') %>
-                </section>
-    
                 <!-- Booking list -->
                 <section id="booking">
                     <%- include('dashboard/booking', { bookings: bookings }) %>
@@ -106,6 +95,10 @@
                 <!-- Feedback -->
                 <section id="feedback">
                     <%- include('dashboard/feedback', { feedback: feedback }) %>
+                </section>
+                <!-- Support -->
+                <section id="support">
+                    <%- include('dashboard/support', { supports: supports }) %>
                 </section>
             </div>
         </div>

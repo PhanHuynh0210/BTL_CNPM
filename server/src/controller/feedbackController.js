@@ -14,6 +14,18 @@ const createFeedback = async (req, res) => {
         });
     }
 };
+const getFeedbacks = async (req, res) => {
+    try {
+        const result = await feedbackService.getFeedbackList();
+        res.json({ data: result });
+    } catch (error) {
+        res.status(500).json({
+            message: "Lỗi khi lấy danh sách đánh giá",
+            error: error.message
+        });
+    }
+};
 export default {
-    createFeedback
+    createFeedback,
+    getFeedbacks
   };

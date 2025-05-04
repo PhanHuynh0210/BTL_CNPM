@@ -1,306 +1,408 @@
-<div class="card shadow-sm mb-4">
-  <div class="card-header bg-white d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">Danh sách Phòng học</h5>
-    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addRoomModal">
-      <i class="bi bi-plus-lg me-1"></i>Thêm phòng mới
+<div class="card shadow-sm mb-4 border-0">
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 fw-semibold"><i class="bi bi-door-open me-2"></i>Quản lý Phòng học</h5>
+    <button class="btn btn-light btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+      <i class="bi bi-plus-circle me-1"></i>Thêm phòng mới
     </button>
   </div>
-  <div class="card-body">
-      <%# Hiển thị flash messages nếu có %>
-      <%# if (messages.error && messages.error.length > 0) { %>
-      <%#   messages.error.forEach(msg => { %>
-      <%#   }) %>
-      <%# } %>
-       <%# if (messages.success && messages.success.length > 0) { %>
-      <%#   messages.success.forEach(msg => { %>
-      <%#   }) %>
-      <%# } %>
+  <div class="card-body p-0">
+    <!-- Flash Messages -->
+<!-- Flash Messages -->
+<div class="container-fluid pt-3">
+  <% if (typeof messages !== 'undefined' && messages.error && messages.error.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show mb-3 rounded-1" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <%= messages.error[0] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  <% if (typeof messages !== 'undefined' && messages.success && messages.success.length > 0) { %>
+    <div class="alert alert-success alert-dismissible fade show mb-3 rounded-1" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      <%= messages.success[0] %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+</div>
 
+    <div class="container-fluid px-0">
+      <ul class="nav nav-tabs nav-justified" id="roomTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active d-flex align-items-center justify-content-center" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-rooms-tab" type="button" role="tab">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>Tất cả
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link d-flex align-items-center justify-content-center" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse-rooms-tab" type="button" role="tab">
+            <i class="bi bi-x-circle-fill me-2"></i>Đầy
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link d-flex align-items-center justify-content-center" id="empty-tab" data-bs-toggle="tab" data-bs-target="#empty-rooms-tab" type="button" role="tab">
+            <i class="bi bi-check-circle-fill me-2"></i>Trống
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link d-flex align-items-center justify-content-center" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance-rooms-tab" type="button" role="tab">
+            <i class="bi bi-tools me-2"></i>Bảo trì
+          </button>
+        </li>
+      </ul>
 
-    <ul class="nav nav-tabs" id="roomTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-rooms-tab" type="button" role="tab" aria-controls="all-rooms-tab" aria-selected="true">Tất cả phòng</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="inuse-tab" data-bs-toggle="tab" data-bs-target="#inuse-rooms-tab" type="button" role="tab" aria-controls="inuse-rooms-tab" aria-selected="false">Đầy</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="empty-tab" data-bs-toggle="tab" data-bs-target="#empty-rooms-tab" type="button" role="tab" aria-controls="empty-rooms-tab" aria-selected="false">Trống</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance-rooms-tab" type="button" role="tab" aria-controls="maintenance-rooms-tab" aria-selected="false">Bảo trì</button>
-      </li>
-    </ul>
-
-    <div class="tab-content mt-3" id="roomTabsContent">
-      <div class="tab-pane fade show active" id="all-rooms-tab" role="tabpanel" aria-labelledby="all-tab">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle"> 
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Trạng thái</th>
-                <th>Loại phòng</th> 
-                <th>Sức chứa</th>
-                <th>Chỗ trống</th> 
-                <th>Thiết bị</th>
-                <th>Vị trí</th>
-                <th>QR Code</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
-                <% rooms.forEach(room => { %>
-                  <tr>
-                    <td>Phòng <%= room.room_id %></td>
-                    <td>
-                      <% if (room.room_status === 'Occupied') { %>
-                        <span class="badge bg-danger">Đầy</span> 
-                      <% } else if (room.room_status === 'Available') { %>
-                        <span class="badge bg-success">Trống</span> 
-                      <% } else { %>
-                        <span class="badge bg-warning text-dark">Bảo trì</span>
-                      <% } %>
-                    </td>
-                    <td>
-                      <% if (room.room_type === 'single') { %>
-                          <span class="badge bg-info text-dark">Phòng đơn</span>
-                      <% } else if (room.room_type === 'group') { %>
-                           <span class="badge bg-secondary">Phòng nhóm</span>
-                      <% } else { %>
-                           <%= room.room_type %>
-                      <% } %>
-                    </td>
-                    <td><%= room.capacity %> người</td>
-                    <td>
-                        <% if (room.available_seats !== null && room.available_seats !== undefined) { %>
-                            <span class="fw-bold <%= room.available_seats > 0 ? 'text-success' : 'text-danger' %>"><%= room.available_seats %></span> / <%= room.capacity %>
+      <div class="tab-content p-3" id="roomTabsContent">
+        <div class="tab-pane fade show active" id="all-rooms-tab" role="tabpanel" aria-labelledby="all-tab">
+          <div class="table-responsive rounded-3 border">
+            <table class="table table-hover align-middle mb-0"> 
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">ID</th>
+                  <th>Trạng thái</th>
+                  <th>Loại phòng</th> 
+                  <th>Sức chứa</th>
+                  <th>Chỗ trống</th> 
+                  <th>Thiết bị</th>
+                  <th>Vị trí</th>
+                  <th>QR Code</th>
+                  <th class="pe-4">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
+                  <% rooms.forEach(room => { %>
+                    <tr class="<%= room.room_status === 'Maintenance' ? 'table-warning' : '' %>">
+                      <td class="ps-4 fw-semibold">Phòng <%= room.room_id %></td>
+                      <td>
+                        <% if (room.room_status === 'Occupied') { %>
+                          <span class="badge bg-danger rounded-pill px-3 py-1">Đầy</span> 
+                        <% } else if (room.room_status === 'Available') { %>
+                          <span class="badge bg-success rounded-pill px-3 py-1">Trống</span> 
                         <% } else { %>
-                            <span class="text-muted">N/A</span>
+                          <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Bảo trì</span>
                         <% } %>
-                    </td>
-                    <td><%= room.devices || "Không có" %></td>
-                    <td><%= room.location %></td>
-                    <td>
-                      <% if (room.qr_code) { %>
-                        <img src="<%= room.qr_code %>" alt="QR Code phòng <%= room.location %>" class="img-thumbnail" style="width: 50px; height: 50px;">
-                      <% } else { %>
-                        <span class="text-muted">Không có</span>
-                      <% } %>
-                    </td>
-                    <td>
-                      <%# Nút khóa chỉ hiển thị nếu phòng không phải đang bảo trì %>
-                      <% if (room.room_status !== 'Maintenance') { %>
-                          <form action="/lock-room/<%= room.room_id %>" method="POST" style="display:inline-block;" onsubmit="return confirm('Bạn có chắc muốn khóa (chuyển sang bảo trì) phòng <%= room.location %> không?')">
-                              <button type="submit" class="btn btn-secondary btn-sm me-1" title="Khóa phòng (Bảo trì)">
-                                  <i class="bi bi-lock-fill"></i>
-                              </button>
-                          </form>
-                       <% } %>
+                      </td>
+                      <td>
+                        <% if (room.room_type === 'single') { %>
+                            <span class="badge bg-info rounded-pill px-3 py-1">Phòng đơn</span>
+                        <% } else if (room.room_type === 'group') { %>
+                             <span class="badge bg-secondary rounded-pill px-3 py-1">Phòng nhóm</span>
+                        <% } else { %>
+                             <%= room.room_type %>
+                        <% } %>
+                      </td>
+                      <td><%= room.capacity %> <span class="text-muted">người</span></td>
+                      <td>
+                          <% if (room.available_seats !== null && room.available_seats !== undefined) { %>
+                              <span class="fw-bold <%= room.available_seats > 0 ? 'text-success' : 'text-danger' %>"><%= room.available_seats %></span> / <%= room.capacity %>
+                          <% } else { %>
+                              <span class="text-muted">N/A</span>
+                          <% } %>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <% if (room.devices) { %>
+                            <i class="bi bi-pc-display me-2 text-primary"></i>
+                            <span><%= room.devices.split(',').slice(0, 2).join(',') %><%= room.devices.split(',').length > 2 ? '...' : '' %></span>
+                          <% } else { %>
+                            <span class="text-muted">Không có</span>
+                          <% } %>
+                        </div>
+                      </td>
+                      <td class="fw-semibold"><%= room.location %></td>
+                      <td>
+                        <% if (room.qr_code) { %>
+                          <img src="<%= room.qr_code %>" alt="QR Code phòng <%= room.location %>" class="img-thumbnail border-0" style="width: 50px; height: 50px;">
+                        <% } else { %>
+                          <span class="text-muted">Không có</span>
+                        <% } %>
+                      </td>
+                      <td class="pe-4">
+                        <div class="d-flex">
+                          <% if (room.room_status !== 'Maintenance') { %>
+                              <form action="/lock-room/<%= room.room_id %>" method="POST" style="display:inline-block;" onsubmit="return confirm('Bạn có chắc muốn khóa (chuyển sang bảo trì) phòng <%= room.location %> không?')">
+                                  <button type="submit" class="btn btn-outline-secondary btn-sm me-1 rounded-circle" title="Khóa phòng (Bảo trì)" style="width: 32px; height: 32px;">
+                                      <i class="bi bi-lock-fill"></i>
+                                  </button>
+                              </form>
+                           <% } %>
 
-                      <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editRoomModal"
-                        title="Chỉnh sửa phòng"
-                        data-roomid="<%= room.room_id %>"
-                        data-status="<%= room.room_status %>"
-                        data-capacity="<%= room.capacity %>"
-                        data-devices="<%= room.devices || '' %>"
-                        data-location="<%= room.location %>"
-                        data-roomtype="<%= room.room_type %>"              
-                        data-availableseats="<%= (room.available_seats !== null && room.available_seats !== undefined) ? room.available_seats : '' %>"> 
-                        <i class="bi bi-pencil-fill"></i>
-                      </button>
-                    </td>
-                  </tr>
-                <% }) %>
-              <% } else { %>
-                 <tr>
-                     <td colspan="9" class="text-center text-muted">Không có dữ liệu phòng.</td>
-                 </tr>
-              <% } %>
-            </tbody>
-          </table>
+                          <button class="btn btn-outline-primary btn-sm rounded-circle" data-bs-toggle="modal" data-bs-target="#editRoomModal"
+                            title="Chỉnh sửa phòng"
+                            data-roomid="<%= room.room_id %>"
+                            data-status="<%= room.room_status %>"
+                            data-capacity="<%= room.capacity %>"
+                            data-devices="<%= room.devices || '' %>"
+                            data-location="<%= room.location %>"
+                            data-roomtype="<%= room.room_type %>"              
+                            data-availableseats="<%= (room.available_seats !== null && room.available_seats !== undefined) ? room.available_seats : '' %>" 
+                            style="width: 32px; height: 32px;">
+                            <i class="bi bi-pencil-fill"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                   <tr>
+                       <td colspan="9" class="text-center text-muted py-4">
+                         <i class="bi bi-door-closed display-6 text-muted mb-2"></i>
+                         <p class="mb-0">Không có dữ liệu phòng.</p>
+                       </td>
+                   </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <div class="tab-pane fade" id="inuse-rooms-tab" role="tabpanel" aria-labelledby="inuse-tab">
-        <% if (typeof rooms !== 'undefined') { %>
-           <% const inUseRooms = rooms.filter(r => r.room_status === 'Occupied'); %>
-           <% if (inUseRooms.length === 0) { %>
-             <p class="text-muted fst-italic mt-2">Không có phòng nào đang ở trạng thái Đầy.</p>
-           <% } else { %>
-             <ul class="list-group">
-               <% inUseRooms.forEach(r => { %>
-                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                     <span>Phòng <strong><%= r.location %></strong> (ID: <%= r.room_id %>) - Loại: <%= r.room_type === 'single' ? 'Đơn' : 'Nhóm' %></span>
-                     <span class="badge bg-secondary rounded-pill"><%= r.capacity %> chỗ</span>
-                 </li>
-               <% }) %>
-             </ul>
-           <% } %>
-        <% } %>
-      </div>
-
-      <div class="tab-pane fade" id="empty-rooms-tab" role="tabpanel" aria-labelledby="empty-tab">
-         <% if (typeof rooms !== 'undefined') { %>
-           <% const availableRooms = rooms.filter(r => r.room_status === 'Available'); %>
-           <% if (availableRooms.length === 0) { %>
-             <p class="text-muted fst-italic mt-2">Không có phòng nào đang ở trạng thái Trống.</p>
-           <% } else { %>
-             <ul class="list-group">
-               <% availableRooms.forEach(r => { %>
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                     <span>Phòng <strong><%= r.location %></strong> (ID: <%= r.room_id %>) - Loại: <%= r.room_type === 'single' ? 'Đơn' : 'Nhóm' %></span>
-                     <span class="badge bg-success rounded-pill"><%= r.available_seats ?? 'N/A' %> / <%= r.capacity %> chỗ trống</span>
-                 </li>
-               <% }) %>
-             </ul>
-           <% } %>
-         <% } %>
-      </div>
-
-      <div class="tab-pane fade" id="maintenance-rooms-tab" role="tabpanel" aria-labelledby="maintenance-tab">
-         <% if (typeof rooms !== 'undefined') { %>
-           <% const maintenanceRooms = rooms.filter(r => r.room_status === 'Maintenance'); %>
-           <% if (maintenanceRooms.length === 0) { %>
-             <p class="text-muted fst-italic mt-2">Không có phòng nào đang ở trạng thái Bảo trì.</p>
-           <% } else { %>
-             <ul class="list-group">
-               <% maintenanceRooms.forEach(r => { %>
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                     <span>Phòng <strong><%= r.location %></strong> (ID: <%= r.room_id %>) - Loại: <%= r.room_type === 'single' ? 'Đơn' : 'Nhóm' %></span>
-                      <span class="badge bg-warning text-dark rounded-pill">Đang bảo trì</span>
-                 </li>
-               <% }) %>
-             </ul>
-           <% } %>
+        <!-- Other tabs content remains similar but with improved styling -->
+        <div class="tab-pane fade" id="inuse-rooms-tab" role="tabpanel" aria-labelledby="inuse-tab">
+          <% if (typeof rooms !== 'undefined') { %>
+             <% const inUseRooms = rooms.filter(r => r.room_status === 'Occupied'); %>
+             <% if (inUseRooms.length === 0) { %>
+               <div class="text-center py-5">
+                 <i class="bi bi-check2-circle display-4 text-muted mb-3"></i>
+                 <p class="text-muted fs-5">Không có phòng nào đang ở trạng thái Đầy.</p>
+               </div>
+             <% } else { %>
+               <div class="row g-3">
+                 <% inUseRooms.forEach(r => { %>
+                   <div class="col-md-6 col-lg-4">
+                     <div class="card h-100 border-danger border-opacity-25">
+                       <div class="card-body">
+                         <div class="d-flex justify-content-between align-items-start mb-2">
+                           <h5 class="card-title mb-0">Phòng <strong><%= r.location %></strong></h5>
+                           <span class="badge bg-danger rounded-pill px-3">Đầy</span>
+                         </div>
+                         <p class="text-muted mb-2">ID: <%= r.room_id %></p>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span class="badge bg-secondary"><%= r.room_type === 'single' ? 'Đơn' : 'Nhóm' %></span>
+                           <span class="text-muted"><%= r.capacity %> chỗ</span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 <% }) %>
+               </div>
+             <% } %>
           <% } %>
+        </div>
+
+        <div class="tab-pane fade" id="empty-rooms-tab" role="tabpanel" aria-labelledby="empty-tab">
+           <% if (typeof rooms !== 'undefined') { %>
+             <% const availableRooms = rooms.filter(r => r.room_status === 'Available'); %>
+             <% if (availableRooms.length === 0) { %>
+               <div class="text-center py-5">
+                 <i class="bi bi-check2-circle display-4 text-muted mb-3"></i>
+                 <p class="text-muted fs-5">Không có phòng nào đang ở trạng thái Trống.</p>
+               </div>
+             <% } else { %>
+               <div class="row g-3">
+                 <% availableRooms.forEach(r => { %>
+                   <div class="col-md-6 col-lg-4">
+                     <div class="card h-100 border-success border-opacity-25">
+                       <div class="card-body">
+                         <div class="d-flex justify-content-between align-items-start mb-2">
+                           <h5 class="card-title mb-0">Phòng <strong><%= r.location %></strong></h5>
+                           <span class="badge bg-success rounded-pill px-3">Trống</span>
+                         </div>
+                         <p class="text-muted mb-2">ID: <%= r.room_id %></p>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span class="badge bg-info text-dark"><%= r.room_type === 'single' ? 'Đơn' : 'Nhóm' %></span>
+                           <span class="text-success fw-semibold"><%= r.available_seats ?? 'N/A' %> / <%= r.capacity %> chỗ</span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 <% }) %>
+               </div>
+             <% } %>
+           <% } %>
+        </div>
+
+        <div class="tab-pane fade" id="maintenance-rooms-tab" role="tabpanel" aria-labelledby="maintenance-tab">
+           <% if (typeof rooms !== 'undefined') { %>
+             <% const maintenanceRooms = rooms.filter(r => r.room_status === 'Maintenance'); %>
+             <% if (maintenanceRooms.length === 0) { %>
+               <div class="text-center py-5">
+                 <i class="bi bi-check2-circle display-4 text-muted mb-3"></i>
+                 <p class="text-muted fs-5">Không có phòng nào đang ở trạng thái Bảo trì.</p>
+               </div>
+             <% } else { %>
+               <div class="row g-3">
+                 <% maintenanceRooms.forEach(r => { %>
+                   <div class="col-md-6 col-lg-4">
+                     <div class="card h-100 border-warning border-opacity-25">
+                       <div class="card-body">
+                         <div class="d-flex justify-content-between align-items-start mb-2">
+                           <h5 class="card-title mb-0">Phòng <strong><%= r.location %></strong></h5>
+                           <span class="badge bg-warning text-dark rounded-pill px-3">Bảo trì</span>
+                         </div>
+                         <p class="text-muted mb-2">ID: <%= r.room_id %></p>
+                         <div class="d-flex justify-content-between align-items-center">
+                           <span class="badge bg-secondary"><%= r.room_type === 'single' ? 'Đơn' : 'Nhóm' %></span>
+                           <span class="text-muted"><%= r.capacity %> chỗ</span>
+                         </div>
+                       </div>
+                       <div class="card-footer bg-transparent">
+                         <form action="/unlock-room/<%= r.room_id %>" method="POST" onsubmit="return confirm('Mở khóa phòng <%= r.location %>?')">
+                           <button type="submit" class="btn btn-sm btn-outline-success w-100">
+                             <i class="bi bi-unlock-fill me-1"></i>Mở phòng
+                           </button>
+                         </form>
+                       </div>
+                     </div>
+                   </div>
+                 <% }) %>
+               </div>
+             <% } %>
+            <% } %>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Edit Room Modal -->
 <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <form action="/update-room" method="POST">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-primary text-white">
           <h5 class="modal-title" id="editRoomModalLabel">Chỉnh sửa phòng học</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" name="room_id" id="edit-room-id">
 
-           <div class="row g-2 mb-2">
-               <div class="col-md">
-                   <label for="edit-location" class="form-label">Vị trí</label>
-                   <input type="text" name="location" id="edit-location" class="form-control" placeholder="Ví dụ: 101-H1" required>
-               </div>
-               <div class="col-md">
-                   <label for="edit-room-status" class="form-label">Trạng thái</label>
-                    <select name="room_status" id="edit-room-status" class="form-select" required>
-                      <option value="Available">Trống</option>
-                      <option value="Occupied">Đầy</option>
-                      <option value="Maintenance">Bảo trì</option>
-                    </select>
-               </div>
-           </div>
-
-           <div class="row g-2 mb-2">
-              <div class="col-md">
-                <label for="edit-room-type" class="form-label">Loại phòng</label>
-                <select name="room_type" id="edit-room-type" class="form-select" required>
-                  <option value="" disabled>Chọn loại phòng</option>
-                  <option value="single">Phòng đơn</option>
-                  <option value="group">Phòng nhóm</option>
-                </select>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="edit-location" class="form-label">Vị trí phòng</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" name="location" id="edit-location" class="form-control" placeholder="Ví dụ: 101-H1" required>
               </div>
-               <div class="col-md">
-                    <label for="edit-capacity" class="form-label">Sức chứa tối đa</label>
-                    <input type="number" name="capacity" id="edit-capacity" class="form-control" placeholder="Số người" required min="1">
-               </div>
-           </div>
-
-           <div class="row g-2 mb-2">
-               <div class="col-md">
-                    <label for="edit-available-seats" class="form-label">Số chỗ còn trống</label>
-                    <input type="number" name="available_seats" id="edit-available-seats" class="form-control" placeholder="Để trống nếu bằng sức chứa" min="0">
-                    <div class="form-text">Nhập số chỗ trống hiện tại. Sẽ tự bằng sức chứa nếu để trống khi tạo.</div>
-               </div>
-           </div>
-
-
-          <div class="mb-2">
-            <label for="edit-devices" class="form-label">Thiết bị (cách nhau bởi dấu phẩy)</label>
-            <input type="text" name="devices" id="edit-devices" class="form-control" placeholder="Ví dụ: Máy chiếu, Bảng, Điều hòa">
+            </div>
+            
+            <div class="col-md-6">
+              <label for="edit-room-status" class="form-label">Trạng thái</label>
+              <select name="room_status" id="edit-room-status" class="form-select" required>
+                <option value="Available">Trống</option>
+                <option value="Occupied">Đầy</option>
+                <option value="Maintenance">Bảo trì</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="edit-room-type" class="form-label">Loại phòng</label>
+              <select name="room_type" id="edit-room-type" class="form-select" required>
+                <option value="" disabled>Chọn loại phòng</option>
+                <option value="single">Phòng đơn</option>
+                <option value="group">Phòng nhóm</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="edit-capacity" class="form-label">Sức chứa tối đa</label>
+              <div class="input-group">
+                <input type="number" name="capacity" id="edit-capacity" class="form-control" placeholder="Số người" required min="1">
+                <span class="input-group-text">người</span>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="edit-available-seats" class="form-label">Số chỗ còn trống</label>
+              <div class="input-group">
+                <input type="number" name="available_seats" id="edit-available-seats" class="form-control" placeholder="Để trống nếu bằng sức chứa" min="0">
+                <span class="input-group-text">/ <span id="capacity-display">0</span></span>
+              </div>
+              <div class="form-text text-muted">Nhập số chỗ trống hiện tại. Sẽ tự bằng sức chứa nếu để trống.</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="edit-devices" class="form-label">Thiết bị</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-pc-display"></i></span>
+                <input type="text" name="devices" id="edit-devices" class="form-control" placeholder="Ví dụ: Máy chiếu, Bảng, Điều hòa">
+              </div>
+              <div class="form-text text-muted">Cách nhau bởi dấu phẩy</div>
+            </div>
           </div>
-
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
         </div>
       </div>
     </form>
   </div>
 </div>
 
-<!-- MODAL THÊM PHÒNG MỚI -->
+<!-- Add Room Modal -->
 <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <form action="/add-room" method="POST">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addRoomModalLabel">Thêm phòng học mới</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="addRoomModalLabel"><i class="bi bi-plus-circle me-2"></i>Thêm phòng học mới</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
         </div>
         <div class="modal-body">
-           <div class="row g-2 mb-2">
-               <div class="col-md">
-                   <label for="add-location" class="form-label">Vị trí</label>
-                   <input type="text" name="location" id="add-location" class="form-control" placeholder="Ví dụ: 101-H1" required>
-               </div>
-               <div class="col-md">
-                   <label for="add-room-status" class="form-label">Trạng thái ban đầu</label>
-                    <select name="room_status" id="add-room-status" class="form-select" required>
-                      <option value="Available" selected>Trống</option>
-                      <option value="Occupied">Đầy</option>
-                      <option value="Maintenance">Bảo trì</option>
-                    </select>
-               </div>
-           </div>
-
-          <div class="row g-2 mb-2">
-              <div class="col-md">
-                <label for="add-room-type" class="form-label">Loại phòng</label>
-                <select name="room_type" id="add-room-type" class="form-select" required>
-                  <option value="" disabled selected>Chọn loại phòng</option>
-                  <option value="single">Phòng đơn</option>
-                  <option value="group">Phòng nhóm</option>
-                </select>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="add-location" class="form-label">Vị trí phòng</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" name="location" id="add-location" class="form-control" placeholder="Ví dụ: 101-H1" required>
               </div>
-              <div class="col-md">
-                   <label for="add-capacity" class="form-label">Sức chứa tối đa</label>
-                   <input type="number" name="capacity" id="add-capacity" class="form-control" placeholder="Số người" required min="1">
-               </div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="add-room-status" class="form-label">Trạng thái ban đầu</label>
+              <select name="room_status" id="add-room-status" class="form-select" required>
+                <option value="Available" selected>Trống</option>
+                <option value="Occupied">Đầy</option>
+                <option value="Maintenance">Bảo trì</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="add-room-type" class="form-label">Loại phòng</label>
+              <select name="room_type" id="add-room-type" class="form-select" required>
+                <option value="" disabled selected>Chọn loại phòng</option>
+                <option value="single">Phòng đơn</option>
+                <option value="group">Phòng nhóm</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="add-capacity" class="form-label">Sức chứa tối đa</label>
+              <div class="input-group">
+                <input type="number" name="capacity" id="add-capacity" class="form-control" placeholder="Số người" required min="1">
+                <span class="input-group-text">người</span>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="add-available-seats" class="form-label">Số chỗ còn trống (ban đầu)</label>
+              <div class="input-group">
+                <input type="number" name="available_seats" id="add-available-seats" class="form-control" placeholder="Để trống nếu bằng sức chứa" min="0">
+                <span class="input-group-text">/ <span id="add-capacity-display">0</span></span>
+              </div>
+              <div class="form-text text-muted">Nếu để trống, số chỗ trống sẽ tự động bằng sức chứa.</div>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="add-devices" class="form-label">Thiết bị</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-pc-display"></i></span>
+                <input type="text" name="devices" id="add-devices" class="form-control" placeholder="Ví dụ: Máy chiếu, Bảng">
+              </div>
+              <div class="form-text text-muted">Cách nhau bởi dấu phẩy</div>
+            </div>
           </div>
-
-           <div class="row g-2 mb-2">
-               <div class="col-md">
-                    <label for="add-available-seats" class="form-label">Số chỗ còn trống (ban đầu)</label>
-                    <input type="number" name="available_seats" id="add-available-seats" class="form-control" placeholder="Để trống nếu bằng sức chứa" min="0">
-                   <div class="form-text">Nếu để trống, số chỗ trống sẽ tự động bằng sức chứa.</div>
-               </div>
-           </div>
-
-          <div class="mb-2">
-            <label for="add-devices" class="form-label">Thiết bị (cách nhau bởi dấu phẩy)</label>
-            <input type="text" name="devices" id="add-devices" class="form-control" placeholder="Ví dụ: Máy chiếu, Bảng">
-          </div>
-
         </div>
         <div class="modal-footer">
-           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
           <button type="submit" class="btn btn-primary">Thêm phòng</button>
         </div>
       </div>
@@ -308,42 +410,60 @@
   </div>
 </div>
 
- <script>
-  document.addEventListener('DOMContentLoaded', () => {
-      const editRoomModalElement = document.getElementById('editRoomModal');
-      if (editRoomModalElement) {
-          editRoomModalElement.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Edit Room Modal
+  const editRoomModalElement = document.getElementById('editRoomModal');
+  if (editRoomModalElement) {
+    editRoomModalElement.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const roomId = button.getAttribute('data-roomid');
+      const status = button.getAttribute('data-status');
+      const capacity = button.getAttribute('data-capacity');
+      const devices = button.getAttribute('data-devices');
+      const location = button.getAttribute('data-location');
+      const roomType = button.getAttribute('data-roomtype');           
+      const availableSeats = button.getAttribute('data-availableseats'); 
 
-            const roomId = button.getAttribute('data-roomid');
-            const status = button.getAttribute('data-status');
-            const capacity = button.getAttribute('data-capacity');
-            const devices = button.getAttribute('data-devices');
-            const location = button.getAttribute('data-location');
-            const roomType = button.getAttribute('data-roomtype');           
-            const availableSeats = button.getAttribute('data-availableseats'); 
+      const modal = this; 
+      modal.querySelector('#edit-room-id').value = roomId;
+      modal.querySelector('#edit-room-status').value = status;
+      modal.querySelector('#edit-capacity').value = capacity;
+      modal.querySelector('#edit-devices').value = devices;
+      modal.querySelector('#edit-location').value = location;
+      modal.querySelector('#edit-room-type').value = roomType;         
+      modal.querySelector('#edit-available-seats').value = availableSeats;
+      modal.querySelector('#capacity-display').textContent = capacity;
 
-            const modal = this; 
-            modal.querySelector('#edit-room-id').value = roomId;
-            modal.querySelector('#edit-room-status').value = status;
-            modal.querySelector('#edit-capacity').value = capacity;
-            modal.querySelector('#edit-devices').value = devices;
-            modal.querySelector('#edit-location').value = location;
-            modal.querySelector('#edit-room-type').value = roomType;         
-            modal.querySelector('#edit-available-seats').value = availableSeats;
+      modal.querySelector('.modal-title').textContent = `Chỉnh sửa phòng ${location} (ID: ${roomId})`;
+    });
+  }
 
-            modal.querySelector('.modal-title').textContent = `Chỉnh sửa phòng ${location} (ID: ${roomId})`;
-          });
+  // Add Room Modal
+  const addRoomModalElement = document.getElementById('addRoomModal');
+  if (addRoomModalElement) {
+    addRoomModalElement.addEventListener('hidden.bs.modal', function(event) {
+      const form = this.querySelector('form');
+      if(form) {
+        form.reset();
       }
+    });
+  }
 
-       const addRoomModalElement = document.getElementById('addRoomModal');
-       if (addRoomModalElement) {
-           addRoomModalElement.addEventListener('hidden.bs.modal', function(event) {
-               const form = this.querySelector('form');
-               if(form) {
-                    form.reset();
-               }
-           });
-       }
-  });
+  // Update capacity display in add modal
+  const addCapacityInput = document.getElementById('add-capacity');
+  if (addCapacityInput) {
+    addCapacityInput.addEventListener('input', function() {
+      document.getElementById('add-capacity-display').textContent = this.value;
+    });
+  }
+
+  // Update capacity display in edit modal
+  const editCapacityInput = document.getElementById('edit-capacity');
+  if (editCapacityInput) {
+    editCapacityInput.addEventListener('input', function() {
+      document.getElementById('capacity-display').textContent = this.value;
+    });
+  }
+});
 </script>

@@ -1,43 +1,73 @@
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Phản hồi từ người dùng</h5>
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-semibold"><i class="bi bi-chat-square-text me-2"></i>Phản hồi từ người dùng</h5>
+      <div class="dropdown">
+        <ul class="dropdown-menu" aria-labelledby="feedbackFilter">
+          <li><a class="dropdown-item filter-feedback active" href="#" data-rating="all">Tất cả</a></li>
+          <li><a class="dropdown-item filter-feedback" href="#" data-rating="1">Không tốt</a></li>
+          <li><a class="dropdown-item filter-feedback" href="#" data-rating="2">Tạm</a></li>
+          <li><a class="dropdown-item filter-feedback" href="#" data-rating="3">Tốt</a></li>
+          <li><a class="dropdown-item filter-feedback" href="#" data-rating="4">Rất tốt</a></li>
+          <li><a class="dropdown-item filter-feedback" href="#" data-rating="5">Tuyệt vời</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>MSSV</th>
-                        <th>Đánh giá</th>
-                        <th>Bình luận</th>
-                        <th>Thời gian</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% feedback.forEach(fb=> { %>
-                        <tr>
-                            <td>
-                                <%= fb.feedback_id %>
-                            </td>
-                            <td>
-                                <%= fb.mssv %>
-                            </td>
-                            <td>
-                                <% const ratingText=[ "Không xác định" , "Không tốt" , "Tạm" , "Tốt" , "Rất tốt"
-                                    , "Tuyệt vời" ]; %>
-                                    <%= ratingText[parseInt(fb.rating)] %>
-                            </td>
-                            <td>
-                                <%= fb.comment %>
-                            </td>
-                            <td>
-                                <%= new Date(fb.Time).toLocaleString() %>
-                            </td>
-                        </tr>
-                        <% }) %>
-                </tbody>
-            </table>
-        </div>
+  
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="feedbackTable">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>MSSV</th>
+              <th class="text-center">Đánh giá</th>
+              <th>Bình luận</th>
+              <th>Thời gian</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% feedback.forEach(fb => { %>
+              <tr class="feedback-row" data-rating="<%= fb.rating %>">
+                <td class="ps-4 fw-semibold"><%= fb.feedback_id %></td>
+                <td>
+                  <div href="#" class="text-decoration-none user-link" data-mssv="<%= fb.mssv %>">
+                    <i class="bi bi-person-circle me-1"></i><%= fb.mssv %>
+                  </>
+                </td>
+                <td class="text-center">
+                  <% const ratingText = ["Không xác định", "Không tốt", "Tạm", "Tốt", "Rất tốt", "Tuyệt vời"]; %>
+                  <% const ratingColors = ["secondary", "danger", "warning", "info", "primary", "success"]; %>
+                  <span class="badge bg-<%= ratingColors[parseInt(fb.rating)] %> rounded-pill px-3 py-1">
+                    <i class="bi bi-star-fill me-1"></i><%= ratingText[parseInt(fb.rating)] %>
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <% if (fb.comment.length > 50) { %>
+                      <span class="comment-preview" data-full-comment="<%= fb.comment %>">
+                        <%= fb.comment.substring(0, 50) %>...
+                        <a href="#" class="text-primary read-more">Xem thêm</a>
+                      </span>
+                    <% } else { %>
+                      <%= fb.comment %>
+                    <% } %>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span class="small text-muted"><%= new Date(fb.Time).toLocaleDateString('vi-VN') %></span>
+                    <span class="small"><%= new Date(fb.Time).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) %></span>
+                  </div>
+                </td>
+                
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     </div>
-</div>
+  </div>
+  
+
+  
+  
