@@ -1,104 +1,127 @@
 <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 fw-semibold"><i class="bi bi-calendar-check me-2"></i>Quản lý đặt chỗ</h5>
-      <div class="dropdown">
-      
-        <ul class="dropdown-menu" aria-labelledby="filterDropdown">
-          <li><a class="dropdown-item filter-item active" href="#" data-status="all">Tất cả</a></li>
-          <li><a class="dropdown-item filter-item" href="#" data-status="Confirmed">Đã xác nhận</a></li>
-          <li><a class="dropdown-item filter-item" href="#" data-status="Pending">Chờ xử lý</a></li>
-          <li><a class="dropdown-item filter-item" href="#" data-status="CheckedIn">Đang sử dụng</a></li>
-          <li><a class="dropdown-item filter-item" href="#" data-status="CheckedOut">Đã trả phòng</a></li>
-          <li><a class="dropdown-item filter-item" href="#" data-status="Completed">Đã hết hạn</a></li>
-        </ul>
-      </div>
-    </div>
-  
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="bookingTable">
-          <thead class="table-light">
-            <tr>
-              <th class="ps-4">ID</th>
-              <th>Phòng</th>
-              <th>MSSV</th>
-              <th>Thời gian</th>
-              <th class="text-center">Trạng thái</th>
-              <th class="text-center">QR Code</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% bookings.forEach(booking => { %>
-              <tr class="booking-row" data-status="<%= booking.status %>">
-                <td class="ps-4 fw-semibold"><%= booking.id %></td>
-                <td class="fw-semibold"><%= booking.room_name %></td>
-                <td>
-                  <div href="#" class="text-decoration-none user-profile" data-mssv="<%= booking.mssv %>">
-                    <i class="bi bi-person-circle me-1"></i><%= booking.mssv %>
-                  </>
-                </td>
-                <td>
-                  <div class="d-flex flex-column">
-                    <span class="fw-semibold"><%= booking.Day %></span>
-                    <span class="text-muted small"><%= booking.start_time %> - <%= booking.end_time %></span>
-                  </div>
-                </td>
-                <td class="text-center">
-                  <% if (booking.status === 'Confirmed') { %>
-                    <span class="badge bg-success rounded-pill px-3 py-1">Đã xác nhận</span>
-                  <% } else if (booking.status === 'Pending') { %>
-                    <span class="badge bg-warning rounded-pill px-3 py-1">Chờ xử lý</span>
-                  <% } else if (booking.status === 'CheckedIn') { %>
-                    <span class="badge bg-danger rounded-pill px-3 py-1">Đang sử dụng</span>
-                  <% } else if (booking.status === 'CheckedOut') { %>
-                    <span class="badge bg-secondary rounded-pill px-3 py-1">Đã trả phòng</span>
-                  <% } else if (booking.status === 'Completed') { %>
-                    <span class="badge bg-dark rounded-pill px-3 py-1">Đã hết hạn</span>
-                  <% } else { %>
-                    <span class="badge bg-secondary rounded-pill px-3 py-1"><%= booking.status %></span>
-                  <% } %>
-                </td>
-                <td class="text-center">
-                  <% if (booking.qr_code) { %>
-                    <img src="<%= booking.qr_code %>" alt="QR Code" class="img-thumbnail border-0 qr-code" 
-                         style="width: 50px; height: 50px; cursor: pointer;" data-bs-toggle="modal" 
-                         data-bs-target="#qrModal" data-qr="<%= booking.qr_code %>">
-                  <% } else { %>
-                    <span class="text-muted">Không có</span>
-                  <% } %>
-                </td>
-                <td class="pe-4 text-center">
-                  <div class="d-flex justify-content-center">
-                    <% if (booking.status === 'Pending') { %>
-                      <button class="btn btn-success btn-sm rounded-circle me-1 confirm-booking" 
-                              data-id="<%= booking.id %>" title="Xác nhận">
-                        <i class="bi bi-check-lg"></i>
-                      </button>
-                      <button class="btn btn-danger btn-sm rounded-circle me-1 reject-booking" 
-                              data-id="<%= booking.id %>" title="Từ chối">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
-                    <% } %>
-                    
-                    <% if (booking.status === 'Confirmed') { %>
-                      <button class="btn btn-primary btn-sm rounded-circle me-1 checkin-booking" 
-                              data-id="<%= booking.id %>" title="Check-in">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                      </button>
-                    <% } %>
-                    
-                    <% if (booking.status === 'CheckedIn') { %>
-                      <button class="btn btn-warning btn-sm rounded-circle me-1 checkout-booking" 
-                              data-id="<%= booking.id %>" title="Check-out">
-                        <i class="bi bi-box-arrow-right"></i>
-                      </button>
-                    <% } %>
-                  </div>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 fw-semibold"><i class="bi bi-calendar-check me-2"></i>Quản lý đặt chỗ</h5>
+    <div class="dropdown">
+
+      <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+        <li><a class="dropdown-item filter-item active" href="#" data-status="all">Tất cả</a></li>
+        <li><a class="dropdown-item filter-item" href="#" data-status="Confirmed">Đã xác nhận</a></li>
+        <li><a class="dropdown-item filter-item" href="#" data-status="Pending">Chờ xử lý</a></li>
+        <li><a class="dropdown-item filter-item" href="#" data-status="CheckedIn">Đang sử dụng</a></li>
+        <li><a class="dropdown-item filter-item" href="#" data-status="CheckedOut">Đã trả phòng</a></li>
+        <li><a class="dropdown-item filter-item" href="#" data-status="Completed">Đã hết hạn</a></li>
+      </ul>
     </div>
   </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="bookingTable">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">ID</th>
+            <th>Phòng</th>
+            <th>MSSV</th>
+            <th>Thời gian</th>
+            <th class="text-center">Trạng thái</th>
+            <th class="text-center">QR Code</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% bookings.forEach(booking=> { %>
+            <tr class="booking-row" data-status="<%= booking.status %>">
+              <td class="ps-4 fw-semibold">
+                <%= booking.id %>
+              </td>
+              <td class="fw-semibold">
+                <%= booking.room_name %>
+              </td>
+              <td>
+                <div href="#" class="text-decoration-none user-profile" data-mssv="<%= booking.mssv %>">
+                  <i class="bi bi-person-circle me-1"></i>
+                  <%= booking.mssv %>
+                    </>
+              </td>
+              <td>
+                <% const dayObj=new Date(booking.Day); const formattedDay=dayObj.toLocaleDateString("vi-VN", {
+                  day: "2-digit" , month: "2-digit" , year: "numeric" }); const formatTime=(timeStr)=> {
+                  const d = new Date(`1970-01-01T${timeStr}`);
+                  return d.toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false
+                  });
+                  };
+                  %>
+
+                  <div class="d-flex flex-column">
+                    <span class="fw-semibold">
+                      <%= formattedDay %>
+                    </span>
+                    <span class="text-muted small">
+                      <%= formatTime(booking.start_time) %> - <%= formatTime(booking.end_time) %>
+                    </span>
+                  </div>
+
+              </td>
+              <td class="text-center">
+                <% if (booking.status==='Confirmed' ) { %>
+                  <span class="badge bg-success rounded-pill px-3 py-1">Đã xác nhận</span>
+                  <% } else if (booking.status==='Pending' ) { %>
+                    <span class="badge bg-warning rounded-pill px-3 py-1">Chờ xử lý</span>
+                    <% } else if (booking.status==='CheckedIn' ) { %>
+                      <span class="badge bg-danger rounded-pill px-3 py-1">Đang sử dụng</span>
+                      <% } else if (booking.status==='CheckedOut' ) { %>
+                        <span class="badge bg-secondary rounded-pill px-3 py-1">Đã trả phòng</span>
+                        <% } else if (booking.status==='Completed' ) { %>
+                          <span class="badge bg-dark rounded-pill px-3 py-1">Đã hết hạn</span>
+                          <% } else { %>
+                            <span class="badge bg-secondary rounded-pill px-3 py-1">
+                              <%= booking.status %>
+                            </span>
+                            <% } %>
+              </td>
+              <td class="text-center">
+                <% if (booking.qr_code) { %>
+                  <img src="<%= booking.qr_code %>" alt="QR Code" class="img-thumbnail border-0 qr-code"
+                    style="width: 50px; height: 50px; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#qrModal"
+                    data-qr="<%= booking.qr_code %>">
+                  <% } else { %>
+                    <span class="text-muted">Không có</span>
+                    <% } %>
+              </td>
+              <td class="pe-4 text-center">
+                <div class="d-flex justify-content-center">
+                  <% if (booking.status==='Pending' ) { %>
+                    <button class="btn btn-success btn-sm rounded-circle me-1 confirm-booking"
+                      data-id="<%= booking.id %>" title="Xác nhận">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm rounded-circle me-1 reject-booking" data-id="<%= booking.id %>"
+                      title="Từ chối">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                    <% } %>
+
+                      <% if (booking.status==='Confirmed' ) { %>
+                        <button class="btn btn-primary btn-sm rounded-circle me-1 checkin-booking"
+                          data-id="<%= booking.id %>" title="Check-in">
+                          <i class="bi bi-box-arrow-in-right"></i>
+                        </button>
+                        <% } %>
+
+                          <% if (booking.status==='CheckedIn' ) { %>
+                            <button class="btn btn-warning btn-sm rounded-circle me-1 checkout-booking"
+                              data-id="<%= booking.id %>" title="Check-out">
+                              <i class="bi bi-box-arrow-right"></i>
+                            </button>
+                            <% } %>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
