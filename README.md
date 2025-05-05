@@ -14,3 +14,9 @@ Welcome to **Smart Study Space Management and Reservation System at HCMUT**
 ```bash
 git clone https://github.com/PhanHuynh0210/BTL_CNPM.git
 
+
+
+For the server:
+```bash
+cd server
+npm install
