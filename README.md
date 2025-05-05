@@ -16,7 +16,7 @@ git clone https://github.com/PhanHuynh0210/BTL_CNPM.git
 
 
 
-For the server:
+### For the server:
 ```bash
 cd server
 npm install
