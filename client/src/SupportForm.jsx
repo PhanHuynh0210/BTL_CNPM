@@ -275,7 +275,7 @@ export default function SupportForm() {
         <div className="w-64 bg-blue-50 rounded-xl p-4 border border-blue-200 shadow-sm">
           <h3 className="text-lg font-semibold text-blue-700 mb-4">Thông tin hỗ trợ</h3>
           <ul className="text-sm text-gray-700 space-y-2">
-            <li><strong>Email:</strong> support@hust.edu.vn</li>
+            <li><strong>Email:</strong> support@hcmut.edu.vn</li>
             <li><strong>Hotline:</strong> 1900 123 456</li>
             <li><strong>Thời gian:</strong> 08:00 - 17:00 (T2 - T6)</li>
             <li><strong>Địa chỉ:</strong> Phòng 101, Tòa A1, Đại học Bách Khoa TPHCM</li>
